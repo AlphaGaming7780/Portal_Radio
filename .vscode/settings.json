@@ -7,6 +7,18 @@
         "ratio": "cpp",
         "sstream": "cpp",
         "streambuf": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "deque": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "vector": "cpp",
+        "string_view": "cpp",
+        "initializer_list": "cpp",
+        "regex": "cpp",
+        "random": "cpp",
+        "iomanip": "cpp",
+        "iostream": "cpp",
+        "istream": "cpp"
     }
 }

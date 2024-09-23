@@ -2,6 +2,8 @@
 #include "BluetoothA2DPSink.h"
 #include "../../pAudioSource.h"
 
+#ifndef dBluetoothAudioSource
+#define dBluetoothAudioSource
 class BluetoothAudioSource : public pAudioSource
 {
 private:
@@ -22,3 +24,4 @@ public:
 };
 
 extern BluetoothAudioSource bluetoothAudioSource;
+#endif

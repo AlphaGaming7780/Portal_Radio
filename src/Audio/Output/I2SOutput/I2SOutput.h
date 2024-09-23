@@ -1,8 +1,8 @@
 #include "AudioTools.h"
 #include "../../pAudioOutput.h"
 
-// #ifndef dAnalogueOutput
-// #define dAnalogueOutput
+#ifndef dI2SOutput
+#define dI2SOutput
 class I2SOutput : public pAudioOutput
 {
 private:
@@ -24,6 +24,7 @@ public:
     }
 
     void begin() {
+        
         auto config = _stream.defaultConfig(TX_MODE);
         config.i2s_format = I2S_LSB_FORMAT;
         config.pin_ws = 14;
@@ -43,4 +44,4 @@ public:
 
 extern I2SOutput i2SOutput;
 
-// #endif
+#endif

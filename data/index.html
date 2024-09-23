@@ -1,8 +1,10 @@
 <head>
+    <!-- https://www.w3schools.com/howto/default.asp -->
     <title>Portal Radio</title>
     <meta name="viewport" content="width=device-width, initial-scale=1"n charset="UTF-8">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" >
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="PortalRadio.css">
     <script type="text/javascript" src="script.js"></script>
 </head>
@@ -12,89 +14,104 @@
         <div id="ConnectionStatus" class="ConnectionStatus" style="display: flex; justify-content: flex-end; align-items: center; font-weight: bold; font-size: x-large; max-height: 25px;">Disconnected</div>
     </div>
 
-    <details>
-        <summary>
-            <span>System</span>
-        </summary>
-        <div>
-            <span>Model:</span>
-            <span id="System_model">Unknown</span>
-        </div>
-        <div>
-            <span>Features:</span>
-            <span id="System_features">Unknown</span>
-        </div>
-        <div>
-            <span>Cores:</span>
-            <span id="System_cores">Unknown</span>
-        </div>
-        <div>
-            <span>Full revision:</span>
-            <span id="System_full_revision">Unknown</span>
-        </div>
-        <div>
-            <span>Revision:</span>
-            <span id="System_revision">Unknown</span>
-        </div>
-        <div>
-            <span>Date:</span>
-            <span id="System_date">Unknown</span>
-        </div>
-        <div>
-            <span>Time:</span>
-            <span id="System_time">Unknown</span>
-        </div>
-    </details>
+    <div class="topnav" id="navbar">
+        <button onclick="buttonNavBarClicked('Audio', this)" class="active">Audio</button>
+        <button onclick="buttonNavBarClicked('Monitoring', this)">Monitoring</button>
+    </div>
 
-    <details>
-        <summary>
-            <span>Bluetooth</span>
-            <!-- <input type="checkbox" id="Bluetooth_checkbox"> -->
-        </summary>
+    <div id="pageContainer">
+        <div id="Audio">Audio</div>
 
-        <div>
-            <span>Enable:</span>
-            <span>
-                <input type="checkbox" id="Bluetooth_enable" onclick="BluetoothOnEnable()">
-            </span>
+        <div id="Monitoring" style="display: none;">
+            <details>
+                <summary>
+                    <span>System</span>
+                </summary>
+                <div>
+                    <span>Model:</span>
+                    <span id="System_model">Unknown</span>
+                </div>
+                <div>
+                    <span>Features:</span>
+                    <span id="System_features">Unknown</span>
+                </div>
+                <div>
+                    <span>Cores:</span>
+                    <span id="System_cores">Unknown</span>
+                </div>
+                <div>
+                    <span>Full revision:</span>
+                    <span id="System_full_revision">Unknown</span>
+                </div>
+                <div>
+                    <span>Revision:</span>
+                    <span id="System_revision">Unknown</span>
+                </div>
+                <div>
+                    <span>Date:</span>
+                    <span id="System_date">Unknown</span>
+                </div>
+                <div>
+                    <span>Time:</span>
+                    <span id="System_time">Unknown</span>
+                </div>
+            </details>
+        
+            <details>
+                <summary>
+                    <span>Bluetooth</span>
+                    <!-- <input type="checkbox" id="Bluetooth_checkbox"> -->
+                </summary>
+        
+                <div>
+                    <span>Enable:</span>
+                    <span>
+                        <input type="checkbox" id="Bluetooth_enable" onclick="BluetoothOnEnable()">
+                    </span>
+                </div>
+                <div>
+                    <span>Status:</span>
+                    <span id="Bluetooth_status">Unknown</span>
+                </div>
+                <div>
+                    <span>Peer name:</span>
+                    <span id="Bluetooth_peerName">Unknown</span>
+                </div>
+            </details>
+        
+            <details>
+                <summary>Wifi</summary>
+                <div>
+                    <span>Enable:</span>
+                    <span>
+                        <input type="checkbox" id="Wifi_enable" onclick="WifiOnEnable()">
+                    </span>
+                </div>
+                <div>
+                    <span>Status:</span>
+                    <span id="Wifi_status">Unknown</span>
+                </div>
+                <div>
+                    <span>SSID:</span>
+                    <span id="Wifi_ssid">Unknown</span>
+                </div>
+                <div>
+                    <span>IP:</span>
+                    <span id="Wifi_ip">Unknown</span>
+                </div>
+                <div>
+                    <span>MAC:</span>
+                    <span id="Wifi_mac">Unknown</span>
+                </div>
+                <div>
+                    <span>Subnet mask:</span>
+                    <span id="Wifi_subnetMask">Unknown</span>
+                </div>
+                <div>
+                    <span>DNS:</span>
+                    <span id="Wifi_dns">Unknown</span>
+                </div>
+            </details>
         </div>
-        <div>
-            <span>Status:</span>
-            <span id="Bluetooth_status">Unknown</span>
-        </div>
-    </details>
-
-    <details>
-        <summary>Wifi</summary>
-        <div>
-            <span>Enable:</span>
-            <span>
-                <input type="checkbox" id="Wifi_enable" onclick="WifiOnEnable()">
-            </span>
-        </div>
-        <div>
-            <span>Status:</span>
-            <span id="Wifi_status">Unknown</span>
-        </div>
-        <div>
-            <span>SSID:</span>
-            <span id="Wifi_ssid">Unknown</span>
-        </div>
-        <div>
-            <span>IP:</span>
-            <span id="Wifi_ip">Unknown</span>
-        </div>
-        <div>
-            <span>MAC:</span>
-            <span id="Wifi_mac">Unknown</span>
-        </div>
-        <div>
-            <span>Subnet mask:</span>
-            <span id="Wifi_subnetMask">Unknown</span>
-        </div>
-        <div>
-            <span>DNS:</span>
-            <span id="Wifi_dns">Unknown</span>
-        </div>
-    </details>
+    </div>
 </body>

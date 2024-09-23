@@ -17,10 +17,6 @@
 const char* SSID = "C chez toi ici";
 const char* PWD = "DecoP9DecoP9";
 
-I2SStream stream;
-AnalogAudioStream out;
-BluetoothA2DPSink bluetoothAudioSink(stream);
-
 void setup() {
 
     Serial.begin(115200);
@@ -40,7 +36,7 @@ void setup() {
     File file = root.openNextFile();
 
     while (file)
-    {
+    {   
         Serial.printf("File: %s.\n", file.name());
         file.close();
         file = root.openNextFile();
@@ -49,6 +45,7 @@ void setup() {
 //--------------------------------------------------------- BLUETOOTH
 
     audioManager.SetSourceAndOutput(&bluetoothAudioSource, &i2SOutput, true);
+    // audioManager.SetSourceAndOutput(&sdSource, &i2SOutput, true);
 
 //--------------------------------------------------------- WIFI
 

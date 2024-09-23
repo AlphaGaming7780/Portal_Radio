@@ -1,8 +1,8 @@
 #include "AudioTools.h"
 #include "../../pAudioOutput.h"
 
-// #ifndef dAnalogueOutput
-// #define dAnalogueOutput
+#ifndef dAnalogueOutput
+#define dAnalogueOutput
 class AnalogueOutput : public pAudioOutput
 {
 private:
@@ -23,4 +23,4 @@ public:
 
 extern AnalogueOutput analogueOutput;
 
-// #endif
+#endif

@@ -1,5 +1,7 @@
 #include "AudioManager.h"
 
+AudioManager audioManager;
+
 AudioManager::AudioManager(/* args */)
 {
 }
@@ -7,8 +9,6 @@ AudioManager::AudioManager(/* args */)
 AudioManager::~AudioManager()
 {
 }
-
-AudioManager audioManager = AudioManager();
 
 void AudioManager::SetAudioSource(pAudioSource *audioSource, bool update)
 {

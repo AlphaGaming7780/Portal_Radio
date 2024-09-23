@@ -2,8 +2,11 @@
 #include "Output/AnalogueOutput/AnalogueOutput.h"
 #include "Output/I2SOutput/I2SOutput.h"
 #include "Source/Bluetooth/BluetoothAudioSource.h"
+#include "Source/SD/SDSource.h"
+#include "Source/SPIFFSSource/SPIFFSSource.h"
 
-
+// #ifndef dAudioManager
+// #define dAudioManager
 class AudioManager
 {
 private:
@@ -15,7 +18,9 @@ private:
 public:
     AudioManager(/* args */);
     ~AudioManager();
-    
+
+    AudioPlayer audioPlayer;
+
     pAudioSource *currentSource = _currentSource;
     pAudioOutput *currentOutput = _currentOutput;
 
@@ -26,3 +31,4 @@ public:
 };
 
 extern AudioManager audioManager;
+// #endif

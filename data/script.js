@@ -1,5 +1,18 @@
-function OnBluetoothEnableButtonChange() {
-    
+var _activePage = ""
+
+function buttonNavBarClicked(newValue, elmnt) {
+    var children = document.getElementById("pageContainer").children
+    Array.from(children).forEach(child => {
+        child.style.display = "none"
+    });
+
+    children = document.getElementById("navbar").children
+    Array.from(children).forEach(child => {
+        child.classList = ""
+    });
+    elmnt.classList = "active"
+    document.getElementById(newValue).style.display = "block"
+    _activePage = newValue;
 }
 
 setInterval(
@@ -60,6 +73,7 @@ function UpdateData_system(data) {
 
 function UpdateData_bluetooth(data) {
     UpdateBluetoothStatus( (data && data.status != undefined) ? data.status : -1)
+    document.getElementById("Bluetooth_peerName").innerHTML = (data && data.peerName) ? data.peerName : "Unknown"
 }
 
 function UpdateBluetoothStatus(status) {

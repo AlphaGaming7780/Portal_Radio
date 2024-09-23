@@ -1,5 +1,6 @@
 #include "server.h"
 #include "main.h"
+#include "Audio/AudioManager.h"
 
 AsyncWebServer server(80);
 
@@ -85,8 +86,8 @@ String SystemModelToString(esp_chip_model_t model) {
 
 void GetBluetoothData(JsonVariant& root) {
     JsonObject BluetoothData = root["Bluetooth"].to<JsonObject>();
-    BluetoothData["status"] = a2dp_sink.get_connection_state();
-    BluetoothData["peerName"] = a2dp_sink.get_peer_name();
+    BluetoothData["status"] = bluetoothAudioSource.a2dp_sink.get_connection_state();
+    BluetoothData["peerName"] = bluetoothAudioSource.a2dp_sink.get_peer_name();
 }
 
 void GetWifiData(JsonVariant& root) {
