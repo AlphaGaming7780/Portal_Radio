@@ -1,0 +1,22 @@
+details>div {
+    display: flex; 
+}
+
+details>div> input ~ div {
+    display: flex; 
+    justify-content: flex-end;
+}
+
+details>div>span:last-child {
+    display: flex; 
+    flex-grow: 1; 
+    justify-content: flex-end;
+}
+
+.ConnectionStatus {
+    border-style: solid;
+    border-width: 10px;
+    border-radius: 15px;
+    border-color: var(--ConnectionStatusColor, red);
+    background-color: var(--ConnectionStatusColor, red);
+}

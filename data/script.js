@@ -1,0 +1,142 @@
+function OnBluetoothEnableButtonChange() {
+    
+}
+
+setInterval(
+    function getData()
+    {
+        var xhttp = new XMLHttpRequest()
+        xhttp.timeout = 1000;
+
+        xhttp.onreadystatechange = function()
+            {
+                if(this.readyState == 4)
+                {
+                    if(this.status != 200) 
+                    {
+                        console.log("Wifi data get return a "+this.status+" code.")
+                        UpdateConnectionStatus(false)
+                        UpdateData_system(undefined)
+                        UpdateData_bluetooth(undefined)
+                        UpdateData_wifi(undefined)
+                        return
+                    }
+                    var result = JSON.parse(this.responseText)
+                    console.log(result)
+                    UpdateConnectionStatus(true)
+                    UpdateData_system(result.System)
+                    UpdateData_bluetooth(result.Bluetooth)
+                    UpdateData_wifi(result.Wifi)
+                }
+            }
+        
+        // xhttp.ontimeout = function()
+        // {
+
+        // }
+        xhttp.open("GET", "Data", true)
+        xhttp.send()
+    }, 1000
+)
+
+function UpdateConnectionStatus(status) {
+    var connectionStatus = document.getElementById("ConnectionStatus")
+    if(status) {
+        connectionStatus.style.setProperty("--ConnectionStatusColor", "green")
+        connectionStatus.innerHTML = "Connected"
+        return
+    }
+    connectionStatus.style.setProperty("--ConnectionStatusColor", "red")
+    connectionStatus.innerHTML = "Disconnected"
+}
+
+function UpdateData_system(data) {
+    document.getElementById("System_model").innerHTML = (data && data.model) ? data.model : "Unknown"
+    document.getElementById("System_cores").innerHTML = (data && data.cores) ? data.cores : "Unknown"
+    document.getElementById("System_features").innerHTML = (data && data.features) ? data.features : "Unknown"
+    document.getElementById("System_full_revision").innerHTML = (data && data.full_revision) ? data.full_revision : "Unknown"
+    document.getElementById("System_revision").innerHTML = (data && data.revision) ? data.revision : "Unknown"
+}
+
+function UpdateData_bluetooth(data) {
+    UpdateBluetoothStatus( (data && data.status != undefined) ? data.status : -1)
+}
+
+function UpdateBluetoothStatus(status) {
+    var bluetooth_status = document.getElementById("Bluetooth_status")
+    console.log(status)
+    switch (status) {
+        case 0:
+            bluetooth_status.innerHTML = "Disconnected"
+            bluetooth_status.style.color = "red"
+            break;
+        case 1:
+            bluetooth_status.innerHTML = "Connecting"
+            bluetooth_status.style.color = "orange"
+            break;
+        case 2:
+            bluetooth_status.innerHTML = "Connected"
+            bluetooth_status.style.color = "green"
+            break;
+        case 3:
+            bluetooth_status.innerHTML = "Disconnecting"
+            bluetooth_status.style.color = "orange"
+            break;
+        default:
+            bluetooth_status.innerHTML = "Unknown"
+            bluetooth_status.style.color = "var(--text-main)"
+            break;
+    }
+}
+
+function UpdateData_wifi(data) {
+    WifiStatusUpdate( (data && data.status != undefined) ? data.status : "-1" );
+    document.getElementById("Wifi_ssid").innerHTML = (data && data.ssid) ? data.ssid : "Unknown"
+    document.getElementById("Wifi_ip").innerHTML = (data && data.ip) ? data.ip : "Unknown"
+    document.getElementById("Wifi_mac").innerHTML = (data && data.mac) ? data.mac : "Unknown"
+    document.getElementById("Wifi_subnetMask").innerHTML = (data && data.subnetMask) ? data.subnetMask : "Unknown"
+    document.getElementById("Wifi_dns").innerHTML = (data && data.dns) ? data.dns : "Unknown"
+}
+
+function WifiStatusUpdate(status) {
+    var wifi_status = document.getElementById("Wifi_status")
+    switch (status) {
+        case 255:
+            wifi_status.innerHTML = "No shield"
+            wifi_status.style.color = "var(--text-main)"
+            break;
+        case 1:
+            wifi_status.innerHTML = "Idle"
+            wifi_status.style.color = "var(--text-main)"
+            break;
+        case 2:
+            wifi_status.innerHTML = "No SSID"
+            wifi_status.style.color = "red"
+            break;
+        case 3:
+            wifi_status.innerHTML = "Connected"
+            wifi_status.style.color = "green"
+            break;
+        case 4:
+            wifi_status.innerHTML = "Connexion failed"
+            wifi_status.style.color = "red"
+            break;
+        case 5:
+            wifi_status.innerHTML = "Connexion lost"
+            wifi_status.style.color = "red"
+            break;
+        case 6:
+            wifi_status.innerHTML = "Disconnected"
+            wifi_status.style.color = "var(--text-main)"
+            break;
+        default:
+            wifi_status.innerHTML = "Unknown"
+            wifi_status.style.color = "var(--text-main)"
+            break;
+    }
+
+}
+
+function CheckifValide(first, seconde, vFalse) {
+    return (first && seconde ) ? seconde : vFalse
+}
