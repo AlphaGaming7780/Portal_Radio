@@ -20,12 +20,14 @@ SDSource::~SDSource()
 void SDSource::begin(audio_tools::AudioOutput &output, pAudioOutput *pAudioOutput)
 {
     audioManager.audioPlayer.setOutput(output);
+    pAudioOutput->begin();
     _begin();
 }
 
 void SDSource::begin(audio_tools::AudioStream &stream, pAudioOutput *pAudioOutput)
 {
     audioManager.audioPlayer.setOutput(stream);
+    pAudioOutput->begin();
     _begin();
 }
 

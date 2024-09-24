@@ -23,6 +23,7 @@ void SPIFFSSource::begin(audio_tools::AudioOutput &output, pAudioOutput *pAudioO
     // audioManager.audioPlayer.setOutput(output);
     volume.setStream(_stream);
     volume.setOutput(output);
+    pAudioOutput->begin();
     _begin();
 }
 
@@ -31,6 +32,7 @@ void SPIFFSSource::begin(audio_tools::AudioStream &stream, pAudioOutput *pAudioO
     // audioManager.audioPlayer.setOutput(stream);
     volume.setStream(_stream);
     volume.setOutput(stream);
+    pAudioOutput->begin();
     _begin();
 }
 

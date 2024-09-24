@@ -44,8 +44,9 @@ void setup() {
 
 //--------------------------------------------------------- BLUETOOTH
 
-    audioManager.SetSourceAndOutput(&bluetoothAudioSource, &i2SOutput, true);
+    // audioManager.SetSourceAndOutput(&bluetoothAudioSource, &i2SOutput, true);
     // audioManager.SetSourceAndOutput(&sdSource, &i2SOutput, true);
+    
 
 //--------------------------------------------------------- WIFI
 
@@ -65,19 +66,19 @@ void setup() {
 
 //             SSID, WPA2_AUTH_... , IDENTITY, UserName, Password, ca_pem , client _crt, client_key, channel, bssid, connect
     //WiFi.begin(SSID, WPA2_AUTH_PEAP, Identity, Identity, PASSWORD, nullptr, nullptr, nullptr, 0, nullptr);
-    // WiFi.begin(SSID, PWD);
+    WiFi.begin(SSID, PWD);
 
-    // while (WiFi.status() != WL_CONNECTED)
-    // {
-    //     if(WiFi.status() == WL_CONNECT_FAILED) {
-    //         Serial.printf("Failed to connect to wifi\n");
-    //         return;
-    //     }
-    //     Serial.print(".");
-    //     delay(100);
-    // }
-    // Serial.println("\nConnection établie!");
-    // Serial.printf("Adresse IP: %s.\n", WiFi.localIP().toString());
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        if(WiFi.status() == WL_CONNECT_FAILED) {
+            Serial.printf("Failed to connect to wifi\n");
+            return;
+        }
+        Serial.print(".");
+        delay(100);
+    }
+    Serial.println("\nConnection établie!");
+    Serial.printf("Adresse IP: %s.\n", WiFi.localIP().toString());
 
     // char	*ipAddress, ap[31];
     // Esp8266.begin();
@@ -109,6 +110,8 @@ void setup() {
 //--------------------------------------------------------- SERVER
 
     // Setup_Server();
+
+    audioManager.SetSourceAndOutput(&webRadioSource, &i2SOutput, true);
 
     Serial.println("Portal Radio started!");
 }

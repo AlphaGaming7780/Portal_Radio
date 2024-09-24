@@ -4,6 +4,7 @@
 #include "Source/Bluetooth/BluetoothAudioSource.h"
 #include "Source/SD/SDSource.h"
 #include "Source/SPIFFSSource/SPIFFSSource.h"
+#include "Source/WebRadioSource/WebRadioSource.h"
 
 // #ifndef dAudioManager
 // #define dAudioManager

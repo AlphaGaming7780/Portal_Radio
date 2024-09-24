@@ -1,5 +1,4 @@
 #include "BluetoothAudioSource.h"
-
 // AnalogAudioStream out;
 // BluetoothA2DPSink a2dp_sink(out);
 
@@ -16,6 +15,7 @@ BluetoothAudioSource::~BluetoothAudioSource()
 void BluetoothAudioSource::begin(audio_tools::AudioOutput &output, pAudioOutput *pAudioOutput) 
 {
     a2dp_sink.set_output(output);
+    pAudioOutput->begin();
     _begin();
 }
 
@@ -32,6 +32,7 @@ void BluetoothAudioSource::_begin()
     // a2dp_sink->set_on_connection_state_changed(OnBluetoothConnectionChanged);
     a2dp_sink.set_avrc_metadata_attribute_mask(127);
     a2dp_sink.set_avrc_metadata_callback(OnBluetoothMetadataCallback);
+    a2dp_sink.set_volume_control(&volume);
 
     a2dp_sink.start("Portal Radio");
     Serial.println("Bluetooth actif!");
@@ -43,27 +44,27 @@ void BluetoothAudioSource::end() {
     // a2dp_sink = nullptr;
 }
 
-// void BluetoothAudioSource::OnBluetoothConnectionChanged(esp_a2d_connection_state_t state, void * )
-// {
-//     switch (state)
-//     {
-//     case ESP_A2D_CONNECTION_STATE_CONNECTING:
-//         Serial.printf("ESP32 connecting.\n");
-//         break;
-//     case ESP_A2D_CONNECTION_STATE_CONNECTED:
-//         Serial.printf("ESP32 connected to %s.\n", a2dp_sink->get_peer_name());
-//         break;
-//     case ESP_A2D_CONNECTION_STATE_DISCONNECTING:
-//         Serial.printf("ESP32 disconecting of %s.\n", a2dp_sink->get_peer_name());
-//         break;
-//     case ESP_A2D_CONNECTION_STATE_DISCONNECTED:
-//         Serial.printf("ESP32 disconected.\n");
-//         break;
-//     default:
-//         Serial.println("Unknow `esp_a2d_connection_state_t` for `OnBluetoothConnectionChanged`.");
-//         break;
-//     }
-// }
+void BluetoothAudioSource::OnBluetoothConnectionChanged(esp_a2d_connection_state_t state, void * )
+{
+    switch (state)
+    {
+    case ESP_A2D_CONNECTION_STATE_CONNECTING:
+        Serial.printf("ESP32 connecting.\n");
+        break;
+    case ESP_A2D_CONNECTION_STATE_CONNECTED:
+        Serial.printf("ESP32 connected to %s.\n", bluetoothAudioSource.a2dp_sink.get_peer_name());
+        break;
+    case ESP_A2D_CONNECTION_STATE_DISCONNECTING:
+        Serial.printf("ESP32 disconecting of %s.\n", bluetoothAudioSource.a2dp_sink.get_peer_name());
+        break;
+    case ESP_A2D_CONNECTION_STATE_DISCONNECTED:
+        Serial.printf("ESP32 disconected.\n");
+        break;
+    default:
+        Serial.println("Unknow `esp_a2d_connection_state_t` for `OnBluetoothConnectionChanged`.");
+        break;
+    }
+}
 
 void BluetoothAudioSource::OnBluetoothMetadataCallback(uint8_t data1, const uint8_t *data2) {
 
