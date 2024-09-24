@@ -1,8 +1,7 @@
 #include "pAudioSource.h"
-#include "Output/AnalogueOutput/AnalogueOutput.h"
 #include "Output/I2SOutput/I2SOutput.h"
-#include "Source/Bluetooth/BluetoothAudioSource.h"
-#include "Source/SD/SDSource.h"
+// #include "Source/Bluetooth/BluetoothAudioSource.h"
+// #include "Source/SD/SDSource.h"
 #include "Source/SPIFFSSource/SPIFFSSource.h"
 #include "Source/WebRadioSource/WebRadioSource.h"
 
@@ -29,6 +28,8 @@ public:
     void SetAudioOutput(pAudioOutput *audioOutput, bool update = false);
     void SetSourceAndOutput(pAudioSource *audioSource, pAudioOutput *audioOutput, bool update = false);
     void Update();
+    void loop();
+    void end();
 };
 
 extern AudioManager audioManager;

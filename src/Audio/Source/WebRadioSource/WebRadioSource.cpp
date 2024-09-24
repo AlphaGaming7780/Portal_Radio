@@ -13,24 +13,36 @@ WebRadioSource::~WebRadioSource()
 {
 }
 
+void WebRadioSource::preBegin()
+{
+    decoder.addNotifyAudioChange(audioManager.audioPlayer);
+    audioManager.audioPlayer.setAudioSource(source);
+    audioManager.audioPlayer.setDecoder(decoder);
+    audioManager.audioPlayer.setMetadataCallback(printMetaData);
+}
+
 void WebRadioSource::begin(audio_tools::AudioOutput &output, pAudioOutput *pAudioOutput) 
 {   
-    pAudioOutput->begin();
-    _begin();
+    audioManager.audioPlayer.setOutput(output);
 }
 
 void WebRadioSource::begin(audio_tools::AudioStream &stream, pAudioOutput *pAudioOutput)
 {
-    pAudioOutput->begin();
-    _begin();
+    audioManager.audioPlayer.setOutput(stream);
 }
 
-void WebRadioSource::_begin()
+void WebRadioSource::postBegin()
 {
-    audioManager.audioPlayer.setAudioSource(source);
     audioManager.audioPlayer.begin();
+    audioManager.audioPlayer.setVolume(0.02);
+}
+
+void WebRadioSource::loop()
+{
+    audioManager.audioPlayer.copy();
 }
 
 void WebRadioSource::end() {
-
+    decoder.removeNotifyAudioChange(audioManager.audioPlayer);
+    audioManager.audioPlayer.end();
 }

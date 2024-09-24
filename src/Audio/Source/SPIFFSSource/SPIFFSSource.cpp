@@ -3,41 +3,46 @@
 
 SPIFFSSource spiffsSource;
 
-void SPIFFSSource::_begin()
-{
-    
-    // audioManager.audioPlayer.setAudioSource(stream);
-    // audioManager.audioPlayer.begin();
-}
-
 SPIFFSSource::SPIFFSSource()
 {
+
 }
 
 SPIFFSSource::~SPIFFSSource()
 {
 }
 
+void SPIFFSSource::preBegin()
+{
+    decoder.addNotifyAudioChange(audioManager.audioPlayer);
+    audioManager.audioPlayer.setAudioSource(source);
+    audioManager.audioPlayer.setDecoder(decoder);
+    audioManager.audioPlayer.setMetadataCallback(printMetaData);
+}
+
 void SPIFFSSource::begin(audio_tools::AudioOutput &output, pAudioOutput *pAudioOutput)
 {
-    // audioManager.audioPlayer.setOutput(output);
-    volume.setStream(_stream);
-    volume.setOutput(output);
-    pAudioOutput->begin();
-    _begin();
+    audioManager.audioPlayer.setOutput(output);
 }
 
 void SPIFFSSource::begin(audio_tools::AudioStream &stream, pAudioOutput *pAudioOutput)
 {
-    // audioManager.audioPlayer.setOutput(stream);
-    volume.setStream(_stream);
-    volume.setOutput(stream);
-    pAudioOutput->begin();
-    _begin();
+    audioManager.audioPlayer.setOutput(stream);
+}
+
+void SPIFFSSource::postBegin()
+{
+    audioManager.audioPlayer.begin();
+    audioManager.audioPlayer.setVolume(0.1f);
+}
+
+void SPIFFSSource::loop()
+{
+    audioManager.audioPlayer.copy();
 }
 
 void SPIFFSSource::end()
-{
-    // audioPlayer.end();
+{   
+    decoder.removeNotifyAudioChange(audioManager.audioPlayer);
     audioManager.audioPlayer.end();
 }

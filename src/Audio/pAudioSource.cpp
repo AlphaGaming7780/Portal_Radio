@@ -10,6 +10,8 @@ pAudioSource::~pAudioSource()
 
 void pAudioSource::begin(pAudioOutput *pAudioOutput)
 {
+    pAudioOutput->begin();
+    preBegin();
     switch (pAudioOutput->GetOutputType())
     {
     case OutputType:
@@ -22,4 +24,13 @@ void pAudioSource::begin(pAudioOutput *pAudioOutput)
         Serial.printf("Unknown audio type : %i.\n", pAudioOutput->GetOutputType());
         break;
     }
+    postBegin();
+}
+
+void printMetaData(MetaDataType type, const char *str, int len)
+{
+    Serial.print("==> ");
+    Serial.print(toStr(type));
+    Serial.print(": ");
+    Serial.println(str);
 }

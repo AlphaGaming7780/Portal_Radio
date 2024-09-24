@@ -15,6 +15,113 @@ function buttonNavBarClicked(newValue, elmnt) {
     _activePage = newValue;
 }
 
+
+////////////////////////////////////////////// AUDIO /////////////////////////////////////////
+
+/* When the user clicks on the button,
+toggle between hiding and showing the dropdown content */
+
+var sourceIDS = new Array("Bluetooth", "SD card", "Webradio");
+var outputIDS = new Array("I2SStream");
+
+var selectedOutput = outputIDS[0];
+var selectedSource = sourceIDS[0];
+
+var pendingOutput = outputIDS[0];
+var pendingSource = sourceIDS[0];
+
+function AudioDropdownButton_Click(elem) {
+    if(elem.parentElement.children[1].children.length > 0) elem.parentElement.children[1].classList.toggle("show");
+}
+
+function AudioDropdownContent_MouseLeave(elem) {
+    elem.lastElementChild.classList.remove("show");
+}
+
+function AudioDropdownContentButton_Click(gev, mev, elem) {
+    // var s = document.getElementById();
+    
+    if(elem == null) {
+        elem = gev.target
+    }
+
+    if(elem === null) return;
+    elem.parentElement.classList.remove("show");
+    var type = elem.parentElement.parentElement.id;
+    if( type === "AudioSourceDropdown" ) {
+        pendingSource = elem.id;
+    } else if( type === "AudioOutputDropdown" ) {
+        pendingOutput = elem.id;
+    }
+    console.log("Selected : " + type + " | " + elem.id);
+    UpdateDropdownsAndUpdateButton()
+}
+
+function UpdateDropdownsAndUpdateButton() {
+
+    document.getElementById("AudioSourceDropdownButton").innerHTML = pendingSource;
+    document.getElementById("AudioOutputDropdownButton").innerHTML = pendingOutput;
+
+    var AudioSourceDropdownContent = document.getElementById("AudioSourceDropdownContent");
+
+    while (AudioSourceDropdownContent.lastElementChild) {
+        AudioSourceDropdownContent.removeChild(AudioSourceDropdownContent.lastElementChild);
+    }
+
+    sourceIDS.forEach((id) => {
+        if(id !== pendingSource) {
+            var button = document.createElement("button");
+            button.id = id;
+            button.addEventListener("click", AudioDropdownContentButton_Click, button)
+            button.innerHTML = id;
+            AudioSourceDropdownContent.appendChild(button);
+        }
+    });
+
+    var AudioOutputDropdownContent = document.getElementById("AudioOutputDropdownContent");
+
+    while (AudioOutputDropdownContent.lastElementChild) {
+        AudioOutputDropdownContent.removeChild(AudioOutputDropdownContent.lastElementChild);
+    }
+
+    outputIDS.forEach((id) => {
+        if(id !== pendingOutput) {
+            var button = document.createElement("button");
+            button.id = id;
+            button.addEventListener("click", AudioDropdownContentButton_Click, button)
+            button.innerHTML = id;
+            AudioOutputDropdownContent.appendChild(button);
+        }
+    });
+
+    if(pendingOutput == selectedOutput && pendingSource == selectedSource) 
+    {
+        document.getElementById("UpdateAudioInput-OutputButton").classList.remove("show");
+    } else {
+        document.getElementById("UpdateAudioInput-OutputButton").classList.add("show");
+    }
+}
+
+UpdateDropdownsAndUpdateButton()
+
+// Close the dropdown menu if the user clicks outside of it
+// window.onclick = function(event) {
+//     if (!event.target.matches('.AudioDropdownButton')) {
+//         var dropdowns = document.getElementsByClassName("AudioDropdownContent");
+//         var i;
+//         for (i = 0; i < dropdowns.length; i++) {
+//             var openDropdown = dropdowns[i];
+//             if (openDropdown.classList.contains('show')) {
+//                 openDropdown.classList.remove('show');
+//             }
+//         }
+//     }
+// }
+
+
+
+//////////////////////////////////////////// MONITORING //////////////////////////////////////
+
 setInterval(
     function getData()
     {
@@ -42,14 +149,9 @@ setInterval(
                     UpdateData_wifi(result.Wifi)
                 }
             }
-        
-        // xhttp.ontimeout = function()
-        // {
-
-        // }
         xhttp.open("GET", "Data", true)
         xhttp.send()
-    }, 1000
+    }, 100000000000000
 )
 
 function UpdateConnectionStatus(status) {
@@ -148,9 +250,4 @@ function WifiStatusUpdate(status) {
             wifi_status.style.color = "var(--text-main)"
             break;
     }
-
-}
-
-function CheckifValide(first, seconde, vFalse) {
-    return (first && seconde ) ? seconde : vFalse
 }

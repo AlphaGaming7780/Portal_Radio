@@ -24,6 +24,7 @@ public:
     virtual audio_tools::AudioStream& GetAudioStream() = 0;
 
     virtual void begin() = 0;
+    virtual void end() = 0;
 };
 
 #endif

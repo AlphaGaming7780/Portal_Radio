@@ -1,26 +1,21 @@
 #include "Arduino.h"
 #include "main.h"
 #include "Audio/AudioManager.h"
-#include "AudioConfig.h"
-
-// #include "ESP8266.h"
-
-// ESP8266 Esp8266(Serial2);
 
 // const char* SSID = "eduroam";
 // const char* ID = "loic.trioen@std.heh.be";
 // const char* PWD = "Loicx22heh22loicx";
 
-// const char* SSID = "S24+ Triton";
-// const char* PWD = "axyktb87k2rxbp2";
+const char* SSID = "S24+ Triton";
+const char* PWD = "axyktb87k2rxbp2";
 
-const char* SSID = "C chez toi ici";
-const char* PWD = "DecoP9DecoP9";
+// const char* SSID = "C chez toi ici";
+// const char* PWD = "DecoP9DecoP9";
 
 void setup() {
 
     Serial.begin(115200);
-
+    // AudioLogger::instance().begin(Serial, AudioLogger::Info);
     Serial.print("\n");
     Serial.println("Starting...");
 
@@ -51,7 +46,7 @@ void setup() {
 //--------------------------------------------------------- WIFI
 
     
-    // Serial.print("Tentative de connection.");
+    Serial.print("Tentative de connection WIFI.");
 
     // WiFi.disconnect(true);      
     // esp_wifi_sta_wpa2_ent_set_identity((uint8_t *)Identity, strlen(Identity));
@@ -79,43 +74,20 @@ void setup() {
     }
     Serial.println("\nConnection établie!");
     Serial.printf("Adresse IP: %s.\n", WiFi.localIP().toString());
-
-    // char	*ipAddress, ap[31];
-    // Esp8266.begin();
-    // WIFI_ERR err = Esp8266.setup( WIFI_CONN_SERVER, WIFI_PRO_TCP, WIFI_MUX_MULTI);
-    // if(err != WIFI_ERR_OK  ) 
-    // {
-    //     Serial.printf("\nWiFi setup fail error code : %i.\n", (int)err);
-    //     return;
-    // }
-
-    // if (Esp8266.join(SSID, PWD) == WIFI_ERR_OK) {
-    //     ipAddress = Esp8266.ip(ESP2866_WIFI_MODE_STA);
-	// 	Serial.print(F("\n\rIP address: "));
-	// 	Serial.print(ipAddress);
-	// 	Serial.print(" : ");  
-	// 	if (Esp8266.isConnect(ap))
-	// 		Serial.println(ap);
-	// 	else
-	// 		Serial.println(" not found");
-	// } else {
-	// 	Serial.println(F("connect fail"));
-	// 	while (1);
-	// }
-
-    // Serial.println("\nConnection établie!");
-    // Serial.printf("Adresse IP: %s.\n", ipAddress);
     
 
 //--------------------------------------------------------- SERVER
 
-    // Setup_Server();
+    Setup_Server();
+
 
     audioManager.SetSourceAndOutput(&webRadioSource, &i2SOutput, true);
+    // audioManager.SetSourceAndOutput(&spiffsSource, &i2SOutput, true);
 
     Serial.println("Portal Radio started!");
 }
 
 void loop() {
-
+    audioManager.loop();
+    // player.copy();
 }

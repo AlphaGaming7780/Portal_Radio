@@ -40,6 +40,10 @@ public:
         _stream.begin(config);
     }
 
+    void end() {
+        _stream.end();
+    }
+
 };
 
 extern I2SOutput i2SOutput;

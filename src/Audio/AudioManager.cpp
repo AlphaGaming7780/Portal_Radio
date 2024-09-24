@@ -34,8 +34,21 @@ void AudioManager::Update()
     if( _pendingSource == nullptr && _pendingOutput == nullptr) return;
 
     if(_currentSource != nullptr) _currentSource->end();
+    if(_currentOutput != nullptr) _currentOutput->end();
     if(_pendingSource != nullptr) _currentSource = _pendingSource;
     if(_pendingOutput != nullptr) _currentOutput = _pendingOutput;
     _currentSource->begin(_currentOutput);
+}
 
+void AudioManager::loop()
+{
+    if(_currentSource != nullptr) _currentSource->loop();
+}
+
+void AudioManager::end()
+{
+    if(_currentSource != nullptr) _currentSource->end();
+    if(_currentOutput != nullptr) _currentOutput->end();
+    _currentOutput = nullptr;
+    _currentSource = nullptr;
 }

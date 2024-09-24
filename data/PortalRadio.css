@@ -22,6 +22,7 @@ details>div>span:last-child {
     border-radius: 10px;
     display: flex;
     justify-content: center;
+    margin-bottom: 12px;
 }
 
 /* Style the links inside the navigation bar */
@@ -33,9 +34,10 @@ details>div>span:last-child {
     padding: 14px 16px;
     text-decoration: none;
     font-size: 17px;
-    flex-grow: 1;
+    /* flex-grow: 1; */
     margin-top: 6px;
     margin-left: 6px;
+    width: 50%;
 }
 
 .topnav>button:hover {  
@@ -58,26 +60,94 @@ details>div>span:last-child {
     display: none;
 }
 
-/* When the screen is less than 600 pixels wide, hide all links, except for the first one ("Home"). Show the link that contains should open and close the topnav (.icon) */
-@media screen and (max-width: 450px) {
-    .topnav a:not(:first-child) {display: none;}
-    .topnav a.icon {
-        float: right;
-        display: block;
-    }
+.AudioController {
+    background-color: var(--background-alt);
+    border-radius: 10px;
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    align-content: center;
+}
+
+.AudioController .AudioInput-OutputSelector {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.UpdateAudioInput-OutputButton {
+    margin-left: 6px;
+    display: none;
+}
+
+.UpdateAudioInput-OutputButton.show {
+    display: block;
+}
+
+.AudioContainer {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.AudioContainer>h3 {
+    align-self: center;
+}
+
+  /* The container <div> - needed to position the dropdown content */
+.AudioDropdown {
+    position: relative;
+    display: inline-block;
+    margin-top: 6px;
+    margin-left: 6px;
+    flex-grow: 1;
+}
+
+.AudioDropdown:last-child {
+    margin-right: 6px;
+}
+
+/* Dropdown Button */
+.AudioDropdownButton {
+    /* background-color: #3498DB; */
+    /* color: white; */
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
 }
   
-  /* The "responsive" class is added to the topnav with JavaScript when the user clicks on the icon. This class makes the topnav look good on small screens (display the links vertically instead of horizontally) */
-@media screen and (max-width: 450px) {
-    .topnav.responsive {position: relative;}
-    .topnav.responsive a.icon {
-        position: absolute;
-        right: 0;
-        top: 0;
-    }
-    .topnav.responsive a {
-        float: none;
-        display: block;
-        text-align: left;
-    }
+  /* Dropdown button on hover & focus */
+.AudioDropdownButton:hover, .AudioDropdownButton:focus {
+    /* background-color: #2980B9; */
 }
+  
+  /* Dropdown Content (Hidden by Default) */
+.AudioDropdownContent {
+    display: none;
+    position: absolute;
+    background-color: var(--background-alt);
+    /* min-width: 160px; */
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    flex-direction: column;
+    border-radius: 10px;
+    width: 100%;
+}
+  
+  /* Links inside the dropdown */
+.AudioDropdownContent button {
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    margin-left: 6px;
+}
+
+.AudioDropdownContent button:first-child {
+    margin-top: 6px;
+}
+  
+  /* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
+.AudioDropdownContent.show {display:flex;}
