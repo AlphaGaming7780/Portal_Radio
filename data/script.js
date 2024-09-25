@@ -113,7 +113,7 @@ function getAudioSourcesAndOutputsData()
             {
                 if(this.status != 200) 
                 {
-                    console.log("AudioSourcesAndOutputs data get return a "+this.status+" code.")
+                    console.log("Get AudioSourcesAndOutputs data return a "+this.status+" code.")
                     return
                 }
                 var result = JSON.parse(this.responseText)
@@ -141,7 +141,7 @@ setInterval(
                 {
                     if(this.status != 200) 
                     {
-                        console.log("Wifi data get return a "+this.status+" code.")
+                        console.log("Get Monitoring data return a "+this.status+" code.")
                         UpdateConnectionStatus(false)
                         UpdateData_system(undefined)
                         UpdateData_bluetooth(undefined)
