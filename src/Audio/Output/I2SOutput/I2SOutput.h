@@ -13,6 +13,8 @@ public:
     }
     ~I2SOutput() {}
 
+    String getID() { return "Speaker"; }
+
     AudioOutputType GetOutputType() 
     {
         return StreamType;
@@ -22,6 +24,8 @@ public:
     {
         return _stream;
     }
+
+    AudioInfo GetAudioInfo() { return _stream.audioInfo(); }
 
     void begin() {
         
@@ -39,13 +43,8 @@ public:
         config.auto_clear = true; // avoiding noise in case of data unavailability
         _stream.begin(config);
     }
-
-    void end() {
-        _stream.end();
-    }
-
 };
 
-extern I2SOutput i2SOutput;
+extern I2SOutput i2sOutput;
 
 #endif

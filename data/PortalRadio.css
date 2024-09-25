@@ -88,7 +88,7 @@ details>div>span:last-child {
 .AudioContainer {
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
+    width: 50%;
 }
 
 .AudioContainer>h3 {
@@ -117,11 +117,6 @@ details>div>span:last-child {
     border: none;
     cursor: pointer;
     width: 100%;
-}
-  
-  /* Dropdown button on hover & focus */
-.AudioDropdownButton:hover, .AudioDropdownButton:focus {
-    /* background-color: #2980B9; */
 }
   
   /* Dropdown Content (Hidden by Default) */

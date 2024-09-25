@@ -1,4 +1,5 @@
 #include "pAudioSource.h"
+#include "AudioManager.h"
 
 pAudioSource::pAudioSource(/* args */)
 {
@@ -12,18 +13,24 @@ void pAudioSource::begin(pAudioOutput *pAudioOutput)
 {
     pAudioOutput->begin();
     preBegin();
-    switch (pAudioOutput->GetOutputType())
-    {
-    case OutputType:
-        begin(pAudioOutput->GetAudioOutput(), pAudioOutput);
-        break;
-    case StreamType:
-        begin(pAudioOutput->GetAudioStream(), pAudioOutput);
-        break;
-    default:
-        Serial.printf("Unknown audio type : %i.\n", pAudioOutput->GetOutputType());
-        break;
+
+    if(audioManager.useEquilizer) {
+        begin(pAudioOutput->GetEquilizerStream(), pAudioOutput);
+    } else {
+        switch (pAudioOutput->GetOutputType())
+        {
+        case OutputType:
+            begin(pAudioOutput->GetAudioOutput(), pAudioOutput);
+            break;
+        case StreamType:
+            begin(pAudioOutput->GetAudioStream(), pAudioOutput);
+            break;
+        default:
+            Serial.printf("Unknown audio type : %i.\n", pAudioOutput->GetOutputType());
+            break;
+        }
     }
+    
     postBegin();
 }
 

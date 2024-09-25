@@ -33,7 +33,6 @@ void SPIFFSSource::begin(audio_tools::AudioStream &stream, pAudioOutput *pAudioO
 void SPIFFSSource::postBegin()
 {
     audioManager.audioPlayer.begin();
-    audioManager.audioPlayer.setVolume(0.1f);
 }
 
 void SPIFFSSource::loop()

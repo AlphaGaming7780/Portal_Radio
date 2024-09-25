@@ -13,6 +13,11 @@ WebRadioSource::~WebRadioSource()
 {
 }
 
+String WebRadioSource::getID()
+{
+    return "Webradio";
+}
+
 void WebRadioSource::preBegin()
 {
     decoder.addNotifyAudioChange(audioManager.audioPlayer);
@@ -34,7 +39,6 @@ void WebRadioSource::begin(audio_tools::AudioStream &stream, pAudioOutput *pAudi
 void WebRadioSource::postBegin()
 {
     audioManager.audioPlayer.begin();
-    audioManager.audioPlayer.setVolume(0.02);
 }
 
 void WebRadioSource::loop()
@@ -45,4 +49,9 @@ void WebRadioSource::loop()
 void WebRadioSource::end() {
     decoder.removeNotifyAudioChange(audioManager.audioPlayer);
     audioManager.audioPlayer.end();
+}
+
+void WebRadioSource::updateVolume(float volume)
+{
+    audioManager.audioPlayer.setVolume(volume);
 }

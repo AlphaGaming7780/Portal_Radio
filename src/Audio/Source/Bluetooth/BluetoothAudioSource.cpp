@@ -4,6 +4,8 @@
 
 BluetoothAudioSource bluetoothAudioSource;
 
+// int BluetoothAudioSource::s_deviceVolume = 0;
+
 BluetoothAudioSource::BluetoothAudioSource()
 {
 }
@@ -12,39 +14,60 @@ BluetoothAudioSource::~BluetoothAudioSource()
 {
 }
 
+String BluetoothAudioSource::getID()
+{
+    return "Bluetooth";
+}
+
+void BluetoothAudioSource::preBegin()
+{
+    Serial.println("Tentative de démarage du Bluetooth.");
+    a2dp_sink.set_on_connection_state_changed(OnBluetoothConnectionChanged);
+    a2dp_sink.set_avrc_metadata_attribute_mask(127);
+    a2dp_sink.set_avrc_metadata_callback(OnBluetoothMetadataCallback);
+
+    // a2dp_sink.set_avrc_rn_volumechange(OnDeviceVolumeChange);
+
+    a2dp_sink.set_volume_control(&_volumeControl);
+}
+
 void BluetoothAudioSource::begin(audio_tools::AudioOutput &output, pAudioOutput *pAudioOutput) 
 {
     a2dp_sink.set_output(output);
-    pAudioOutput->begin();
-    _begin();
 }
 
 void BluetoothAudioSource::begin(audio_tools::AudioStream &stream, pAudioOutput *pAudioOutput)
 {
     a2dp_sink.set_output(stream);
-    pAudioOutput->begin();
-    _begin();
 }
 
-void BluetoothAudioSource::_begin()
+void BluetoothAudioSource::postBegin()
 {
-    Serial.println("Tentative de démarage du Bluetooth.");
-    // a2dp_sink->set_on_connection_state_changed(OnBluetoothConnectionChanged);
-    a2dp_sink.set_avrc_metadata_attribute_mask(127);
-    a2dp_sink.set_avrc_metadata_callback(OnBluetoothMetadataCallback);
-    a2dp_sink.set_volume_control(&volume);
-
     a2dp_sink.start("Portal Radio");
     Serial.println("Bluetooth actif!");
 }
 
-void BluetoothAudioSource::end() {
-    a2dp_sink.end();
-    // free(a2dp_sink);
-    // a2dp_sink = nullptr;
+void BluetoothAudioSource::loop()
+{
 }
 
-void BluetoothAudioSource::OnBluetoothConnectionChanged(esp_a2d_connection_state_t state, void * )
+void BluetoothAudioSource::end() {
+    a2dp_sink.end();
+}
+
+void BluetoothAudioSource::updateVolume(float volume)
+{
+    // _volumeControl.set_volume(volume * s_deviceVolume);
+    // a2dp_sink.set_volume(volume * s_deviceVolume);
+}
+
+// void BluetoothAudioSource::OnDeviceVolumeChange(int volume)
+// {
+//     Serial.printf("Device Volume change : %i\n.", volume);
+//     s_deviceVolume = volume;
+// }
+
+void BluetoothAudioSource::OnBluetoothConnectionChanged(esp_a2d_connection_state_t state, void *)
 {
     switch (state)
     {

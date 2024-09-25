@@ -7,12 +7,12 @@
 class pAudioSource
 {
 private:
-    String _ID;
+
 public:
     pAudioSource(/* args */);
     ~pAudioSource();
 
-    String ID = _ID;
+    virtual String getID() = 0;
 
     void begin(pAudioOutput *pAudioOutput);
     virtual void preBegin() = 0;
@@ -21,6 +21,8 @@ public:
     virtual void postBegin() = 0;
     virtual void loop() = 0;
     virtual void end() = 0;
+
+    virtual void updateVolume(float volume) = 0;
 
 };
 

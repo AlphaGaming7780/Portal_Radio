@@ -24,11 +24,11 @@ toggle between hiding and showing the dropdown content */
 var sourceIDS = new Array("Bluetooth", "SD card", "Webradio");
 var outputIDS = new Array("I2SStream");
 
-var selectedOutput = outputIDS[0];
-var selectedSource = sourceIDS[0];
+var selectedOutput = "Unknown" //outputIDS[0];
+var selectedSource = "Unknown" //sourceIDS[0];
 
-var pendingOutput = outputIDS[0];
-var pendingSource = sourceIDS[0];
+var pendingOutput = "Unknown" // outputIDS[0];
+var pendingSource = "Unknown" // sourceIDS[0];
 
 function AudioDropdownButton_Click(elem) {
     if(elem.parentElement.children[1].children.length > 0) elem.parentElement.children[1].classList.toggle("show");
@@ -102,28 +102,35 @@ function UpdateDropdownsAndUpdateButton() {
     }
 }
 
-UpdateDropdownsAndUpdateButton()
+function getAudioSourcesAndOutputsData()
+{
+    var xhttp = new XMLHttpRequest()
+    xhttp.timeout = 1000;
 
-// Close the dropdown menu if the user clicks outside of it
-// window.onclick = function(event) {
-//     if (!event.target.matches('.AudioDropdownButton')) {
-//         var dropdowns = document.getElementsByClassName("AudioDropdownContent");
-//         var i;
-//         for (i = 0; i < dropdowns.length; i++) {
-//             var openDropdown = dropdowns[i];
-//             if (openDropdown.classList.contains('show')) {
-//                 openDropdown.classList.remove('show');
-//             }
-//         }
-//     }
-// }
+    xhttp.onreadystatechange = function()
+        {
+            if(this.readyState == 4)
+            {
+                if(this.status != 200) 
+                {
+                    console.log("AudioSourcesAndOutputs data get return a "+this.status+" code.")
+                    return
+                }
+                var result = JSON.parse(this.responseText)
+                console.log(result)
+                UpdateDropdownsAndUpdateButton()
+            }
+        }
+    xhttp.open("GET", "Data/AudioSourcesAndOutputs", true)
+    xhttp.send()
+}
 
-
+getAudioSourcesAndOutputsData()
 
 //////////////////////////////////////////// MONITORING //////////////////////////////////////
 
 setInterval(
-    function getData()
+    function getMonitoringData()
     {
         var xhttp = new XMLHttpRequest()
         xhttp.timeout = 1000;
@@ -149,7 +156,7 @@ setInterval(
                     UpdateData_wifi(result.Wifi)
                 }
             }
-        xhttp.open("GET", "Data", true)
+        xhttp.open("GET", "Data/Monitoring", true)
         xhttp.send()
     }, 100000000000000
 )

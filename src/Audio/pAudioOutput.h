@@ -13,18 +13,20 @@ enum AudioOutputType {
 class pAudioOutput
 {
 private:
-    /* data */
+    bool _useEq = false;
 public:
-    // pAudioOutput(/* args */);
-    // ~pAudioOutput();
+    Equilizer3Bands *eq;
 
+    virtual String getID() = 0;
     virtual AudioOutputType GetOutputType() = 0;
 
     virtual audio_tools::AudioOutput& GetAudioOutput() = 0;
     virtual audio_tools::AudioStream& GetAudioStream() = 0;
+    audio_tools::ModifyingStream& GetEquilizerStream();
+    virtual AudioInfo GetAudioInfo() = 0;
 
     virtual void begin() = 0;
-    virtual void end() = 0;
+    virtual void end();
 };
 
 #endif

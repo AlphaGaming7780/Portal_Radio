@@ -24,22 +24,49 @@ void Setup_Server() {
         }
     );
 
-    server.on("/Data", HTTP_GET, [](AsyncWebServerRequest *request) 
+    server.on("/Data/Monitoring", HTTP_GET, [](AsyncWebServerRequest *request) 
         {
             AsyncJsonResponse * response = new AsyncJsonResponse();
-            response->addHeader("Server","Portal Radio Data");
+            response->addHeader("Server","Portal Radio Data Monitoring");
             JsonVariant& root = response->getRoot();
 
             GetSystemData(root);
             GetBluetoothData(root);
             GetWifiData(root);
 
+            response->setLength();
+            request->send(response);
+        }
+    );
 
+    server.on("/Data/AudioSourcesAndOutputs", HTTP_GET, [](AsyncWebServerRequest *request) 
+        {
+            AsyncJsonResponse * response = new AsyncJsonResponse();
+            response->addHeader("Server","Portal Radio Data AudioSourcesAndOutputs");
+            JsonVariant& root = response->getRoot();
+
+            int outputsListSize = sizeof(audioManager.outputList) / sizeof(audioManager.outputList[0]);
+            int sourcesListSize = sizeof(audioManager.sourceList) / sizeof(audioManager.sourceList[0]);
+
+            String outputsName[outputsListSize];
+            String sourcesName[sourcesListSize];
+
+            for(int i = 0; i < outputsListSize; i++) {
+                outputsName[i] = audioManager.outputList[i]->getID();
+            }
+
+            for(int i = 0; i < sourcesListSize; i++) {
+                sourcesName[i] = audioManager.sourceList[i]->getID();
+            }
+
+            root["outputsName"] = outputsName;
+            root["sourcesName"] = sourcesName;
 
             response->setLength();
             request->send(response);
         }
     );
+
     server.begin();
     Serial.println("Server actif!");
 }

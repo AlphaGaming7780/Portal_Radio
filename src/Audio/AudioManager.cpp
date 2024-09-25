@@ -4,6 +4,7 @@ AudioManager audioManager;
 
 AudioManager::AudioManager(/* args */)
 {
+    audioPlayer.setVolumeControl(_volumeControl);
 }
 
 AudioManager::~AudioManager()
@@ -41,8 +42,11 @@ void AudioManager::Update()
 }
 
 void AudioManager::loop()
-{
-    if(_currentSource != nullptr) _currentSource->loop();
+{   
+    if(_currentSource != nullptr) {
+        updateVolume();
+        _currentSource->loop();
+    }
 }
 
 void AudioManager::end()
@@ -51,4 +55,10 @@ void AudioManager::end()
     if(_currentOutput != nullptr) _currentOutput->end();
     _currentOutput = nullptr;
     _currentSource = nullptr;
+}
+
+void AudioManager::updateVolume() {
+    // Reading potentiometer value (range is 0 - 4095)
+    float vol = static_cast<float>(analogRead(_volumePin));
+    _currentSource->updateVolume(vol/4065.0);
 }
