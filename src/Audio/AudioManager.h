@@ -1,8 +1,8 @@
 #include "pAudioSource.h"
 #include "Output/I2SOutput/I2SOutput.h"
-#include "Source/Bluetooth/BluetoothAudioSource.h"
+// #include "Source/Bluetooth/BluetoothAudioSource.h"
 // #include "Source/SD/SDSource.h"
-// #include "Source/SPIFFSSource/SPIFFSSource.h"
+#include "Source/SPIFFSSource/SPIFFSSource.h"
 #include "Source/WebRadioSource/WebRadioSource.h"
 
 // #ifndef dAudioManager
@@ -29,15 +29,15 @@ public:
     AudioManager(/* args */);
     ~AudioManager();
 
-    pAudioSource *sourceList[2] {&bluetoothAudioSource, &webRadioSource};
+    pAudioSource *sourceList[2] {&spiffsSource, &webRadioSource};
     pAudioOutput *outputList[1] {&i2sOutput};
 
     AudioPlayer audioPlayer;
 
     bool useEquilizer = false;
 
-    pAudioSource *currentSource = _currentSource;
-    pAudioOutput *currentOutput = _currentOutput;
+    pAudioSource *getCurrentSource() { return _currentSource; };
+    pAudioOutput *getCurrentOutput() { return _currentOutput; };
 
     void SetAudioSource(pAudioSource *audioSource, bool update = false);
     void SetAudioOutput(pAudioOutput *audioOutput, bool update = false);

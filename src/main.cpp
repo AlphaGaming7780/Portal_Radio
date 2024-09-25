@@ -41,14 +41,14 @@ void setup() {
 
 //--------------------------------------------------------- BLUETOOTH
 
-    audioManager.SetSourceAndOutput(&bluetoothAudioSource, &i2sOutput, true);
+    // audioManager.SetSourceAndOutput(&bluetoothAudioSource, &i2sOutput, true);
     // audioManager.SetSourceAndOutput(&sdSource, &i2sOutput, true);
     
 
 //--------------------------------------------------------- WIFI
 
     
-    // Serial.print("Tentative de connection WIFI.");
+    Serial.print("Tentative de connection WIFI.");
 
     // WiFi.disconnect(true);      
     // esp_wifi_sta_wpa2_ent_set_identity((uint8_t *)Identity, strlen(Identity));
@@ -63,28 +63,28 @@ void setup() {
 
 //             SSID, WPA2_AUTH_... , IDENTITY, UserName, Password, ca_pem , client _crt, client_key, channel, bssid, connect
     //WiFi.begin(SSID, WPA2_AUTH_PEAP, Identity, Identity, PASSWORD, nullptr, nullptr, nullptr, 0, nullptr);
-    // WiFi.begin(SSID, PWD);
+    WiFi.begin(SSID, PWD);
 
-    // while (WiFi.status() != WL_CONNECTED)
-    // {
-    //     if(WiFi.status() == WL_CONNECT_FAILED) {
-    //         Serial.printf("Failed to connect to wifi\n");
-    //         return;
-    //     }
-    //     Serial.print(".");
-    //     delay(100);
-    // }
-    // Serial.println("\nConnection établie!");
-    // Serial.printf("Adresse IP: %s.\n", WiFi.localIP().toString());
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        if(WiFi.status() == WL_CONNECT_FAILED) {
+            Serial.printf("Failed to connect to wifi\n");
+            return;
+        }
+        Serial.print(".");
+        delay(100);
+    }
+    Serial.println("\nConnection établie!");
+    Serial.printf("Adresse IP: %s.\n", WiFi.localIP().toString());
     
 
 //--------------------------------------------------------- SERVER
 
-    // Setup_Server();
-
-
-    // audioManager.SetSourceAndOutput(&webRadioSource, &i2sOutput, true);
+    audioManager.SetSourceAndOutput(&webRadioSource, &i2sOutput, true);
     // audioManager.SetSourceAndOutput(&spiffsSource, &i2sOutput, true);
+
+    Setup_Server();
+
 
     Serial.println("Portal Radio started!");
 }

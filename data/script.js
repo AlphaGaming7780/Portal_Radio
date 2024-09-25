@@ -21,11 +21,11 @@ function buttonNavBarClicked(newValue, elmnt) {
 /* When the user clicks on the button,
 toggle between hiding and showing the dropdown content */
 
-var sourceIDS = new Array("Bluetooth", "SD card", "Webradio");
-var outputIDS = new Array("I2SStream");
+var sourceIDS = new Array();
+var outputIDS = new Array();
 
-var selectedOutput = "Unknown" //outputIDS[0];
-var selectedSource = "Unknown" //sourceIDS[0];
+var currentOutput = "Unknown" //outputIDS[0];
+var currentSource = "Unknown" //sourceIDS[0];
 
 var pendingOutput = "Unknown" // outputIDS[0];
 var pendingSource = "Unknown" // sourceIDS[0];
@@ -94,7 +94,7 @@ function UpdateDropdownsAndUpdateButton() {
         }
     });
 
-    if(pendingOutput == selectedOutput && pendingSource == selectedSource) 
+    if(pendingOutput == currentOutput && pendingSource == currentSource) 
     {
         document.getElementById("UpdateAudioInput-OutputButton").classList.remove("show");
     } else {
@@ -114,18 +114,34 @@ function getAudioSourcesAndOutputsData()
                 if(this.status != 200) 
                 {
                     console.log("Get AudioSourcesAndOutputs data return a "+this.status+" code.")
+                    sourceIDS = [];
+
+                    outputIDS = [];
+
+                    currentOutput = "Unknown"
+                    currentSource = "Unknown"
+                    
+                    pendingOutput = currentOutput
+                    pendingSource = currentSource
+
                     return
                 }
                 var result = JSON.parse(this.responseText)
+
                 console.log(result)
+
+                sourceIDS = result.sourcesName;
+                outputIDS = result.outputsName;
+
+                pendingOutput = currentOutput = result.currentOutput
+                pendingSource = currentSource = result.currentSource
+
                 UpdateDropdownsAndUpdateButton()
             }
         }
     xhttp.open("GET", "Data/AudioSourcesAndOutputs", true)
     xhttp.send()
 }
-
-getAudioSourcesAndOutputsData()
 
 //////////////////////////////////////////// MONITORING //////////////////////////////////////
 
@@ -158,7 +174,7 @@ setInterval(
             }
         xhttp.open("GET", "Data/Monitoring", true)
         xhttp.send()
-    }, 100000000000000
+    }, 1000
 )
 
 function UpdateConnectionStatus(status) {
@@ -258,3 +274,7 @@ function WifiStatusUpdate(status) {
             break;
     }
 }
+
+///////////////////////////////// END ////////////////////////////////
+
+getAudioSourcesAndOutputsData()

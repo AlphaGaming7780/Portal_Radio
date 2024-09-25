@@ -11,8 +11,8 @@ private:
 //https://streamurl.link/
 //https://fluxradios.blogspot.com/2014/06/flux-url-rtbf-webradios.html
     const char *urls[1] {
-        "https://cast1.torontocast.com:2275/stream"
-        // "http://pureplay.cdnstream1.com/6005_128.mp3",
+        // "https://cast1.torontocast.com:2275/stream",
+        "http://pureplay.cdnstream1.com/6005_128.mp3",
         // "https://fallout.fm:8444/falloutfm6.ogg",
         // "https://cast6.asurahosting.com/proxy/noisedep/stream",
         // "https://hardstyle.stream.laut.fm/hardstyle",

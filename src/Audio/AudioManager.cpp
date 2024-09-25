@@ -39,6 +39,7 @@ void AudioManager::Update()
     if(_pendingSource != nullptr) _currentSource = _pendingSource;
     if(_pendingOutput != nullptr) _currentOutput = _pendingOutput;
     _currentSource->begin(_currentOutput);
+    updateVolume();
 }
 
 void AudioManager::loop()

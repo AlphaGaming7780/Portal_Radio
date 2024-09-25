@@ -17,12 +17,17 @@ public:
 
     SPIFFSSource(/* args */);
     ~SPIFFSSource();
+
+    String getID();
+
     void preBegin();
     void begin(audio_tools::AudioOutput &output, pAudioOutput *pAudioOutput);
     void begin(audio_tools::AudioStream &stream, pAudioOutput *pAudioOutput);
     void postBegin();
     void loop();
     void end();
+
+    void updateVolume(float volume);
 
 };
 

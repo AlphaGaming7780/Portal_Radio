@@ -48,19 +48,19 @@ void Setup_Server() {
             int outputsListSize = sizeof(audioManager.outputList) / sizeof(audioManager.outputList[0]);
             int sourcesListSize = sizeof(audioManager.sourceList) / sizeof(audioManager.sourceList[0]);
 
-            String outputsName[outputsListSize];
-            String sourcesName[sourcesListSize];
+            JsonArray outputsName = root["outputsName"].to<JsonArray>();
+            JsonArray sourcesName = root["sourcesName"].to<JsonArray>();
 
             for(int i = 0; i < outputsListSize; i++) {
-                outputsName[i] = audioManager.outputList[i]->getID();
+                outputsName.add(audioManager.outputList[i]->getID());
             }
 
             for(int i = 0; i < sourcesListSize; i++) {
-                sourcesName[i] = audioManager.sourceList[i]->getID();
+                sourcesName.add(audioManager.sourceList[i]->getID());
             }
 
-            root["outputsName"] = outputsName;
-            root["sourcesName"] = sourcesName;
+            root["currentSource"] = audioManager.getCurrentSource()->getID();
+            root["currentOutput"] = audioManager.getCurrentOutput()->getID();
 
             response->setLength();
             request->send(response);

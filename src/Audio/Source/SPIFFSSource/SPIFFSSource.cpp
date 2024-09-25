@@ -12,6 +12,11 @@ SPIFFSSource::~SPIFFSSource()
 {
 }
 
+String SPIFFSSource::getID()
+{
+    return "SPIFFS";
+}
+
 void SPIFFSSource::preBegin()
 {
     decoder.addNotifyAudioChange(audioManager.audioPlayer);
@@ -44,4 +49,9 @@ void SPIFFSSource::end()
 {   
     decoder.removeNotifyAudioChange(audioManager.audioPlayer);
     audioManager.audioPlayer.end();
+}
+
+void SPIFFSSource::updateVolume(float volume)
+{
+    audioManager.audioPlayer.setVolume(volume);
 }
