@@ -22,10 +22,17 @@ public:
     virtual void loop() = 0;
     virtual void end() = 0;
 
-    virtual void updateVolume(float volume) = 0;
+    virtual void updateVolume(float volume);
+    virtual void play();
+    virtual void pause();
+    virtual void next();
+    virtual void previous();
+
+    virtual float getVolume();
 
 };
 
 void printMetaData(MetaDataType type, const char* str, int len);
+void updateMetaData(MetaDataType type, const char* str, int len);
 
 #endif

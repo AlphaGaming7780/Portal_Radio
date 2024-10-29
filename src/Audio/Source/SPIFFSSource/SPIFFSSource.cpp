@@ -22,7 +22,7 @@ void SPIFFSSource::preBegin()
     decoder.addNotifyAudioChange(audioManager.audioPlayer);
     audioManager.audioPlayer.setAudioSource(source);
     audioManager.audioPlayer.setDecoder(decoder);
-    audioManager.audioPlayer.setMetadataCallback(printMetaData);
+    audioManager.audioPlayer.setMetadataCallback(updateMetaData);
 }
 
 void SPIFFSSource::begin(audio_tools::AudioOutput &output, pAudioOutput *pAudioOutput)
@@ -51,7 +51,7 @@ void SPIFFSSource::end()
     audioManager.audioPlayer.end();
 }
 
-void SPIFFSSource::updateVolume(float volume)
-{
-    audioManager.audioPlayer.setVolume(volume);
-}
+// void SPIFFSSource::updateVolume(float volume)
+// {
+//     audioManager.audioPlayer.setVolume(volume);
+// }

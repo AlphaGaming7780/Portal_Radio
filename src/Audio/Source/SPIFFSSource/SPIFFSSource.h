@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "AudioTools.h"
-#include "AudioLibs/AudioSourceSPIFFS.h"
-#include "AudioCodecs/CodecMP3Helix.h"
+#include "AudioTools/AudioLibs/AudioSourceSPIFFS.h"
+#include "AudioTools/AudioCodecs/CodecMP3Helix.h"
 #include "../../pAudioSource.h"
 
 #ifndef dSPIFFSSource
@@ -18,16 +18,16 @@ public:
     SPIFFSSource(/* args */);
     ~SPIFFSSource();
 
-    String getID();
+    String getID() override;
 
-    void preBegin();
-    void begin(audio_tools::AudioOutput &output, pAudioOutput *pAudioOutput);
-    void begin(audio_tools::AudioStream &stream, pAudioOutput *pAudioOutput);
-    void postBegin();
-    void loop();
-    void end();
+    void preBegin() override;
+    void begin(audio_tools::AudioOutput &output, pAudioOutput *pAudioOutput) override;
+    void begin(audio_tools::AudioStream &stream, pAudioOutput *pAudioOutput) override;
+    void postBegin() override;
+    void loop() override;
+    void end() override;
 
-    void updateVolume(float volume);
+    // void updateVolume(float volume) override;
 
 };
 
