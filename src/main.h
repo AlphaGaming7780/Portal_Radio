@@ -1,5 +1,8 @@
+#include "Arduino.h"
 #include "AudioTools.h"
 #include "SPIFFS.h"
+#include "Audio/AudioManager.h"
+#include "Nextion/Nextion.h"
 
 #ifndef MAIN
 #define MAIN

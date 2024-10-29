@@ -28,8 +28,9 @@ void pAudioOutput::end()
         break;
     case StreamType:
         GetAudioStream().end();
+        break;
     default:
-        Serial.printf("Unknown audio type : %i.\n", GetOutputType());
+        Serial.printf("pAudioOutput::end() : Unknown audio type : %i.\n", GetOutputType());
         break;
     }
 

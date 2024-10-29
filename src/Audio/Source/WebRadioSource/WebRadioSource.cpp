@@ -1,5 +1,6 @@
 #include "WebRadioSource.h"
 #include "../../AudioManager.h"
+// #include "main.h"
 // AnalogAudioStream out;
 // BluetoothA2DPSink a2dp_sink(out);
 
@@ -20,10 +21,14 @@ String WebRadioSource::getID()
 
 void WebRadioSource::preBegin()
 {
-    decoder.addNotifyAudioChange(audioManager.audioPlayer);
+
+    _decoder = audioManager.getDecoder(MP3);
+
+    _decoder->addNotifyAudioChange(audioManager.audioPlayer);
+
     audioManager.audioPlayer.setAudioSource(source);
-    audioManager.audioPlayer.setDecoder(decoder);
-    audioManager.audioPlayer.setMetadataCallback(printMetaData);
+    audioManager.audioPlayer.setDecoder(*_decoder);
+    audioManager.audioPlayer.setMetadataCallback(updateMetaData);
 }
 
 void WebRadioSource::begin(audio_tools::AudioOutput &output, pAudioOutput *pAudioOutput) 
@@ -47,11 +52,7 @@ void WebRadioSource::loop()
 }
 
 void WebRadioSource::end() {
-    decoder.removeNotifyAudioChange(audioManager.audioPlayer);
+    _decoder->removeNotifyAudioChange(audioManager.audioPlayer);
     audioManager.audioPlayer.end();
-}
-
-void WebRadioSource::updateVolume(float volume)
-{
-    audioManager.audioPlayer.setVolume(volume);
+    WiFi.disconnect(true, true);
 }

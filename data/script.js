@@ -194,6 +194,8 @@ function UpdateData_system(data) {
     document.getElementById("System_features").innerHTML = (data && data.features) ? data.features : "Unknown"
     document.getElementById("System_full_revision").innerHTML = (data && data.full_revision) ? data.full_revision : "Unknown"
     document.getElementById("System_revision").innerHTML = (data && data.revision) ? data.revision : "Unknown"
+    document.getElementById("System_heapSize").innerHTML = (data && data.heapSize) ? data.heapSize : "Unknown"
+    document.getElementById("System_heapFree").innerHTML = (data && data.heapFree) ? data.heapFree : "Unknown"
 }
 
 function UpdateData_bluetooth(data) {

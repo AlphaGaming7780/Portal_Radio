@@ -9,25 +9,24 @@ private:
     I2SStream _stream;
 public:
 
-    I2SOutput(/* args */) {
-    }
+    I2SOutput(/* args */) {}
     ~I2SOutput() {}
 
-    String getID() { return "Speaker"; }
+    String getID() override { return "Speaker"; }
 
-    AudioOutputType GetOutputType() 
+    AudioOutputType GetOutputType() override
     {
         return StreamType;
     }
-    audio_tools::AudioOutput &GetAudioOutput() {}
-    audio_tools::AudioStream &GetAudioStream() 
+    audio_tools::AudioOutput &GetAudioOutput() override {}
+    audio_tools::AudioStream &GetAudioStream() override
     {
         return _stream;
     }
 
-    AudioInfo GetAudioInfo() { return _stream.audioInfo(); }
+    AudioInfo GetAudioInfo() override { return _stream.audioInfo(); }
 
-    void begin() {
+    void begin() override {
         
         auto config = _stream.defaultConfig(TX_MODE);
         config.i2s_format = I2S_LSB_FORMAT;

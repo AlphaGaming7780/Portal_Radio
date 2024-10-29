@@ -80,6 +80,8 @@ void GetSystemData(JsonVariant& root) {
     SystemData["model"] = SystemModelToString(info.model);
     SystemData["full_revision"] = info.full_revision;
     SystemData["revision"] = info.revision;
+    SystemData["heapSize"] = heap_caps_get_total_size(MALLOC_CAP_DEFAULT);
+    SystemData["heapFree"] = heap_caps_get_free_size(MALLOC_CAP_DEFAULT);
 }
 
 String SystemFeaturesToString(uint32_t features) {
@@ -125,7 +127,6 @@ void GetWifiData(JsonVariant& root) {
     WifiData["mac"] = WiFi.macAddress();
     WifiData["subnetMask"] = WiFi.subnetMask();
     WifiData["dns"] = WiFi.dnsIP();
-    
     // return WifiData;
 }
 
