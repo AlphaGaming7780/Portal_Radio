@@ -21,66 +21,64 @@ String BluetoothAudioSource::getID()
     return "Bluetooth";
 }
 
-void BluetoothAudioSource::preBegin()
+void BluetoothAudioSource::Setup()
 {
     Serial.println("Tentative de démarage du Bluetooth.");
     a2dp_sink.set_task_core(1);
-    a2dp_sink.set_on_connection_state_changed(OnBluetoothConnectionChanged);
-    a2dp_sink.set_on_audio_state_changed(OnBluetoothAudioStateCallback);
+    a2dp_sink.set_on_connection_state_changed(onBluetoothConnectionChanged);
+    a2dp_sink.set_on_audio_state_changed(onBluetoothAudioStateCallback);
     a2dp_sink.set_avrc_metadata_attribute_mask(127);
-    a2dp_sink.set_avrc_metadata_callback(OnBluetoothMetadataCallback);
-    a2dp_sink.set_avrc_rn_volumechange(OnBluetootVolumeChanged);
+    a2dp_sink.set_avrc_metadata_callback(onBluetoothMetadataCallback);
+    a2dp_sink.set_avrc_rn_volumechange(onBluetootVolumeChanged);
 
     // a2dp_sink.set_avrc_rn_volumechange(OnDeviceVolumeChange);
 
     a2dp_sink.set_volume_control(&_volumeControl);
 }
 
-void BluetoothAudioSource::begin(audio_tools::AudioOutput &output, pAudioOutput *pAudioOutput) 
+void BluetoothAudioSource::setOutput(audio_tools::AudioOutput &output) 
 {
     a2dp_sink.set_output(output);
 }
 
-void BluetoothAudioSource::begin(audio_tools::AudioStream &stream, pAudioOutput *pAudioOutput)
+void BluetoothAudioSource::setOutput(audio_tools::AudioStream &stream)
 {
     a2dp_sink.set_output(stream);
 }
 
-void BluetoothAudioSource::postBegin()
+void BluetoothAudioSource::Begin()
 {
     a2dp_sink.start("Portal Radio");
     Serial.println("Bluetooth actif!");
 }
 
-void BluetoothAudioSource::loop()
-{
-}
+void BluetoothAudioSource::Loop() {}
 
-void BluetoothAudioSource::end() {
+void BluetoothAudioSource::End() {
     a2dp_sink.end();
 }
 
-void BluetoothAudioSource::updateVolume(float volume)
+void BluetoothAudioSource::UpdateVolume(float volume)
 {
     _potVolume = volume;
 }
 
-void BluetoothAudioSource::play()
+void BluetoothAudioSource::Play()
 {
     a2dp_sink.play();
 }
 
-void BluetoothAudioSource::pause()
+void BluetoothAudioSource::Pause()
 {
     a2dp_sink.pause();
 }
 
-void BluetoothAudioSource::next()
+void BluetoothAudioSource::Next()
 {
     a2dp_sink.next();
 }
 
-void BluetoothAudioSource::previous()
+void BluetoothAudioSource::Previous()
 {
     a2dp_sink.previous();
 }
@@ -96,7 +94,7 @@ float BluetoothAudioSource::getVolume()
 //     s_deviceVolume = volume;
 // }
 
-void BluetoothAudioSource::OnBluetoothConnectionChanged(esp_a2d_connection_state_t state, void *)
+void BluetoothAudioSource::onBluetoothConnectionChanged(esp_a2d_connection_state_t state, void *)
 {
     switch (state)
     {
@@ -118,7 +116,7 @@ void BluetoothAudioSource::OnBluetoothConnectionChanged(esp_a2d_connection_state
     }
 }
 
-void BluetoothAudioSource::OnBluetoothAudioStateCallback(esp_a2d_audio_state_t state, void *)
+void BluetoothAudioSource::onBluetoothAudioStateCallback(esp_a2d_audio_state_t state, void *)
 {
     Serial.printf("Audio State changed : %i.\n", state);
     switch (state)
@@ -140,7 +138,7 @@ void BluetoothAudioSource::OnBluetoothAudioStateCallback(esp_a2d_audio_state_t s
     }
 }
 
-void BluetoothAudioSource::OnBluetoothMetadataCallback(uint8_t data1, const uint8_t *data2) {
+void BluetoothAudioSource::onBluetoothMetadataCallback(uint8_t data1, const uint8_t *data2) {
 
     Serial.println("Metadat has been updated:");
 
@@ -148,19 +146,19 @@ void BluetoothAudioSource::OnBluetoothMetadataCallback(uint8_t data1, const uint
     {
     case ESP_AVRC_MD_ATTR_TITLE:
         // Serial.printf("==> Title: %s.\n", data2);
-        updateMetaData(Title, (const char*)data2, -1);
+        UpdateMetaData(Title, (const char*)data2, -1);
         break;
     case ESP_AVRC_MD_ATTR_ALBUM:
         // Serial.printf("==> Album: %s.\n", data2);
-        updateMetaData(Album, (const char*)data2, -1);
+        UpdateMetaData(Album, (const char*)data2, -1);
         break;
     case ESP_AVRC_MD_ATTR_ARTIST:
         // Serial.printf("==> Artist: %s.\n", data2);
-        updateMetaData(Artist, (const char*)data2, -1);
+        UpdateMetaData(Artist, (const char*)data2, -1);
         break;
     case ESP_AVRC_MD_ATTR_GENRE:
         // Serial.printf("==> Genre: %s.\n", data2);
-        updateMetaData(Genre, (const char*)data2, -1);
+        UpdateMetaData(Genre, (const char*)data2, -1);
         break;
     case ESP_AVRC_MD_ATTR_TRACK_NUM:
         Serial.printf("==> Track num: %s.\n", data2);
@@ -178,7 +176,7 @@ void BluetoothAudioSource::OnBluetoothMetadataCallback(uint8_t data1, const uint
     }
 }
 
-void BluetoothAudioSource::OnBluetootVolumeChanged(int volume)
+void BluetoothAudioSource::onBluetootVolumeChanged(int volume)
 {
     nextion.setVolume(volume, audioManager.isMuted());
 }

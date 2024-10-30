@@ -10,39 +10,67 @@ pAudioSource::~pAudioSource()
 {
 }
 
-void pAudioSource::begin(pAudioOutput *pAudioOutput)
+void pAudioSource::Begin(pAudioOutput *pAudioOutput)
 {
-    pAudioOutput->begin();
-    preBegin();
+    pAudioOutput->Begin();
+    Setup();
 
     if(audioManager.useEquilizer) {
-        begin(pAudioOutput->GetEquilizerStream(), pAudioOutput);
+        setOutput(pAudioOutput->getEquilizerStream());
     } else {
-        switch (pAudioOutput->GetOutputType())
+        switch (pAudioOutput->getOutputType())
         {
         case OutputType:
-            begin(pAudioOutput->GetAudioOutput(), pAudioOutput);
+            setOutput(pAudioOutput->getAudioOutput());
             break;
         case StreamType:
-            begin(pAudioOutput->GetAudioStream(), pAudioOutput);
+            setOutput(pAudioOutput->getAudioStream());
             break;
         default:
-            Serial.printf("pAudioSource::begin : Unknown audio type : %i.\n", pAudioOutput->GetOutputType());
+            Serial.printf("pAudioSource::begin : Unknown audio type : %i.\n", pAudioOutput->getOutputType());
             break;
         }
     }
     
-    postBegin();
+    Begin();
 }
 
-void pAudioSource::updateVolume(float volume) { audioManager.audioPlayer.setVolume(volume); nextion.setVolume(volume * 100, audioManager.isMuted()); };
-void pAudioSource::play() { audioManager.audioPlayer.play(); };
-void pAudioSource::pause() { audioManager.audioPlayer.stop(); };
-void pAudioSource::next() { audioManager.audioPlayer.next(); };
-void pAudioSource::previous() { audioManager.audioPlayer.previous(); }
+void pAudioSource::setOutput(audio_tools::AudioOutput &output)
+{
+    audioManager.audioPlayer.setOutput(output);
+}
+
+void pAudioSource::setOutput(audio_tools::AudioStream &stream)
+{
+    audioManager.audioPlayer.setOutput(stream);
+}
+
+void pAudioSource::Begin()
+{
+    audioManager.audioPlayer.begin();
+}
+
+void pAudioSource::Loop()
+{
+    audioManager.audioPlayer.copy();
+}
+
+void pAudioSource::End()
+{
+}
+
+void pAudioSource::UpdateVolume(float volume)
+{
+    audioManager.audioPlayer.setVolume(volume);
+    nextion.setVolume(volume * 100, audioManager.isMuted());
+}
+void pAudioSource::Play() { audioManager.audioPlayer.play(); }
+void pAudioSource::Pause() { audioManager.audioPlayer.stop(); }
+void pAudioSource::Next() { audioManager.audioPlayer.next(); }
+void pAudioSource::Previous() { audioManager.audioPlayer.previous(); }
 float pAudioSource::getVolume() { return audioManager.audioPlayer.volume(); }
 
-void printMetaData(MetaDataType type, const char *str, int len)
+void PrintMetaData(MetaDataType type, const char *str, int len)
 {
     Serial.print("==> ");
     Serial.print(toStr(type));
@@ -50,9 +78,9 @@ void printMetaData(MetaDataType type, const char *str, int len)
     Serial.println(str);
 }
 
-void updateMetaData(MetaDataType type, const char *str, int len)
+void UpdateMetaData(MetaDataType type, const char *str, int len)
 {
-    printMetaData(type, str, len);
+    PrintMetaData(type, str, len);
     switch (type)
     {
     case Title:

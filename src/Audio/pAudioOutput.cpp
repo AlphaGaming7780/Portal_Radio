@@ -1,16 +1,16 @@
 #include "pAudioOutput.h"
 
-audio_tools::ModifyingStream &pAudioOutput::GetEquilizerStream()
+audio_tools::ModifyingStream &pAudioOutput::getEquilizerStream()
 {
     Serial.println("Use EQ.");
-    if(GetOutputType() == OutputType) {
-        eq = new Equilizer3Bands(GetAudioOutput());
+    if(getOutputType() == OutputType) {
+        eq = new Equilizer3Bands(getAudioOutput());
     } else {
-        eq = new Equilizer3Bands(GetAudioStream());
+        eq = new Equilizer3Bands(getAudioStream());
 
     }
     ConfigEquilizer3Bands &cfg_eq = eq->defaultConfig();
-    cfg_eq.setAudioInfo(GetAudioInfo());
+    cfg_eq.setAudioInfo(getAudioInfo());
     cfg_eq.gain_low = 1.0; 
     cfg_eq.gain_medium = 0.5;
     cfg_eq.gain_high = 1.0;
@@ -19,18 +19,18 @@ audio_tools::ModifyingStream &pAudioOutput::GetEquilizerStream()
     return *eq;
 }
 
-void pAudioOutput::end()
+void pAudioOutput::End()
 {
-    switch (GetOutputType())
+    switch (getOutputType())
     {
     case OutputType:
-        GetAudioOutput().end();
+        getAudioOutput().end();
         break;
     case StreamType:
-        GetAudioStream().end();
+        getAudioStream().end();
         break;
     default:
-        Serial.printf("pAudioOutput::end() : Unknown audio type : %i.\n", GetOutputType());
+        Serial.printf("pAudioOutput::end() : Unknown audio type : %i.\n", getOutputType());
         break;
     }
 

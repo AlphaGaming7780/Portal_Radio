@@ -21,26 +21,26 @@ public:
 
     String getID() override;
 
-    void preBegin() override;
-    void begin(audio_tools::AudioOutput &output, pAudioOutput *pAudioOutput) override;
-    void begin(audio_tools::AudioStream &stream, pAudioOutput *pAudioOutput) override;
-    void postBegin() override;
-    void loop() override;
-    void end() override;
+    void Setup() override;
+    void setOutput(audio_tools::AudioOutput &output) override;
+    void setOutput(audio_tools::AudioStream &stream) override;
+    void Begin() override;
+    void Loop() override;
+    void End() override;
 
-    void updateVolume(float volume) override;
-    void play() override;
-    void pause() override;
-    void next() override;
-    void previous() override;
+    void UpdateVolume(float volume) override;
+    void Play() override;
+    void Pause() override;
+    void Next() override;
+    void Previous() override;
 
     float getVolume() override;
 
     // static void OnDeviceVolumeChange(int volume);
-    static void OnBluetoothConnectionChanged(esp_a2d_connection_state_t, void *);
-    static void OnBluetoothAudioStateCallback(esp_a2d_audio_state_t state, void*);
-    static void OnBluetoothMetadataCallback(uint8_t, const uint8_t *);
-    static void OnBluetootVolumeChanged(int volume);
+    static void onBluetoothConnectionChanged(esp_a2d_connection_state_t, void *);
+    static void onBluetoothAudioStateCallback(esp_a2d_audio_state_t state, void*);
+    static void onBluetoothMetadataCallback(uint8_t, const uint8_t *);
+    static void onBluetootVolumeChanged(int volume);
 };
 
 extern BluetoothAudioSource bluetoothAudioSource;

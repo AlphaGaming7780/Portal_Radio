@@ -43,29 +43,32 @@ public:
     AudioManager(/* args */);
     ~AudioManager();
 
-    pAudioSource *sourceList[3] {&webRadioSource, &sdSource, &bluetoothAudioSource};
-    pAudioOutput *outputList[1] {&i2sOutput};
+    pAudioSource *sourceList[4] { &bluetoothAudioSource, &sdSource, &webRadioSource, &spiffsSource };
+    pAudioOutput *outputList[1] { &i2sOutput };
 
     AudioPlayer audioPlayer;
 
     bool useEquilizer = false;
 
+    pAudioSource *getAudioSource(const char* s);
+    pAudioOutput *getAudioOutput(const char* s);
+
     pAudioSource *getCurrentSource() { return _currentSource; };
     pAudioOutput *getCurrentOutput() { return _currentOutput; };
 
-    void SetAudioSource(pAudioSource *audioSource, bool update = false);
-    void SetAudioOutput(pAudioOutput *audioOutput, bool update = false);
-    void SetSourceAndOutput(pAudioSource *audioSource, pAudioOutput *audioOutput, bool update = false);
+    void setAudioSource(pAudioSource *audioSource, bool update = false);
+    void setAudioOutput(pAudioOutput *audioOutput, bool update = false);
+    void setSourceAndOutput(pAudioSource *audioSource, pAudioOutput *audioOutput, bool update = false);
     void Update();
-    void loop();
-    void end();
-    void updateVolume();
-    void play() {_currentSource->play(); };
-    void pause() {_currentSource->pause(); };
-    void next() {_currentSource->next(); };
-    void previous() {_currentSource->previous(); };
-    void mute();
-    void unmute();
+    void Loop();
+    void End();
+    void UpdateVolume();
+    void Play() {_currentSource->Play(); };
+    void Pause() {_currentSource->Pause(); };
+    void Next() {_currentSource->Next(); };
+    void Previous() {_currentSource->Previous(); };
+    void Mute();
+    void UnMute();
     bool isMuted() {return _isMuted; };
 
     void setLoopMode(AUDIO_LOOP_MODE mode);

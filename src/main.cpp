@@ -72,6 +72,9 @@ void setup() {
         SD.mkdir("SystemData");
     }
 
+    userDataManager.Load();
+
+
 //--------------------------------------------------------- WIFI
 
     // Serial.print("Tentative de connection WIFI.");
@@ -114,7 +117,13 @@ void setup() {
 
     // audioManager.setLoopMode(AUDIO_LOOP_MODE_PLAYLIST);
 
-    audioManager.SetSourceAndOutput(&bluetoothAudioSource, &i2sOutput, true);
+    pAudioOutput *audioOutput = audioManager.getAudioOutput(userDataManager.getLastSelectedOutput());
+    pAudioSource *audioSource = audioManager.getAudioSource(userDataManager.getLastSelectedSource());
+
+    if(audioOutput == nullptr) audioOutput = &i2sOutput;
+    if(audioSource == nullptr) audioSource = &bluetoothAudioSource;
+
+    audioManager.setSourceAndOutput(audioSource, audioOutput, true);
     // audioManager.SetSourceAndOutput(&sdSource, &i2sOutput, true);
     // audioManager.SetSourceAndOutput(&webRadioSource, &i2sOutput, true);
 
@@ -122,6 +131,6 @@ void setup() {
 }
 
 void loop() {
-    audioManager.loop();
+    audioManager.Loop();
     nextion.Loop();
 }

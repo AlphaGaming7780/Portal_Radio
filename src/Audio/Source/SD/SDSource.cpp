@@ -16,7 +16,7 @@ SDSource::~SDSource()
 {
 }
 
-void SDSource::preBegin()
+void SDSource::Setup()
 {
     _decoder = audioManager.getDecoder(MP3);
 
@@ -24,36 +24,36 @@ void SDSource::preBegin()
 
     audioManager.audioPlayer.setAudioSource(source);
     audioManager.audioPlayer.setDecoder(*_decoder);
-    audioManager.audioPlayer.setMetadataCallback(updateMetaData);
+    audioManager.audioPlayer.setMetadataCallback(UpdateMetaData);
 }
 
-void SDSource::begin(audio_tools::AudioOutput &output, pAudioOutput *pAudioOutput)
-{
-    audioManager.audioPlayer.setOutput(output);
-}
+// void SDSource::setOutput(audio_tools::AudioOutput &output)
+// {
+//     audioManager.audioPlayer.setOutput(output);
+// }
 
-void SDSource::begin(audio_tools::AudioStream &stream, pAudioOutput *pAudioOutput)
-{
-    audioManager.audioPlayer.setOutput(stream);
-}
+// void SDSource::setOutput(audio_tools::AudioStream &stream)
+// {
+//     audioManager.audioPlayer.setOutput(stream);
+// }
 
-void SDSource::postBegin()
-{
-    audioManager.audioPlayer.begin();
-}
+// void SDSource::Begin()
+// {
+//     audioManager.audioPlayer.begin();
+// }
 
-void SDSource::loop()
-{
-    audioManager.audioPlayer.copy();
-}
+// void SDSource::Loop()
+// {
+//     audioManager.audioPlayer.copy();
+// }
 
-void SDSource::end()
+void SDSource::End()
 {
     _decoder->removeNotifyAudioChange(audioManager.audioPlayer);
     audioManager.audioPlayer.end();
 }
 
-void SDSource::setPathAndBegin(char *path)
+void SDSource::setPathAndPlay(char *path)
 {
     source.setPath(path);
     source.begin();

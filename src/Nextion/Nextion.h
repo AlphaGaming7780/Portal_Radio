@@ -28,7 +28,7 @@ private:
 
     String _endChar = String(char(0xFF))+String(char(0xFF))+String(char(0xFF));
 
-    void updatePendingAudioSource(String source);    
+    void UpdatePendingAudioSource(String source);    
 };
 
 extern Nextion nextion;

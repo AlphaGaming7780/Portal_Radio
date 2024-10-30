@@ -44,19 +44,19 @@ void Nextion::Loop()
     else if ( s == "\x1Cÿÿÿ" ) Serial.println("Assignement operation failed");
     else if ( s == "ÿÿÿ" ) Serial.println("Auto sleep");
     else if ( s == "ÿÿÿ" ) Serial.println("Auto wakeup");
-    else if ( s == "play" ) audioManager.play();
-    else if ( s == "pause") audioManager.pause();
-    else if ( s == "next" ) audioManager.next();
-    else if ( s == "prev" ) audioManager.previous();
-    else if ( s == "mute" ) audioManager.mute();
-    else if ( s == "unmute") audioManager.unmute();
+    else if ( s == "play" ) audioManager.Play();
+    else if ( s == "pause") audioManager.Pause();
+    else if ( s == "next" ) audioManager.Next();
+    else if ( s == "prev" ) audioManager.Previous();
+    else if ( s == "mute" ) audioManager.Mute();
+    else if ( s == "unmute") audioManager.UnMute();
     else if ( x != -1 ) {
         String c = s.substring(0, x);
         String v = s.substring(x+1);
         debug.printlnInfo("Command : " + c);
         debug.printlnInfo("value : " + v);
 
-        if ( c == "audioSource") updatePendingAudioSource(v);
+        if ( c == "audioSource") UpdatePendingAudioSource(v);
 
     }
     else Serial.printf("Unknown data : %s.\n", s);
@@ -113,11 +113,11 @@ void Nextion::setPlayStatus(bool playStatus)
     }
 }
 
-void Nextion::updatePendingAudioSource(String source)
+void Nextion::UpdatePendingAudioSource(String source)
 {
-    if      ( source == "Bluetooth" ) audioManager.SetAudioSource(&bluetoothAudioSource, true);
-    else if ( source == "WebRadio"  ) audioManager.SetAudioSource(&webRadioSource, true);
-    else if ( source == "SD card"   ) audioManager.SetAudioSource(&sdSource, true);
+    if      ( source == "Bluetooth" ) audioManager.setAudioSource(&bluetoothAudioSource, true);
+    else if ( source == "WebRadio"  ) audioManager.setAudioSource(&webRadioSource, true);
+    else if ( source == "SD card"   ) audioManager.setAudioSource(&sdSource, true);
     else if ( source == "FM"        ) debug.printlnError("NO FM AUDIO SOURCE.");
     else if ( source == "DAB"       ) debug.printlnError("NO DAB AUDIO SOURCE.");
 }

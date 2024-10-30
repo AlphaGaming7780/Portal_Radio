@@ -14,19 +14,19 @@ public:
 
     String getID() override { return "Speaker"; }
 
-    AudioOutputType GetOutputType() override
+    AudioOutputType getOutputType() override
     {
         return StreamType;
     }
-    audio_tools::AudioOutput &GetAudioOutput() override {}
-    audio_tools::AudioStream &GetAudioStream() override
+    audio_tools::AudioOutput &getAudioOutput() override {}
+    audio_tools::AudioStream &getAudioStream() override
     {
         return _stream;
     }
 
-    AudioInfo GetAudioInfo() override { return _stream.audioInfo(); }
+    AudioInfo getAudioInfo() override { return _stream.audioInfo(); }
 
-    void begin() override {
+    void Begin() override {
         
         auto config = _stream.defaultConfig(TX_MODE);
         config.i2s_format = I2S_LSB_FORMAT;

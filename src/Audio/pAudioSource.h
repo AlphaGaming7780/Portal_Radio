@@ -14,25 +14,25 @@ public:
 
     virtual String getID() = 0;
 
-    void begin(pAudioOutput *pAudioOutput);
-    virtual void preBegin() = 0;
-    virtual void begin(audio_tools::AudioOutput &output, pAudioOutput *pAudioOutput) = 0;
-    virtual void begin(audio_tools::AudioStream &stream, pAudioOutput *pAudioOutput) = 0;
-    virtual void postBegin() = 0;
-    virtual void loop() = 0;
-    virtual void end() = 0;
+    void Begin(pAudioOutput *pAudioOutput);
+    virtual void Setup() = 0;
+    virtual void setOutput(audio_tools::AudioOutput &output);
+    virtual void setOutput(audio_tools::AudioStream &StreamBufferDef_t);
+    virtual void Begin();
+    virtual void Loop();
+    virtual void End();
 
-    virtual void updateVolume(float volume);
-    virtual void play();
-    virtual void pause();
-    virtual void next();
-    virtual void previous();
+    virtual void UpdateVolume(float volume);
+    virtual void Play();
+    virtual void Pause();
+    virtual void Next();
+    virtual void Previous();
 
     virtual float getVolume();
 
 };
 
-void printMetaData(MetaDataType type, const char* str, int len);
-void updateMetaData(MetaDataType type, const char* str, int len);
+void PrintMetaData(MetaDataType type, const char* str, int len);
+void UpdateMetaData(MetaDataType type, const char* str, int len);
 
 #endif

@@ -38,12 +38,12 @@ public:
 
     String getID() override;
 
-    void preBegin() override;
-    void begin(audio_tools::AudioOutput &output, pAudioOutput *pAudioOutput) override;
-    void begin(audio_tools::AudioStream &stream, pAudioOutput *pAudioOutput) override;
-    void postBegin() override;
-    void loop() override;
-    void end() override;
+    void Setup() override;
+    // void setOutput(audio_tools::AudioOutput &output) override;
+    // void setOutput(audio_tools::AudioStream &stream) override;
+    // void Begin() override;
+    // void Loop() override;
+    void End() override;
 
     // void updateVolume(float volume) override;
 };
