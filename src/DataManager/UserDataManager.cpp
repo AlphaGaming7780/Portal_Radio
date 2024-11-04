@@ -12,8 +12,8 @@ UserDataManager::~UserDataManager()
 
 bool UserDataManager::Load()
 {
-
-    File userDataFile = SD.open("SystemData/userdata.json", "r", true);
+    debug.printlnInfo("Loading user data.");
+    File userDataFile = SD.open("/SystemData/userdata.json", "r", true);
     deserializeJson(_userData, userDataFile.readString());
     userDataFile.close();
 
@@ -22,11 +22,12 @@ bool UserDataManager::Load()
 
 bool UserDataManager::Save()
 {
+    debug.printlnInfo("Saving user data.");
     String s;
     serializeJson(_userData, s);
 
-    SD.remove("SystemData/userdata.json");
-    File userDataFile = SD.open("SystemData/userdata.json", "w", true);
+    SD.remove("/SystemData/userdata.json");
+    File userDataFile = SD.open("/SystemData/userdata.json", "w", true);
     userDataFile.print(s);
     userDataFile.close();
 

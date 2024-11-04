@@ -28,7 +28,8 @@ private:
 
     String _endChar = String(char(0xFF))+String(char(0xFF))+String(char(0xFF));
 
-    void UpdatePendingAudioSource(String source);    
+    void UpdatePendingAudioSource(String source);
+    String formatHexCodeToString(uint8_t value);
 };
 
 extern Nextion nextion;

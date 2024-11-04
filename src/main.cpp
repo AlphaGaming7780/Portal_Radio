@@ -67,7 +67,7 @@ void setup() {
         delay(1000);
     }
 
-    if(SD.exists("SystemData"))
+    if(!SD.exists("SystemData"))
     {
         SD.mkdir("SystemData");
     }

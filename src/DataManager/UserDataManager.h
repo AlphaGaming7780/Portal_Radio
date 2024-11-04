@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "SD.h"
 #include "ArduinoJson.h"
+#include "pdebug/pdebug.h"
 
 class UserDataManager
 {

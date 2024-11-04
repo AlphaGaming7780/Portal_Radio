@@ -34,23 +34,23 @@ size_t pDebug::println(String s)
     return _serial->println(s);
 }
 
-size_t pDebug::printf(const char *format, ...)
-{
-    va_list vl;
-    va_start( vl, format );
-    size_t t = _serial->printf(format, va_arg(vl, char*));
-    va_end(vl);
-    return t;
-}
+// size_t pDebug::printf(const char *format, ...)
+// {
+//     va_list vl;
+//     va_start( vl, format );
+//     size_t t = _serial->printf(format, va_arg(vl, char*));
+//     va_end(vl);
+//     return t;
+// }
 
-size_t pDebug::printfln(const char *format, ...)
-{
-    va_list vl;
-    va_start( vl, format );
-    size_t t = _serial->printf("%s\n", format, vl);
-    va_end(vl);
-    return t;
-}
+// size_t pDebug::printfln(const char *format, ...)
+// {
+//     va_list vl;
+//     va_start( vl, format );
+//     size_t t = _serial->printf("%s\n", format, vl);
+//     va_end(vl);
+//     return t;
+// }
 
 size_t pDebug::printlnInfo(String s)
 {
@@ -70,12 +70,12 @@ size_t pDebug::printlnError(String s)
     return println("==> ERROR : " + s);
 }
 
-size_t pDebug::printflnInfo(const char *format, ...)
-{
-    if(!(_debugLevel & Debug_INFO)) return -1;
-    va_list arg;
-    va_start( arg, format );
-    size_t t = _serial->printf("==> INFO : %s\n", format, arg);
-    va_end(arg);
-    return t;
-}
+// size_t pDebug::printflnInfo(const char *format, ...)
+// {
+//     if(!(_debugLevel & Debug_INFO)) return -1;
+//     va_list arg;
+//     va_start( arg, format );
+//     size_t t = _serial->printf("==> INFO : %s\n", format, arg);
+//     va_end(arg);
+//     return t;
+// }

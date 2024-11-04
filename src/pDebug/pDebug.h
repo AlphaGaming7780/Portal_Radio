@@ -35,14 +35,14 @@ public:
 
     size_t print(String s);
     size_t println(String s);
-    size_t printf(const char *format, ...);
-    size_t printfln(const char *format, ...);
+    // size_t printf(const char *format, ...);
+    // size_t printfln(const char *format, ...);
 
     size_t printlnInfo(String s);
     size_t printlnWarn(String s);
     size_t printlnError(String s);
 
-    size_t printflnInfo(const char *format, ...);
+    // size_t printflnInfo(const char *format, ...);
     // size_t printflnWarn(const char *format, ...);
     // size_t printflnError(const char *format, ...);
 };

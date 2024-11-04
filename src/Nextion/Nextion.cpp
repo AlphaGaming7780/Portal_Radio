@@ -35,15 +35,25 @@ void Nextion::Loop()
 
     if(_serial->available() == 0) return;
 
-    String s = _serial->readStringUntil(';');
+    String s = _serial->readStringUntil(char(0xFF));
+
+    if(s.length() == 0) return;
+
     int x = s.indexOf(':');
 
     int si = s.toInt();
 
-    if      ( s == "\x00ÿÿÿ") Serial.println("Invalid Commande");
-    else if ( s == "\x1Cÿÿÿ" ) Serial.println("Assignement operation failed");
-    else if ( s == "ÿÿÿ" ) Serial.println("Auto sleep");
-    else if ( s == "ÿÿÿ" ) Serial.println("Auto wakeup");
+    if      ( s == formatHexCodeToString(0x00) ) debug.printlnError("Invalid Commande");
+    else if ( s == formatHexCodeToString(0x1A) ) debug.printlnError("Invalid Variable name or attribute");
+    else if ( s == formatHexCodeToString(0x1B) ) debug.printlnError("Invalid Variable Operation");
+    else if ( s == formatHexCodeToString(0x1C) ) debug.printlnError("Assignement operation failed");
+    else if ( s == formatHexCodeToString(0x1E) ) debug.printlnError("Invalid Quantity of Parameters");
+    else if ( s == formatHexCodeToString(0x20) ) debug.printlnError("Escape Character Invalid");
+    else if ( s == formatHexCodeToString(0x23) ) debug.printlnError("Variable name too long");
+    else if ( s == formatHexCodeToString(0x24) ) debug.printlnWarn("Serial Buffer Overflow");
+    else if ( s == formatHexCodeToString(0x86) ) debug.printlnInfo("Auto sleep");
+    else if ( s == formatHexCodeToString(0x87) ) debug.printlnInfo("Auto wakeup");
+    else if ( s == formatHexCodeToString(0x88) ) debug.printlnInfo("Nextion Ready");
     else if ( s == "play" ) audioManager.Play();
     else if ( s == "pause") audioManager.Pause();
     else if ( s == "next" ) audioManager.Next();
@@ -120,4 +130,9 @@ void Nextion::UpdatePendingAudioSource(String source)
     else if ( source == "SD card"   ) audioManager.setAudioSource(&sdSource, true);
     else if ( source == "FM"        ) debug.printlnError("NO FM AUDIO SOURCE.");
     else if ( source == "DAB"       ) debug.printlnError("NO DAB AUDIO SOURCE.");
+}
+
+String Nextion::formatHexCodeToString(uint8_t value)
+{
+    return String(char(value));
 }
