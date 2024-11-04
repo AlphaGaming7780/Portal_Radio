@@ -11,10 +11,6 @@
 
 // https://www.circuitstate.com/pinouts/doit-esp32-devkit-v1-wifi-development-board-pinout-diagram-and-reference/#ADC
 
-// const char* SSID = "eduroam";
-// const char* ID = "loic.trioen@std.heh.be";
-// const char* PWD = "Loicx22heh22loicx";
-
 // const char* SSID = "S24+ Triton";
 // const char* PWD = "axyktb87k2rxbp2";
 
@@ -48,21 +44,33 @@ void setup() {
 
 //--------------------------------------------------------- SPIFFS
 
-    if(!SPIFFS.begin(true)) 
-    {
-        Serial.println("ERREUR: SPIFFS Failed to begin.");
-        return;
+    // if(!SPIFFS.begin(true)) 
+    // {
+    //     Serial.println("ERREUR: SPIFFS Failed to begin.");
+    //     return;
+    // }
+
+    // File root = SPIFFS.open("/");
+    // File file = root.openNextFile();
+
+    // while (file)
+    // {   
+    //     Serial.printf("File: %s.\n", file.name());
+    //     file.close();
+    //     file = root.openNextFile();
+    // }
+
+//--------------------------------------------------------- SD
+
+    while (!SD.begin()) {
+        debug.println("SD.begin failed");
+        delay(1000);
     }
 
-    File root = SPIFFS.open("/");
-    File file = root.openNextFile();
-
-    while (file)
-    {   
-        Serial.printf("File: %s.\n", file.name());
-        file.close();
-        file = root.openNextFile();
-    }  
+    if(SD.exists("SystemData"))
+    {
+        SD.mkdir("SystemData");
+    }
 
 //--------------------------------------------------------- WIFI
 
