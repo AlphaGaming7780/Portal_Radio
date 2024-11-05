@@ -19,17 +19,22 @@ String WebRadioSource::getID()
     return "Webradio";
 }
 
-void WebRadioSource::Setup()
+AudioSource &WebRadioSource::getAudioSource()
 {
-    // Same code for all the source exept the BLE, maybe merge that function into the pAudioSource.
-    _decoder = audioManager.getDecoder(MP3);
-
-    _decoder->addNotifyAudioChange(audioManager.audioPlayer);
-
-    audioManager.audioPlayer.setAudioSource(source);
-    audioManager.audioPlayer.setDecoder(*_decoder);
-    audioManager.audioPlayer.setMetadataCallback(UpdateMetaData);
+    return source;
 }
+
+// void WebRadioSource::Setup()
+// {
+//     // Same code for all the source exept the BLE, maybe merge that function into the pAudioSource.
+//     _decoder = audioManager.getDecoder(MP3);
+
+//     _decoder->addNotifyAudioChange(audioManager.audioPlayer);
+
+//     audioManager.audioPlayer.setAudioSource(source);
+//     audioManager.audioPlayer.setDecoder(*_decoder);
+//     audioManager.audioPlayer.setMetadataCallback(UpdateMetaData);
+// }
 
 // void WebRadioSource::setOutput(audio_tools::AudioOutput &output) 
 // {   
@@ -51,8 +56,8 @@ void WebRadioSource::Setup()
 //     audioManager.audioPlayer.copy();
 // }
 
-void WebRadioSource::End() {
-    _decoder->removeNotifyAudioChange(audioManager.audioPlayer);
-    audioManager.audioPlayer.end();
-    WiFi.disconnect(true, true);
-}
+// void WebRadioSource::End() {
+//     _decoder->removeNotifyAudioChange(audioManager.audioPlayer);
+//     audioManager.audioPlayer.end();
+//     WiFi.disconnect(true, true);
+// }

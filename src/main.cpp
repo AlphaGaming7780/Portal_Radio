@@ -22,14 +22,14 @@ const char* PWD = "loliloli";
 
 void setup() {
 
-    LOGLEVEL_HELIX = LogLevelHelix::Info;
+    // LOGLEVEL_HELIX = LogLevelHelix::Info;
     debug.setDebugLevel(Debug_INFO | Debug_WARN | Debug_ERROR);
     debug.begin(115200);
     debug.print("\n");
     debug.printlnInfo("Starting...");
 
     // Serial.begin(115200);
-    AudioLogger::instance().begin(Serial, AudioLogger::Info);
+    // AudioLogger::instance().begin(Serial, AudioLogger::Info);
     // Serial.print("\n");
     // Serial.println("Starting...");
 
@@ -115,8 +115,6 @@ void setup() {
 
     // Setup_Server();
 
-    // audioManager.setLoopMode(AUDIO_LOOP_MODE_PLAYLIST);
-
     pAudioOutput *audioOutput = audioManager.getAudioOutput(userDataManager.getLastSelectedOutput());
     pAudioSource *audioSource = audioManager.getAudioSource(userDataManager.getLastSelectedSource());
 
@@ -127,10 +125,16 @@ void setup() {
     // audioManager.SetSourceAndOutput(&sdSource, &i2sOutput, true);
     // audioManager.SetSourceAndOutput(&webRadioSource, &i2sOutput, true);
 
+    audioManager.setLoopMode(AUDIO_LOOP_MODE_PLAYLIST);
+
     debug.printlnInfo("Portal Radio started!");
+
+    audioManager.UpdateVolume();
 }
 
 void loop() {
     audioManager.Loop();
     nextion.Loop();
+    // delay(10000);
+    // audioManager.UpdateVolume();
 }

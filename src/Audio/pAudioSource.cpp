@@ -35,6 +35,19 @@ void pAudioSource::Begin(pAudioOutput *pAudioOutput)
     Begin();
 }
 
+void pAudioSource::Setup()
+{
+    _decoder = audioManager.getDecoder(MP3);
+
+    _decoder->addNotifyAudioChange(audioManager.audioPlayer);
+
+    audioManager.audioPlayer.setAudioSource(getAudioSource());
+    audioManager.audioPlayer.setDecoder(*_decoder);
+    
+    // TO DO : Fix Metadata not working with SD card or find an alternative.
+    audioManager.audioPlayer.setMetadataCallback(UpdateMetaData);
+}
+
 void pAudioSource::setOutput(audio_tools::AudioOutput &output)
 {
     audioManager.audioPlayer.setOutput(output);
@@ -48,15 +61,21 @@ void pAudioSource::setOutput(audio_tools::AudioStream &stream)
 void pAudioSource::Begin()
 {
     audioManager.audioPlayer.begin();
+
+    audioManager.CreateAudioPlayerTask();
+
 }
 
 void pAudioSource::Loop()
 {
-    audioManager.audioPlayer.copy();
+    // audioManager.audioPlayer.copy();
 }
 
 void pAudioSource::End()
 {
+    audioManager.DeleteAudioPlayerTask();
+    _decoder->removeNotifyAudioChange(audioManager.audioPlayer);
+    audioManager.audioPlayer.end();
 }
 
 void pAudioSource::UpdateVolume(float volume)

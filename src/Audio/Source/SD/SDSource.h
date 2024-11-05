@@ -17,15 +17,16 @@ public:
     AudioSourceSD source;
 
     String getID() override;
+    AudioSource &getAudioSource() override;
 
     SDSource(/* args */);
     ~SDSource();
-    void Setup() override;
+    // void Setup() override;
     // void setOutput(audio_tools::AudioOutput &output) override;
     // void setOutput(audio_tools::AudioStream &stream) override;
     // void Begin() override;
     // void Loop() override;
-    void End() override;
+    // void End() override;
 
     // void updateVolume(float volume) override;
 

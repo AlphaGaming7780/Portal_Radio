@@ -8,6 +8,11 @@ String SDSource::getID()
     return "SD card";
 }
 
+AudioSource &SDSource::getAudioSource()
+{
+    return source;
+}
+
 SDSource::SDSource()
 {
 }
@@ -16,16 +21,18 @@ SDSource::~SDSource()
 {
 }
 
-void SDSource::Setup()
-{
-    _decoder = audioManager.getDecoder(MP3);
+// void SDSource::Setup()
+// {
+//     _decoder = audioManager.getDecoder(MP3);
 
-    _decoder->addNotifyAudioChange(audioManager.audioPlayer);
+//     _decoder->addNotifyAudioChange(audioManager.audioPlayer);
 
-    audioManager.audioPlayer.setAudioSource(source);
-    audioManager.audioPlayer.setDecoder(*_decoder);
-    audioManager.audioPlayer.setMetadataCallback(UpdateMetaData);
-}
+//     audioManager.audioPlayer.setAudioSource(source);
+//     audioManager.audioPlayer.setDecoder(*_decoder);
+    
+//     // TO DO : Fix Metadata not working with SD card or find an alternative.
+//     audioManager.audioPlayer.setMetadataCallback(UpdateMetaData);
+// }
 
 // void SDSource::setOutput(audio_tools::AudioOutput &output)
 // {
@@ -47,11 +54,11 @@ void SDSource::Setup()
 //     audioManager.audioPlayer.copy();
 // }
 
-void SDSource::End()
-{
-    _decoder->removeNotifyAudioChange(audioManager.audioPlayer);
-    audioManager.audioPlayer.end();
-}
+// void SDSource::End()
+// {
+//     _decoder->removeNotifyAudioChange(audioManager.audioPlayer);
+//     audioManager.audioPlayer.end();
+// }
 
 void SDSource::setPathAndPlay(char *path)
 {

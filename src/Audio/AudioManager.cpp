@@ -58,12 +58,19 @@ void AudioManager::Update()
     if(_currentSource != nullptr) _currentSource->End();
     if(_currentOutput != nullptr) _currentOutput->End();
     debug.printlnInfo("AudioManager::Update : ending source / output finished.");
+
     if(_pendingSource != nullptr) _currentSource = _pendingSource;
     if(_pendingOutput != nullptr) _currentOutput = _pendingOutput;
     _currentSource->Begin(_currentOutput);
+
     debug.printlnInfo("Updating the volume.");
     UpdateVolume();
+
     nextion.setAudioSource(_currentSource->getID());
+    nextion.setPlayStatus(true);
+
+    _isPaused = false;
+
     userDataManager.setLastSelectedOutput(_currentOutput->getID());
     userDataManager.setLastSelectedSource(_currentSource->getID());
     userDataManager.Save();
@@ -71,12 +78,14 @@ void AudioManager::Update()
 
 void AudioManager::Loop()
 {   
-    if( !_isMuted &&_currentSource != nullptr && audioPlayer.isActive()) {
-        UpdateVolume();
-        _currentSource->Loop();
-    }
+    // if( !_isMuted &&_currentSource != nullptr && audioPlayer.isActive()) {
+    //     UpdateVolume();
+    //     _currentSource->Loop();
+    // }
 
-    if(!audioPlayer.isActive()) {
+    // Serial.printf("%i.\n", uxTaskGetStackHighWaterMark(audioPlayerLoopTask));
+
+    if( _useAudioPlayer && !_isPaused && !audioPlayer.isActive()) {
         if(_audioLoopMode == AUDIO_LOOP_MODE_PLAYLIST) {
             audioPlayer.setIndex(0);
         } else if( _audioLoopMode == AUDIO_LOOP_MODE_TRACK) {
@@ -140,4 +149,41 @@ AudioDecoder *AudioManager::getDecoder(AUDIO_CODEC codec)
         break;
     }
     return nullptr;
+}
+
+void AudioManager::CreateAudioPlayerTask()
+{
+    if(audioPlayerLoopTask != NULL) return;
+
+    xTaskCreatePinnedToCore(
+        AudioPlayerTLoopTask,     /* Function to implement the task */
+        "AudioPlayerLoopTask",    /* Name of the task */
+        10000,                    /* Stack size in words */
+        NULL,                     /* Task input parameter */
+        255,                        /* Priority of the task */
+        &audioPlayerLoopTask,     /* Task handle. */
+        0                         // Core ID
+    );
+
+    _useAudioPlayer = true;
+
+}
+
+void AudioManager::DeleteAudioPlayerTask()
+{
+    if(audioPlayerLoopTask == NULL) return;
+
+    vTaskDelete(audioPlayerLoopTask);
+
+    audioPlayerLoopTask = NULL;
+    _useAudioPlayer = false;
+}
+
+void AudioPlayerTLoopTask(void *parameter)
+{
+    while (true)
+    {
+        // debug.printlnInfo("AudioPlayerTask is running.");
+        audioManager.audioPlayer.copy();
+    }
 }

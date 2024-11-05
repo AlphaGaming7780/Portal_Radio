@@ -8,14 +8,17 @@ class pAudioSource
 {
 private:
 
+    AudioDecoder *_decoder;
+
 public:
     pAudioSource(/* args */);
     ~pAudioSource();
 
     virtual String getID() = 0;
+    virtual AudioSource &getAudioSource() = 0;
 
     void Begin(pAudioOutput *pAudioOutput);
-    virtual void Setup() = 0;
+    virtual void Setup();
     virtual void setOutput(audio_tools::AudioOutput &output);
     virtual void setOutput(audio_tools::AudioStream &StreamBufferDef_t);
     virtual void Begin();

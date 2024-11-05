@@ -21,10 +21,15 @@ String BluetoothAudioSource::getID()
     return "Bluetooth";
 }
 
+AudioSource &BluetoothAudioSource::getAudioSource()
+{
+    
+}
+
 void BluetoothAudioSource::Setup()
 {
     Serial.println("Tentative de démarage du Bluetooth.");
-    a2dp_sink.set_task_core(1);
+    a2dp_sink.set_task_core(0);
     a2dp_sink.set_on_connection_state_changed(onBluetoothConnectionChanged);
     a2dp_sink.set_on_audio_state_changed(onBluetoothAudioStateCallback);
     a2dp_sink.set_avrc_metadata_attribute_mask(127);

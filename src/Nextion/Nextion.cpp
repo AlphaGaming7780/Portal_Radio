@@ -23,9 +23,9 @@ bool Nextion::begin(ulong baudrate)
     _serial->begin(baudrate);
     _baudrate = baudrate;
 
+    Sleep(false);
     _serial->print("thup=1" + _endChar);
     _serial->print("thsp=60" + _endChar);
-    
 
     return true;
 }
@@ -51,8 +51,8 @@ void Nextion::Loop()
     else if ( s == formatHexCodeToString(0x20) ) debug.printlnError("Escape Character Invalid");
     else if ( s == formatHexCodeToString(0x23) ) debug.printlnError("Variable name too long");
     else if ( s == formatHexCodeToString(0x24) ) debug.printlnWarn("Serial Buffer Overflow");
-    else if ( s == formatHexCodeToString(0x86) ) debug.printlnInfo("Auto sleep");
-    else if ( s == formatHexCodeToString(0x87) ) debug.printlnInfo("Auto wakeup");
+    else if ( s == formatHexCodeToString(0x86) ) { debug.printlnInfo("Auto sleep"); _isSleeping = true; }
+    else if ( s == formatHexCodeToString(0x87) ) { debug.printlnInfo("Auto wakeup"); _isSleeping = false; UpdatePendingData(); }
     else if ( s == formatHexCodeToString(0x88) ) debug.printlnInfo("Nextion Ready");
     else if ( s == "play" ) audioManager.Play();
     else if ( s == "pause") audioManager.Pause();
@@ -75,12 +75,23 @@ void Nextion::Loop()
 
 void Nextion::setAudioSource(String source)
 {
+    if(_isSleeping) {
+        _pendingData.audioSource = source;
+        return;
+    }
+
     _serial->print("Audio.currentSource.txt=\"" + source + "\"" + _endChar);
     _serial->print("page 0" + _endChar);
 }
 
 void Nextion::setVolume(int volume, bool isMuted)
 {
+    if(_isSleeping) {
+        _pendingData.volume = volume;
+        _pendingData.isMuted = isMuted ? BOOL3_TRUE : BOOL3_FLASE;
+        return;
+    }
+
     if(volume > 100) volume = 100;
     else if(volume < 0) volume = 0;
 
@@ -101,18 +112,32 @@ void Nextion::setVolume(int volume, bool isMuted)
 
 void Nextion::setTitle(String title)
 {
+    if(_isSleeping) {
+        _pendingData.title = title;
+        return;
+    }
+
     _serial->print("Audio.audioTitle.txt=\"" + title + "\"" + _endChar);
     _serial->print("gTitle.txt=\"" + title + "\"" + _endChar);
 }
 
 void Nextion::setArtist(String artist)
 {
+    if(_isSleeping) {
+        _pendingData.artist = artist;
+        return;
+    }
+
     _serial->print("Audio.audioArtist.txt=\"" + artist + "\"" + _endChar);
     _serial->print("gArtist.txt=\"" + artist + "\"" + _endChar);
 }
 
 void Nextion::setPlayStatus(bool playStatus)
 {
+    if(_isSleeping) {
+        _pendingData.playStatus = playStatus ? BOOL3_TRUE : BOOL3_FLASE;
+        return;
+    }
 
     if(playStatus) {
         _serial->print("Audio.playStatus.val=1" + _endChar);
@@ -121,6 +146,18 @@ void Nextion::setPlayStatus(bool playStatus)
         _serial->print("Audio.playStatus.val=0" + _endChar);
         _serial->print("pPlay.pic=0" + _endChar);
     }
+}
+
+void Nextion::Sleep(bool sleep)
+{
+    if(sleep) {
+        _serial->print("sleep=1" + _endChar);
+        _isSleeping = true;
+    } else {
+        _serial->print("sleep=0" + _endChar);
+        _isSleeping = false;
+        UpdatePendingData();
+    }    
 }
 
 void Nextion::UpdatePendingAudioSource(String source)

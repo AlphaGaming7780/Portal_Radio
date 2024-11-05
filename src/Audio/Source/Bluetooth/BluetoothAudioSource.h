@@ -20,6 +20,7 @@ public:
     ~BluetoothAudioSource();
 
     String getID() override;
+    AudioSource &getAudioSource() override;
 
     void Setup() override;
     void setOutput(audio_tools::AudioOutput &output) override;

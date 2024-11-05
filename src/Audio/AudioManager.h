@@ -37,7 +37,12 @@ private:
 
     AUDIO_LOOP_MODE _audioLoopMode = AUDIO_LOOP_MODE_NONE;
 
+    bool _useAudioPlayer = false;
+
     bool _isMuted = false;
+    bool _isPaused = false;
+
+    TaskHandle_t audioPlayerLoopTask;
 
 public:
     AudioManager(/* args */);
@@ -63,8 +68,8 @@ public:
     void Loop();
     void End();
     void UpdateVolume();
-    void Play() {_currentSource->Play(); };
-    void Pause() {_currentSource->Pause(); };
+    void Play() {_currentSource->Play(); _isPaused = false; };
+    void Pause() {_currentSource->Pause(); _isPaused = true; };
     void Next() {_currentSource->Next(); };
     void Previous() {_currentSource->Previous(); };
     void Mute();
@@ -72,10 +77,15 @@ public:
     bool isMuted() {return _isMuted; };
 
     void setLoopMode(AUDIO_LOOP_MODE mode);
+    
+    void CreateAudioPlayerTask();
+    void DeleteAudioPlayerTask();
 
     AudioDecoder *getDecoder(AUDIO_CODEC codec);
 
 };
+
+void AudioPlayerTLoopTask(void * parameter);
 
 extern AudioManager audioManager;
 #endif

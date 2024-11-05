@@ -17,13 +17,18 @@ String SPIFFSSource::getID()
     return "SPIFFS";
 }
 
-void SPIFFSSource::Setup()
+AudioSource &SPIFFSSource::getAudioSource()
 {
-    decoder.addNotifyAudioChange(audioManager.audioPlayer);
-    audioManager.audioPlayer.setAudioSource(source);
-    audioManager.audioPlayer.setDecoder(decoder);
-    audioManager.audioPlayer.setMetadataCallback(UpdateMetaData);
+    return source;
 }
+
+// void SPIFFSSource::Setup()
+// {
+//     decoder.addNotifyAudioChange(audioManager.audioPlayer);
+//     audioManager.audioPlayer.setAudioSource(source);
+//     audioManager.audioPlayer.setDecoder(decoder);
+//     audioManager.audioPlayer.setMetadataCallback(UpdateMetaData);
+// }
 
 // void SPIFFSSource::setOutput(audio_tools::AudioOutput &output)
 // {
@@ -45,11 +50,11 @@ void SPIFFSSource::Setup()
 //     audioManager.audioPlayer.copy();
 // }
 
-void SPIFFSSource::End()
-{   
-    decoder.removeNotifyAudioChange(audioManager.audioPlayer);
-    audioManager.audioPlayer.end();
-}
+// void SPIFFSSource::End()
+// {   
+//     decoder.removeNotifyAudioChange(audioManager.audioPlayer);
+//     audioManager.audioPlayer.end();
+// }
 
 // void SPIFFSSource::updateVolume(float volume)
 // {
