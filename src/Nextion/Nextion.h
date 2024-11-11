@@ -15,6 +15,8 @@ public:
     bool init(HardwareSerial *serial);
     bool begin(ulong baudrate = 9600);
 
+    void StartupFinished();
+
     void Loop();
 
     void setAudioSource(String source);
@@ -22,7 +24,9 @@ public:
     void setTitle(String title);
     void setArtist(String artist);
     void setPlayStatus(bool playStatus);
+
     void Sleep(bool sleep);
+    void Reset();
 
 private:
     HardwareSerial *_serial;
@@ -31,6 +35,7 @@ private:
     String _endChar = String(char(0xFF))+String(char(0xFF))+String(char(0xFF));
 
     bool _isSleeping = false;
+    bool _isReady = false;
 
     NextionPendingData _pendingData;
 

@@ -24,10 +24,22 @@ bool Nextion::begin(ulong baudrate)
     _baudrate = baudrate;
 
     Sleep(false);
-    _serial->print("thup=1" + _endChar);
-    _serial->print("thsp=60" + _endChar);
+    Reset();
 
     return true;
+}
+
+void Nextion::StartupFinished()
+{
+    while (!_isReady)
+    {
+        Loop();
+    }
+    
+    _serial->print("page 1" + _endChar);
+    _serial->print("thup=1" + _endChar);
+    _serial->print("thsp=60" + _endChar);
+    UpdatePendingData();
 }
 
 void Nextion::Loop()
@@ -44,6 +56,8 @@ void Nextion::Loop()
     int si = s.toInt();
 
     if      ( s == formatHexCodeToString(0x00) ) debug.printlnError("Invalid Commande");
+    else if ( s == formatHexCodeToString(0x01) ) debug.printlnInfo("Instruction Successful");
+    else if ( s == formatHexCodeToString(0x02) ) debug.printlnError("Invalid Component ID");
     else if ( s == formatHexCodeToString(0x1A) ) debug.printlnError("Invalid Variable name or attribute");
     else if ( s == formatHexCodeToString(0x1B) ) debug.printlnError("Invalid Variable Operation");
     else if ( s == formatHexCodeToString(0x1C) ) debug.printlnError("Assignement operation failed");
@@ -53,7 +67,8 @@ void Nextion::Loop()
     else if ( s == formatHexCodeToString(0x24) ) debug.printlnWarn("Serial Buffer Overflow");
     else if ( s == formatHexCodeToString(0x86) ) { debug.printlnInfo("Auto sleep"); _isSleeping = true; }
     else if ( s == formatHexCodeToString(0x87) ) { debug.printlnInfo("Auto wakeup"); _isSleeping = false; UpdatePendingData(); }
-    else if ( s == formatHexCodeToString(0x88) ) debug.printlnInfo("Nextion Ready");
+    // else if ( s == formatHexCodeToString(0x00) + formatHexCodeToString(0x00) + formatHexCodeToString(0x00) ) { debug.printlnInfo("Nextion Startup"); }
+    else if ( s == formatHexCodeToString(0x88) ) { debug.printlnInfo("Nextion Ready"); _isReady = true; }
     else if ( s == "play" ) audioManager.Play();
     else if ( s == "pause") audioManager.Pause();
     else if ( s == "next" ) audioManager.Next();
@@ -75,18 +90,18 @@ void Nextion::Loop()
 
 void Nextion::setAudioSource(String source)
 {
-    if(_isSleeping) {
+    if(_isSleeping || !_isReady) {
         _pendingData.audioSource = source;
         return;
     }
 
     _serial->print("Audio.currentSource.txt=\"" + source + "\"" + _endChar);
-    _serial->print("page 0" + _endChar);
+    _serial->print("page Audio" + _endChar);
 }
 
 void Nextion::setVolume(int volume, bool isMuted)
 {
-    if(_isSleeping) {
+    if(_isSleeping || !_isReady) {
         _pendingData.volume = volume;
         _pendingData.isMuted = isMuted ? BOOL3_TRUE : BOOL3_FLASE;
         return;
@@ -112,7 +127,7 @@ void Nextion::setVolume(int volume, bool isMuted)
 
 void Nextion::setTitle(String title)
 {
-    if(_isSleeping) {
+    if(_isSleeping || !_isReady) {
         _pendingData.title = title;
         return;
     }
@@ -123,7 +138,7 @@ void Nextion::setTitle(String title)
 
 void Nextion::setArtist(String artist)
 {
-    if(_isSleeping) {
+    if(_isSleeping || !_isReady) {
         _pendingData.artist = artist;
         return;
     }
@@ -134,7 +149,7 @@ void Nextion::setArtist(String artist)
 
 void Nextion::setPlayStatus(bool playStatus)
 {
-    if(_isSleeping) {
+    if(_isSleeping || !_isReady) {
         _pendingData.playStatus = playStatus ? BOOL3_TRUE : BOOL3_FLASE;
         return;
     }
@@ -158,6 +173,11 @@ void Nextion::Sleep(bool sleep)
         _isSleeping = false;
         UpdatePendingData();
     }    
+}
+
+void Nextion::Reset()
+{
+    _serial->print("rest" + _endChar);
 }
 
 void Nextion::UpdatePendingAudioSource(String source)

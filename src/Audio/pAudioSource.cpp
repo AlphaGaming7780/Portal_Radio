@@ -12,6 +12,7 @@ pAudioSource::~pAudioSource()
 
 void pAudioSource::Begin(pAudioOutput *pAudioOutput)
 {
+    debug.printlnInfo("Begin audio source.");
     pAudioOutput->Begin();
     Setup();
 

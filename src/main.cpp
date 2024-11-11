@@ -24,12 +24,13 @@ void setup() {
 
     // LOGLEVEL_HELIX = LogLevelHelix::Info;
     debug.setDebugLevel(Debug_INFO | Debug_WARN | Debug_ERROR);
+    // AudioLogger::instance().begin(Serial, AudioLogger::Info);
     debug.begin(115200);
     debug.print("\n");
     debug.printlnInfo("Starting...");
 
     // Serial.begin(115200);
-    // AudioLogger::instance().begin(Serial, AudioLogger::Info);
+    // 
     // Serial.print("\n");
     // Serial.println("Starting...");
 
@@ -130,6 +131,8 @@ void setup() {
     debug.printlnInfo("Portal Radio started!");
 
     audioManager.UpdateVolume();
+
+    nextion.StartupFinished();
 }
 
 void loop() {

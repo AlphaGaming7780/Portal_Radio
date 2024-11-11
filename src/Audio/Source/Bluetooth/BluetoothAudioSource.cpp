@@ -28,7 +28,7 @@ AudioSource &BluetoothAudioSource::getAudioSource()
 
 void BluetoothAudioSource::Setup()
 {
-    Serial.println("Tentative de démarage du Bluetooth.");
+    debug.printlnInfo("Tentative de démarage du Bluetooth.");
     a2dp_sink.set_task_core(0);
     a2dp_sink.set_on_connection_state_changed(onBluetoothConnectionChanged);
     a2dp_sink.set_on_audio_state_changed(onBluetoothAudioStateCallback);
@@ -54,7 +54,7 @@ void BluetoothAudioSource::setOutput(audio_tools::AudioStream &stream)
 void BluetoothAudioSource::Begin()
 {
     a2dp_sink.start("Portal Radio");
-    Serial.println("Bluetooth actif!");
+    debug.printlnInfo("Bluetooth actif!");
 }
 
 void BluetoothAudioSource::Loop() {}
@@ -145,7 +145,7 @@ void BluetoothAudioSource::onBluetoothAudioStateCallback(esp_a2d_audio_state_t s
 
 void BluetoothAudioSource::onBluetoothMetadataCallback(uint8_t data1, const uint8_t *data2) {
 
-    Serial.println("Metadat has been updated:");
+    debug.printlnInfo("Metadat has been updated:");
 
     switch ((esp_avrc_md_attr_mask_t)data1)
     {

@@ -55,9 +55,18 @@ void AudioManager::Update()
 {
     if( _pendingSource == nullptr && _pendingOutput == nullptr) return;
 
-    if(_currentSource != nullptr) _currentSource->End();
-    if(_currentOutput != nullptr) _currentOutput->End();
-    debug.printlnInfo("AudioManager::Update : ending source / output finished.");
+    if(_currentSource != nullptr) 
+    {
+        debug.printlnInfo("Ending audio source.");
+        _currentSource->End();
+    }
+
+    if(_currentOutput != nullptr) 
+    {
+        debug.printlnInfo("Ending audio output.");
+        _currentOutput->End();
+    }
+
 
     if(_pendingSource != nullptr) _currentSource = _pendingSource;
     if(_pendingOutput != nullptr) _currentOutput = _pendingOutput;
