@@ -1,3 +1,4 @@
+#pragma once
 #include "pAudioSource.h"
 #include "Output/I2SOutput/I2SOutput.h"
 #include "Source/Bluetooth/BluetoothAudioSource.h"
@@ -33,7 +34,7 @@ private:
     pAudioOutput *_currentOutput = nullptr;
 
     const int _volumePin = A6;
-    const int _mutePin = 32;
+    const int _mutePin = 33;
 
     AUDIO_LOOP_MODE _audioLoopMode = AUDIO_LOOP_MODE_NONE;
 

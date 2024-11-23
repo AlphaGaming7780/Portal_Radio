@@ -1,7 +1,8 @@
 #pragma once
-
 #include "Arduino.h"
 #include "Audio/AudioManager.h"
+#include "Alarm/AlarmManager.h"
+#include "Alarm/Alarm.h"
 #include "pDebug/pDebug.h"
 #include "Nextion/NextionPendingData.h"
 
@@ -12,8 +13,8 @@ public:
     Nextion(HardwareSerial *serial);
     ~Nextion();
 
-    bool init(HardwareSerial *serial);
-    bool begin(ulong baudrate = 9600);
+    bool Init(HardwareSerial *serial);
+    bool Begin(ulong baudrate = 9600);
 
     void StartupFinished();
 
@@ -25,6 +26,26 @@ public:
     void setArtist(String artist);
     void setPlayStatus(bool playStatus);
 
+    int getYear();
+    int getMonth();
+    int getDay();
+    int getHour();
+    int getMinute();
+    int getSecond();
+    int getDayOfWeek();
+
+    void setYear(int year);
+    void setMonth(int month);
+    void setDay(int day);
+    void setHour(int hour);
+    void setMinute(int minute);
+    void setSecond(int second);
+    void setDatOfWeek(int dayOfWeek);
+
+    void SelectAlarm(int index);
+    void SendAlarmList(Vector<Alarm> alarmList);
+    void SendAlarmData(Alarm alarm);
+
     void Sleep(bool sleep);
     void Reset();
 
@@ -33,16 +54,23 @@ private:
     ulong _baudrate;
 
     String _endChar = String(char(0xFF))+String(char(0xFF))+String(char(0xFF));
+    String _selectedPage = "";
 
     bool _isSleeping = false;
     bool _isReady = false;
 
+    int _selectedAlarmIndex = 0;
+
     NextionPendingData _pendingData;
 
-    void UpdatePendingAudioSource(String source);
-    String formatHexCodeToString(uint8_t value);
+    void _UpdatePendingAudioSource(String source);
+    String _formatHexCodeToString(uint8_t value);
 
-    void UpdatePendingData() {
+    void _print(String c);
+
+    int _getInt(String command, int size);
+
+    void _UpdatePendingData() {
         
         if(_pendingData.audioSource != emptyString)   { setAudioSource(_pendingData.audioSource); _pendingData.audioSource = emptyString; }
 

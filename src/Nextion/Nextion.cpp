@@ -11,13 +11,13 @@ Nextion::~Nextion()
 {
 }
 
-bool Nextion::init(HardwareSerial *serial)
+bool Nextion::Init(HardwareSerial *serial)
 {
     _serial = serial;
     return true;
 }
 
-bool Nextion::begin(ulong baudrate)
+bool Nextion::Begin(ulong baudrate)
 {
     if(_serial == nullptr) return false;
     _serial->begin(baudrate);
@@ -36,56 +36,71 @@ void Nextion::StartupFinished()
         Loop();
     }
     
-    _serial->print("page 1" + _endChar);
-    _serial->print("thup=1" + _endChar);
-    _serial->print("thsp=60" + _endChar);
-    UpdatePendingData();
+    _print("thup=1");
+    _print("thsp=60");
+    setYear(2024);
+    setMonth(11);
+    setDay(18);
+    setHour(8);
+    setMinute(30);
+    setSecond(30);
+    _UpdatePendingData();
+    _print("page 1");
+    delay(1000);
+    Loop();
 }
 
 void Nextion::Loop()
 {
+    while(_serial->available() != 0) {
+        String s = _serial->readStringUntil(char(0xFF));
 
-    if(_serial->available() == 0) return;
+        if(s.length() == 0) continue;
 
-    String s = _serial->readStringUntil(char(0xFF));
+        int x = s.indexOf(':');
 
-    if(s.length() == 0) return;
+        int si = s.toInt();
 
-    int x = s.indexOf(':');
+        if      ( s == _formatHexCodeToString(0x00) ) debug.printlnError("Invalid Commande");
+        else if ( s == _formatHexCodeToString(0x01) ) debug.printlnInfo("Instruction Successful");
+        else if ( s == _formatHexCodeToString(0x02) ) debug.printlnError("Invalid Component ID");
+        else if ( s == _formatHexCodeToString(0x1A) ) debug.printlnError("Invalid Variable name or attribute");
+        else if ( s == _formatHexCodeToString(0x1B) ) debug.printlnError("Invalid Variable Operation");
+        else if ( s == _formatHexCodeToString(0x1C) ) debug.printlnError("Assignement operation failed");
+        else if ( s == _formatHexCodeToString(0x1E) ) debug.printlnError("Invalid Quantity of Parameters");
+        else if ( s == _formatHexCodeToString(0x20) ) debug.printlnError("Escape Character Invalid");
+        else if ( s == _formatHexCodeToString(0x23) ) debug.printlnError("Variable name too long");
+        else if ( s == _formatHexCodeToString(0x24) ) debug.printlnWarn("Serial Buffer Overflow");
+        else if ( s == _formatHexCodeToString(0x86) ) { debug.printlnInfo("Auto sleep"); _isSleeping = true; }
+        else if ( s == _formatHexCodeToString(0x87) ) { debug.printlnInfo("Auto wakeup"); _isSleeping = false; _UpdatePendingData(); }
+        // else if ( s == _formatHexCodeToString(0x00) + _formatHexCodeToString(0x00) + _formatHexCodeToString(0x00) ) { debug.printlnInfo("Nextion Startup"); }
+        else if ( s == _formatHexCodeToString(0x88) ) { debug.printlnInfo("Nextion Ready"); _isReady = true; }
+        else if ( s == "play" ) audioManager.Play();
+        else if ( s == "pause") audioManager.Pause();
+        else if ( s == "next" ) audioManager.Next();
+        else if ( s == "prev" ) audioManager.Previous();
+        else if ( s == "mute" ) audioManager.Mute();
+        else if ( s == "unmute") audioManager.UnMute();
+        else if ( s == "getAlarmList") { SendAlarmList(alarmManager.getAlarmVector()); SelectAlarm(_selectedAlarmIndex); }
+        else if ( s == "newAlarm" ) alarmManager.NewAlarm();
+        else if ( s == "removeAlarm" ) alarmManager.RemoveAlarm(_selectedAlarmIndex);
+        else if ( s == "saveAlarm" ) alarmManager.SaveAlarm();
+        else if ( x != -1 ) {
+            String c = s.substring(0, x);
+            String v = s.substring(x+1);
+            debug.printlnInfo("Command : " + c);
+            debug.printlnInfo("value : " + v);
 
-    int si = s.toInt();
-
-    if      ( s == formatHexCodeToString(0x00) ) debug.printlnError("Invalid Commande");
-    else if ( s == formatHexCodeToString(0x01) ) debug.printlnInfo("Instruction Successful");
-    else if ( s == formatHexCodeToString(0x02) ) debug.printlnError("Invalid Component ID");
-    else if ( s == formatHexCodeToString(0x1A) ) debug.printlnError("Invalid Variable name or attribute");
-    else if ( s == formatHexCodeToString(0x1B) ) debug.printlnError("Invalid Variable Operation");
-    else if ( s == formatHexCodeToString(0x1C) ) debug.printlnError("Assignement operation failed");
-    else if ( s == formatHexCodeToString(0x1E) ) debug.printlnError("Invalid Quantity of Parameters");
-    else if ( s == formatHexCodeToString(0x20) ) debug.printlnError("Escape Character Invalid");
-    else if ( s == formatHexCodeToString(0x23) ) debug.printlnError("Variable name too long");
-    else if ( s == formatHexCodeToString(0x24) ) debug.printlnWarn("Serial Buffer Overflow");
-    else if ( s == formatHexCodeToString(0x86) ) { debug.printlnInfo("Auto sleep"); _isSleeping = true; }
-    else if ( s == formatHexCodeToString(0x87) ) { debug.printlnInfo("Auto wakeup"); _isSleeping = false; UpdatePendingData(); }
-    // else if ( s == formatHexCodeToString(0x00) + formatHexCodeToString(0x00) + formatHexCodeToString(0x00) ) { debug.printlnInfo("Nextion Startup"); }
-    else if ( s == formatHexCodeToString(0x88) ) { debug.printlnInfo("Nextion Ready"); _isReady = true; }
-    else if ( s == "play" ) audioManager.Play();
-    else if ( s == "pause") audioManager.Pause();
-    else if ( s == "next" ) audioManager.Next();
-    else if ( s == "prev" ) audioManager.Previous();
-    else if ( s == "mute" ) audioManager.Mute();
-    else if ( s == "unmute") audioManager.UnMute();
-    else if ( x != -1 ) {
-        String c = s.substring(0, x);
-        String v = s.substring(x+1);
-        debug.printlnInfo("Command : " + c);
-        debug.printlnInfo("value : " + v);
-
-        if ( c == "audioSource") UpdatePendingAudioSource(v);
-
+            if ( c == "page" ) _selectedPage = v;
+            else if ( c == "audioSource") _UpdatePendingAudioSource(v);
+            else if ( c == "getAlarmData" ) { _selectedAlarmIndex = v.toInt(); SendAlarmData(alarmManager.getAlarm(_selectedAlarmIndex)); }
+            else if ( c == "setAlarmHour" ) alarmManager.setAlarmHour(_selectedAlarmIndex, v.toInt());
+            else if ( c == "setAlarmMin" ) alarmManager.setAlarmMinute(_selectedAlarmIndex, v.toInt());
+            else if ( c == "setAlarmEnable" ) alarmManager.setAlarmEnabled( _selectedAlarmIndex, bool(v.toInt()));
+            else if ( c == "setAlarmDay" ) alarmManager.setAlarmDay( _selectedAlarmIndex, dayOfWeekFromTimeInfoFormat(v.toInt()) );
+        }
+        else Serial.printf("Unknown data : %s.\n", s);
     }
-    else Serial.printf("Unknown data : %s.\n", s);
-
 }
 
 void Nextion::setAudioSource(String source)
@@ -163,6 +178,94 @@ void Nextion::setPlayStatus(bool playStatus)
     }
 }
 
+int Nextion::getYear()
+{
+    return _getInt("prints rtc0,2", 2);
+}
+
+int Nextion::getMonth()
+{
+    return _getInt("prints rtc1,1", 1);
+}
+
+int Nextion::getDay()
+{
+    return _getInt("prints rtc2,1", 1);
+}
+
+int Nextion::getHour()
+{
+    return _getInt("prints rtc3,1", 1);
+}
+
+int Nextion::getMinute()
+{
+    return _getInt("prints rtc4,1", 1);
+}
+
+int Nextion::getSecond()
+{
+    return _getInt("prints rtc5,1", 1);
+}
+
+int Nextion::getDayOfWeek()
+{
+    return _getInt("prints rtc6,1", 1);
+}
+
+void Nextion::setYear(int year)
+{
+    _print("rtc0=" + String(year) );
+}
+
+void Nextion::setMonth(int month)
+{
+    if(month > 12) month = 12;
+    else if(month < 1) month = 1;
+
+    _print("rtc1=" + String(month));
+}
+
+void Nextion::setDay(int day)
+{
+    if(day > 31) day = 31;
+    else if(day < 1) day = 1;
+
+    _print("rtc2=" + String(day));
+}
+
+void Nextion::setHour(int hour)
+{
+    if(hour > 23) hour = 23;
+    else if(hour < 0) hour = 0;
+
+    _print("rtc3=" + String(hour));
+}
+
+void Nextion::setMinute(int minute)
+{
+    if(minute > 59) minute = 59;
+    else if(minute < 0) minute = 0;
+
+    _print("rtc4=" + String( minute ) );
+}
+
+void Nextion::setSecond(int second)
+{
+    if(second > 59) second = 59;
+    else if(second < 0) second = 0;
+
+    _print("rtc5=" + String( second ) );
+}
+
+void Nextion::setDatOfWeek(int dayOfWeek)
+{
+    if(dayOfWeek > 6) dayOfWeek = 6;
+    else if(dayOfWeek < 0) dayOfWeek = 0;
+
+    _print("rtc6=" + String( dayOfWeek ) );
+}
+
 void Nextion::Sleep(bool sleep)
 {
     if(sleep) {
@@ -171,7 +274,7 @@ void Nextion::Sleep(bool sleep)
     } else {
         _serial->print("sleep=0" + _endChar);
         _isSleeping = false;
-        UpdatePendingData();
+        _UpdatePendingData();
     }    
 }
 
@@ -180,7 +283,7 @@ void Nextion::Reset()
     _serial->print("rest" + _endChar);
 }
 
-void Nextion::UpdatePendingAudioSource(String source)
+void Nextion::_UpdatePendingAudioSource(String source)
 {
     if      ( source == "Bluetooth" ) audioManager.setAudioSource(&bluetoothAudioSource, true);
     else if ( source == "WebRadio"  ) audioManager.setAudioSource(&webRadioSource, true);
@@ -189,7 +292,67 @@ void Nextion::UpdatePendingAudioSource(String source)
     else if ( source == "DAB"       ) debug.printlnError("NO DAB AUDIO SOURCE.");
 }
 
-String Nextion::formatHexCodeToString(uint8_t value)
+String Nextion::_formatHexCodeToString(uint8_t value)
 {
     return String(char(value));
+}
+
+void Nextion::_print(String c)
+{
+    _serial->print(c + _endChar);
+}
+
+int Nextion::_getInt(String command, int size)
+{
+    _print(command);
+    while (_serial->available() == 0) {}
+    char value[size];
+    _serial->readBytes(value, size);
+
+    int x = 0;
+    for(int i = 0; i < size; i++) {
+        x += int(value[i]) * pow(256, i);
+    }
+
+    return x;
+}
+
+void Nextion::SelectAlarm(int index)
+{
+    if(index < 0) index = 0;
+    _print("alarmList.val=" + String(index));
+    SendAlarmData(alarmManager.getAlarm(index));
+    _selectedAlarmIndex = index;
+}
+
+void Nextion::SendAlarmList(Vector<Alarm> alarmList)
+{
+    String s = "";
+
+    for (size_t i = 0; i < alarmList.size(); i++)
+    {
+        if(i > 0) s += "\\r";
+        s += alarmList[i].getName();
+    }
+
+    _print("alarmList.path=\"" + s + "\"");
+    
+}
+
+void Nextion::SendAlarmData(Alarm alarm)
+{
+    if(alarm.enable) _print("alarmEn.val=1");
+    else _print("alarmEn.val=0");
+
+    _print("alarmHour.val="+String(alarm.hour));
+    _print("alarmMin.val="+String(alarm.minute));
+
+    if( alarm.dayOfWeek & DayOfWeek_Monday )    _print("cAlarmMon.val=1");
+    if( alarm.dayOfWeek & DayOfWeek_Tuesday )   _print("cAlarmTue.val=1");
+    if( alarm.dayOfWeek & DayOfWeek_Wednesday ) _print("cAlarmWed.val=1");
+    if( alarm.dayOfWeek & DayOfWeek_Thursday )  _print("cAlarmThu.val=1");
+    if( alarm.dayOfWeek & DayOfWeek_Friday )    _print("cAlarmFri.val=1");
+    if( alarm.dayOfWeek & DayOfWeek_Saturday )  _print("cAlarmSat.val=1");
+    if( alarm.dayOfWeek & DayOfWeek_Sunday )    _print("cAlarmSun.val=1");
+
 }

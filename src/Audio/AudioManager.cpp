@@ -70,6 +70,8 @@ void AudioManager::Update()
 
     if(_pendingSource != nullptr) _currentSource = _pendingSource;
     if(_pendingOutput != nullptr) _currentOutput = _pendingOutput;
+
+    debug.printlnInfo("Begin source.");
     _currentSource->Begin(_currentOutput);
 
     debug.printlnInfo("Updating the volume.");
@@ -87,18 +89,17 @@ void AudioManager::Update()
 
 void AudioManager::Loop()
 {   
-    // if( !_isMuted &&_currentSource != nullptr && audioPlayer.isActive()) {
-    //     UpdateVolume();
-    //     _currentSource->Loop();
-    // }
 
-    // Serial.printf("%i.\n", uxTaskGetStackHighWaterMark(audioPlayerLoopTask));
+    if( _useAudioPlayer) {
+        
+        if(!_isMuted) UpdateVolume();
 
-    if( _useAudioPlayer && !_isPaused && !audioPlayer.isActive()) {
-        if(_audioLoopMode == AUDIO_LOOP_MODE_PLAYLIST) {
-            audioPlayer.setIndex(0);
-        } else if( _audioLoopMode == AUDIO_LOOP_MODE_TRACK) {
-            audioPlayer.previous();
+        if(!_isPaused && !audioPlayer.isActive()) {
+            if(_audioLoopMode == AUDIO_LOOP_MODE_PLAYLIST) {
+                audioPlayer.setIndex(0);
+            } else if( _audioLoopMode == AUDIO_LOOP_MODE_TRACK) {
+                audioPlayer.previous();
+            }
         }
     }
 }
@@ -117,9 +118,8 @@ void AudioManager::UpdateVolume() {
     vol = roundf( roundf(vol/4095.0 * 100) / 5 ) * 5 / 100.0;
 
     if(_currentSource->getVolume() != vol) {
-        Serial.printf("New Volume : %f.\n", vol);
+        // Serial.printf("New Volume : %f.\n", vol);
         _currentSource->UpdateVolume(vol);
-        // nextion.setVolume(vol * 100);
     }
 }
 

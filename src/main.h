@@ -1,10 +1,13 @@
+#pragma once
 #include "Arduino.h"
 #include "AudioTools.h"
 #include "SPIFFS.h"
 #include <SD.h>
+
 #include "Audio/AudioManager.h"
-#include "Nextion/Nextion.h"
 #include "DataManager/UserDataManager.h"
+#include "Alarm/AlarmManager.h"
+#include "Nextion/Nextion.h"
 
 #ifndef MAIN
 #define MAIN

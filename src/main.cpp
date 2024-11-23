@@ -40,7 +40,7 @@ void setup() {
     // Serial.print(flash_size);
     // Serial.println(" bytes");
     
-    nextion.begin(115200);
+    nextion.Begin(115200);
 
 
 //--------------------------------------------------------- SPIFFS
@@ -115,6 +115,10 @@ void setup() {
     // audioManager.SetSourceAndOutput(&spiffsSource, &i2sOutput, true);
 
     // Setup_Server();
+  
+    nextion.StartupFinished();
+    
+    alarmManager.Begin();
 
     pAudioOutput *audioOutput = audioManager.getAudioOutput(userDataManager.getLastSelectedOutput());
     pAudioSource *audioSource = audioManager.getAudioSource(userDataManager.getLastSelectedSource());
@@ -126,18 +130,16 @@ void setup() {
     // audioManager.SetSourceAndOutput(&sdSource, &i2sOutput, true);
     // audioManager.SetSourceAndOutput(&webRadioSource, &i2sOutput, true);
 
-    audioManager.setLoopMode(AUDIO_LOOP_MODE_PLAYLIST);
+    // audioManager.setLoopMode(AUDIO_LOOP_MODE_PLAYLIST);
 
     debug.printlnInfo("Portal Radio started!");
 
-    audioManager.UpdateVolume();
 
-    nextion.StartupFinished();
+
 }
 
 void loop() {
     audioManager.Loop();
     nextion.Loop();
-    // delay(10000);
-    // audioManager.UpdateVolume();
+    alarmManager.Loop();
 }
