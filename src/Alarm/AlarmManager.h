@@ -26,7 +26,7 @@ public:
 
     void NewAlarm();
     void RemoveAlarm(int index);
-    void SaveAlarm();
+    void SaveAlarm(int index);
 
 private:
     ESP32Time rtc;

@@ -43,6 +43,7 @@ public:
     void setDatOfWeek(int dayOfWeek);
 
     void SelectAlarm(int index);
+    void SelectLastAlarm();
     void SendAlarmList(Vector<Alarm> alarmList);
     void SendAlarmData(Alarm alarm);
 

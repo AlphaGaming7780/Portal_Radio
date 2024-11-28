@@ -23,6 +23,12 @@ public:
     const char* getLastSelectedOutput() { return _userData["LastSelectedOutput"]; };
     void setLastSelectedOutput(String value) { _userData["LastSelectedOutput"] = value; };
 
+    float getVolume() { return _userData["Volume"]; };
+    void setVolume(float value) { _userData["Volume"] = value; };
+
+    bool getEC11InvertDirection() { return _userData["EC11InvertDirection"]; };
+    void setEC11InvertDirection(bool value) { _userData["EC11InvertDirection"] = value; };
+
     int getTimeZone() { return _userData["TimeZone"]; };
     void setTimeZone(int value) { _userData["TimeZone"] = value; };
 
@@ -57,7 +63,7 @@ public:
         for (size_t i = 0; i < value.size(); i++)
         {
             Alarm alarm = value[i];
-            JsonVariant AlarmData = arr.add();
+            JsonVariant AlarmData = arr.add<JsonVariant>();
             AlarmData["enable"] = alarm.enable;
             AlarmData["hour"] = alarm.hour;
             AlarmData["minute"] = alarm.minute;

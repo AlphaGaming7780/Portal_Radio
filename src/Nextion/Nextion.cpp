@@ -84,7 +84,7 @@ void Nextion::Loop()
         else if ( s == "getAlarmList") { SendAlarmList(alarmManager.getAlarmVector()); SelectAlarm(_selectedAlarmIndex); }
         else if ( s == "newAlarm" ) alarmManager.NewAlarm();
         else if ( s == "removeAlarm" ) alarmManager.RemoveAlarm(_selectedAlarmIndex);
-        else if ( s == "saveAlarm" ) alarmManager.SaveAlarm();
+        else if ( s == "saveAlarm" ) alarmManager.SaveAlarm(_selectedAlarmIndex);
         else if ( x != -1 ) {
             String c = s.substring(0, x);
             String v = s.substring(x+1);
@@ -325,6 +325,11 @@ void Nextion::SelectAlarm(int index)
     _selectedAlarmIndex = index;
 }
 
+void Nextion::SelectLastAlarm()
+{
+    SelectAlarm(_selectedAlarmIndex);
+}
+
 void Nextion::SendAlarmList(Vector<Alarm> alarmList)
 {
     String s = "";
@@ -348,11 +353,23 @@ void Nextion::SendAlarmData(Alarm alarm)
     _print("alarmMin.val="+String(alarm.minute));
 
     if( alarm.dayOfWeek & DayOfWeek_Monday )    _print("cAlarmMon.val=1");
-    if( alarm.dayOfWeek & DayOfWeek_Tuesday )   _print("cAlarmTue.val=1");
-    if( alarm.dayOfWeek & DayOfWeek_Wednesday ) _print("cAlarmWed.val=1");
-    if( alarm.dayOfWeek & DayOfWeek_Thursday )  _print("cAlarmThu.val=1");
-    if( alarm.dayOfWeek & DayOfWeek_Friday )    _print("cAlarmFri.val=1");
-    if( alarm.dayOfWeek & DayOfWeek_Saturday )  _print("cAlarmSat.val=1");
-    if( alarm.dayOfWeek & DayOfWeek_Sunday )    _print("cAlarmSun.val=1");
+    else _print("cAlarmMon.val=0");
 
+    if( alarm.dayOfWeek & DayOfWeek_Tuesday )   _print("cAlarmTue.val=1");
+    else _print("cAlarmTue.val=0");
+
+    if( alarm.dayOfWeek & DayOfWeek_Wednesday ) _print("cAlarmWed.val=1");
+    else _print("cAlarmWed.val=0");
+
+    if( alarm.dayOfWeek & DayOfWeek_Thursday )  _print("cAlarmThu.val=1");
+    else _print("cAlarmThu.val=0");
+
+    if( alarm.dayOfWeek & DayOfWeek_Friday )    _print("cAlarmFri.val=1");
+    else _print("cAlarmFri.val=0");
+
+    if( alarm.dayOfWeek & DayOfWeek_Saturday )  _print("cAlarmSat.val=1");
+    else _print("cAlarmSat.val=0");
+
+    if( alarm.dayOfWeek & DayOfWeek_Sunday )    _print("cAlarmSun.val=1");
+    else _print("cAlarmSun.val=0");
 }

@@ -1,5 +1,7 @@
 #include "main.h"
 
+#include "T4B/T4B.h"
+
 // #define ESP8266_USE_DEBUGSERIAL
 // #include "SoftwareSerial.h"
 // #include "ESP8266_Wifi_Module/ESP866WebServer.h"
@@ -20,6 +22,8 @@
 const char* SSID = "Alpha Gaming";
 const char* PWD = "loliloli";
 
+T4B t4b(&Serial1, 25);
+
 void setup() {
 
     // LOGLEVEL_HELIX = LogLevelHelix::Info;
@@ -29,16 +33,15 @@ void setup() {
     debug.print("\n");
     debug.printlnInfo("Starting...");
 
-    // Serial.begin(115200);
-    // 
-    // Serial.print("\n");
-    // Serial.println("Starting...");
+    ec11.Begin();
 
-    // uint32_t flash_size = ESP.getFlashChipSize();
-  
-    // Serial.print("Flash size: ");
-    // Serial.print(flash_size);
-    // Serial.println(" bytes");
+    t4b.Init();
+
+    CmdErrorCode error;
+
+    Serial.println("FM!!!!!!!!!");
+    if(!t4b.PlayFm(104200, &error)) { Serial.println("failed to Play nostalgie : " + String(ToString(error))); }
+    if(!t4b.PlayDab(0, &error)) { Serial.println("failed to Play DAB : " + String(ToString(error))); }
     
     nextion.Begin(115200);
 
@@ -75,6 +78,8 @@ void setup() {
 
     userDataManager.Load();
 
+    ec11.setInvertDirection(userDataManager.getEC11InvertDirection());
+    // ec11.setInvertDirection(true);
 
 //--------------------------------------------------------- WIFI
 
@@ -124,7 +129,7 @@ void setup() {
     pAudioSource *audioSource = audioManager.getAudioSource(userDataManager.getLastSelectedSource());
 
     if(audioOutput == nullptr) audioOutput = &i2sOutput;
-    if(audioSource == nullptr) audioSource = &bluetoothAudioSource;
+    // if(audioSource == nullptr) audioSource = &bluetoothAudioSource;
 
     audioManager.setSourceAndOutput(audioSource, audioOutput, true);
     // audioManager.SetSourceAndOutput(&sdSource, &i2sOutput, true);
@@ -133,12 +138,11 @@ void setup() {
     // audioManager.setLoopMode(AUDIO_LOOP_MODE_PLAYLIST);
 
     debug.printlnInfo("Portal Radio started!");
-
-
-
 }
 
+
 void loop() {
+    ec11.Loop();
     audioManager.Loop();
     nextion.Loop();
     alarmManager.Loop();

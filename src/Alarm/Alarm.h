@@ -20,8 +20,7 @@ public:
     int hour, minute = 0;
     DayOfWeek dayOfWeek = DayOfWeek_NONE;
 
-    String getName() { return String(hour) + ":" + String(minute); }
-
+    String getName();
 };
 
 DayOfWeek dayOfWeekFromTimeInfoFormat(int wday);

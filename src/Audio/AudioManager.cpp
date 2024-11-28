@@ -1,6 +1,7 @@
 #include "AudioManager.h"
 #include "Nextion/Nextion.h"
 #include "DataManager/UserDataManager.h"
+#include "EC11/EC11.h"
 
 AudioManager audioManager;
 
@@ -53,7 +54,7 @@ void AudioManager::setSourceAndOutput(pAudioSource *audioSource, pAudioOutput *a
 
 void AudioManager::Update()
 {
-    if( _pendingSource == nullptr && _pendingOutput == nullptr) return;
+    // if( _pendingSource == nullptr && _pendingOutput == nullptr) return;
 
     if(_currentSource != nullptr) 
     {
@@ -68,22 +69,28 @@ void AudioManager::Update()
     }
 
 
-    if(_pendingSource != nullptr) _currentSource = _pendingSource;
-    if(_pendingOutput != nullptr) _currentOutput = _pendingOutput;
+    _currentSource = _pendingSource;
+    _currentOutput = _pendingOutput;
 
     debug.printlnInfo("Begin source.");
-    _currentSource->Begin(_currentOutput);
+    if(_currentSource != nullptr && _currentOutput != nullptr) {
+        _currentSource->Begin(_currentOutput);
+        debug.printlnInfo("Updating the volume.");
+        UpdateVolume();
 
-    debug.printlnInfo("Updating the volume.");
-    UpdateVolume();
+        nextion.setAudioSource(_currentSource->getID());
+        nextion.setPlayStatus(true);
+        _isPaused = false;
+    } else {
+        nextion.setAudioSource("");
+        nextion.setPlayStatus(false);
+        _isPaused = true;
+    }
 
-    nextion.setAudioSource(_currentSource->getID());
-    nextion.setPlayStatus(true);
-
-    _isPaused = false;
-
-    userDataManager.setLastSelectedOutput(_currentOutput->getID());
-    userDataManager.setLastSelectedSource(_currentSource->getID());
+    if (_currentOutput != nullptr) userDataManager.setLastSelectedOutput(_currentOutput->getID());
+    else userDataManager.setLastSelectedOutput("NULL");
+    if (_currentSource != nullptr) userDataManager.setLastSelectedSource(_currentSource->getID());
+    else userDataManager.setLastSelectedSource("NULL");
     userDataManager.Save();
 }
 
@@ -113,12 +120,16 @@ void AudioManager::End()
 }
 
 void AudioManager::UpdateVolume() {
-    // Reading potentiometer value (range is 0 - 4095)
-    float vol = static_cast<float>(analogRead(_volumePin));
-    vol = roundf( roundf(vol/4095.0 * 100) / 5 ) * 5 / 100.0;
 
-    if(_currentSource->getVolume() != vol) {
-        // Serial.printf("New Volume : %f.\n", vol);
+    float vol = userDataManager.getVolume(); //_currentSource->getVolume();
+    vol += ec11.getDirection() * 5/100.0;
+
+    if(vol < 0) vol = 0;
+    else if( vol > 1 ) vol = 1;
+
+    if( _currentSource != nullptr && _currentSource->getVolume() != vol) {
+        Serial.printf("New Volume : %f.\n", vol);
+        userDataManager.setVolume(vol);
         _currentSource->UpdateVolume(vol);
     }
 }

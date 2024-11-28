@@ -69,8 +69,8 @@ void AlarmManager::setAlarmHour(int index, int hour)
     Alarm alarm = _alarmList[index];
     alarm.hour = hour;
     _alarmList[index] = alarm;
-    nextion.SendAlarmList(_alarmList);
-    nextion.SelectAlarm(index);
+    // nextion.SendAlarmList(_alarmList);
+    // nextion.SelectAlarm(index);
 }
 
 void AlarmManager::setAlarmMinute(int index, int minute)
@@ -79,8 +79,8 @@ void AlarmManager::setAlarmMinute(int index, int minute)
     Alarm alarm = _alarmList[index];
     alarm.minute = minute;
     _alarmList[index] = alarm;
-    nextion.SendAlarmList(_alarmList);
-    nextion.SelectAlarm(index);
+    // nextion.SendAlarmList(_alarmList);
+    // nextion.SelectAlarm(index);
 }
 
 void AlarmManager::setAlarmEnabled(int index, bool enabled)
@@ -89,8 +89,8 @@ void AlarmManager::setAlarmEnabled(int index, bool enabled)
     Alarm alarm = _alarmList[index];
     alarm.enable = enabled;
     _alarmList[index] = alarm;
-    nextion.SendAlarmList(_alarmList);
-    nextion.SelectAlarm(index);
+    // nextion.SendAlarmList(_alarmList);
+    // nextion.SelectAlarm(index);
 }
 
 void AlarmManager::setAlarmDay(int index, DayOfWeek dayOfWeek)
@@ -99,28 +99,28 @@ void AlarmManager::setAlarmDay(int index, DayOfWeek dayOfWeek)
     Alarm alarm = _alarmList[index];
     alarm.dayOfWeek = alarm.dayOfWeek ^ dayOfWeek;
     _alarmList[index] = alarm;
-    nextion.SendAlarmList(_alarmList);
-    nextion.SelectAlarm(index);
+    // nextion.SendAlarmList(_alarmList);
+    // nextion.SelectAlarm(index);
 }
 
 void AlarmManager::NewAlarm()
 {
     _alarmList.push_back(Alarm());
-    nextion.SendAlarmList(_alarmList);
-    nextion.SelectAlarm(_alarmList.size()-1);
+    SaveAlarm(_alarmList.size()-1);
 }
 
 void AlarmManager::RemoveAlarm(int index)
 {
     if (index >= _alarmList.size()) index = _alarmList.size() - 1;
     _alarmList.erase(index);
-    nextion.SendAlarmList(_alarmList);
-    nextion.SelectAlarm(index - 1);
+    SaveAlarm(index - 1);
 }
 
-void AlarmManager::SaveAlarm()
+void AlarmManager::SaveAlarm(int index)
 {
     debug.printlnInfo("Saving alarm.");
     userDataManager.setAlarmList(_alarmList);
     userDataManager.Save();
+    nextion.SendAlarmList(_alarmList);
+    nextion.SelectAlarm(index);
 }

@@ -8,6 +8,7 @@
 #include "DataManager/UserDataManager.h"
 #include "Alarm/AlarmManager.h"
 #include "Nextion/Nextion.h"
+#include "EC11/EC11.h"
 
 #ifndef MAIN
 #define MAIN

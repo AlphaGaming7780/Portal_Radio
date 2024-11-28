@@ -75,3 +75,18 @@ int dayOfWeekToTimeInfoFormat(DayOfWeek wday)
         break;
     }
 }
+
+String Alarm::getName()
+{
+    String s = "";
+    if(dayOfWeek & DayOfWeek_Monday)    s += ",Mon";
+    if(dayOfWeek & DayOfWeek_Tuesday)   s += ",Tue";
+    if(dayOfWeek & DayOfWeek_Wednesday) s += ",Wed";
+    if(dayOfWeek & DayOfWeek_Thursday)  s += ",Thu";
+    if(dayOfWeek & DayOfWeek_Friday)    s += ",Fri";
+    if(dayOfWeek & DayOfWeek_Saturday)  s += ",Sat";
+    if(dayOfWeek & DayOfWeek_Sunday)    s += ",Sun";
+
+    return String(hour) + ":" + String(minute) + s;
+
+}

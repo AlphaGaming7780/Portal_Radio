@@ -33,7 +33,6 @@ private:
     pAudioSource *_currentSource = nullptr;
     pAudioOutput *_currentOutput = nullptr;
 
-    const int _volumePin = A6;
     const int _mutePin = 33;
 
     AUDIO_LOOP_MODE _audioLoopMode = AUDIO_LOOP_MODE_NONE;
@@ -69,10 +68,10 @@ public:
     void Loop();
     void End();
     void UpdateVolume();
-    void Play() {_currentSource->Play(); _isPaused = false; };
-    void Pause() {_currentSource->Pause(); _isPaused = true; };
-    void Next() {_currentSource->Next(); };
-    void Previous() {_currentSource->Previous(); };
+    void Play()     { if(_currentSource == nullptr) return; _currentSource->Play(); _isPaused = false; };
+    void Pause()    { if(_currentSource == nullptr) return; _currentSource->Pause(); _isPaused = true; };
+    void Next()     { if(_currentSource == nullptr) return; _currentSource->Next(); };
+    void Previous() { if(_currentSource == nullptr) return; _currentSource->Previous(); };
     void Mute();
     void UnMute();
     bool isMuted() {return _isMuted; };
