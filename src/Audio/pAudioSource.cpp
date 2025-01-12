@@ -67,11 +67,6 @@ void pAudioSource::Begin()
 
 }
 
-void pAudioSource::Loop()
-{
-    // audioManager.audioPlayer.copy();
-}
-
 void pAudioSource::End()
 {
     audioManager.DeleteAudioPlayerTask();
@@ -79,7 +74,12 @@ void pAudioSource::End()
     audioManager.audioPlayer.end();
 }
 
-void pAudioSource::UpdateVolume(float volume)
+float pAudioSource::volumeInc()
+{
+    return 0.05f;
+}
+
+void pAudioSource::setVolume(float volume)
 {
     audioManager.audioPlayer.setVolume(volume);
     nextion.setVolume(volume * 100, audioManager.isMuted());

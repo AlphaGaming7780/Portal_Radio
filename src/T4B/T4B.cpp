@@ -1,6 +1,8 @@
 
 #include "T4B.h"
 
+T4B t4b(&Serial1, 25);
+
 static const uint8_t HeaderSizeIndex = 5U;
 static const uint8_t ResponseAck = 0x00;
 static const uint8_t ResponseAckNack = 0x02;
@@ -32,6 +34,12 @@ void T4B::Init(ulong baud)
         delay(500U);
         Serial.println("T4B isn't ready");
     }
+    Serial.println("T4B is ready.");
+}
+
+CmdErrorCode T4B::getError()
+{
+    return _cmdError;
 }
 
 // *************************
@@ -70,7 +78,7 @@ bool T4B::Reset(bool const fullReset)
 bool T4B::getModuleVersion(uint8_t *const version)
 {
     Command command = _commandBuilder.createSystem(CmdSystemId::GetModuleVersion).build();
-    return _commandSend(command) && _responseUint8(0, version);
+    return _commandSend(command) && _responseUint8(0U, version);
 }
 
 // *************************
@@ -81,28 +89,42 @@ bool T4B::getModuleVersion(uint8_t *const version)
  *   Play DAB program
  *   programIndex = 1..999999 (see programs index)
  */
-bool T4B::PlayDab(uint32_t const stationId, CmdErrorCode *const error)
+bool T4B::PlayDab(uint32_t const stationId)
 {
     Command command = _commandBuilder.createStream(CmdStreamId::Play)
                           .append(static_cast<uint8_t>(StreamMode::Dab))
                           .append(stationId)
                           .build();
 
-    return _commandSend(command, error);
+    return _commandSend(command);
 }
 
 /*
  *   Play FM program
  *   frequency = 87500..108000 (MHz)
  */
-bool T4B::PlayFm(uint32_t const frequency, CmdErrorCode *error)
+bool T4B::PlayFm(uint32_t const frequency)
 {
     Command command = _commandBuilder.createStream(CmdStreamId::Play)
                           .append(static_cast<uint8_t>(StreamMode::Fm))
                           .append(frequency)
                           .build();
 
-    return _commandSend(command, error);
+    return _commandSend(command);
+}
+
+/*
+ *   Play single tone
+ *   tone = 1 ... 20 (kHz)
+ */
+bool T4B::PlayeSingleTone(uint32_t const tone)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::Play)
+                          .append(static_cast<uint8_t>(StreamMode::SingleTone))
+                          .append(tone)
+                          .build();
+
+    return _commandSend(command);
 }
 
 /*
@@ -153,36 +175,74 @@ bool T4B::DabSearch(DabBand const band)
     return _commandSend(command);
 }
 
+bool T4B::setVolume(uint8_t const volume)
+{
+    uint8_t volumeValue = (volume > 16U) ? 16U : volume;
+    Command command = _commandBuilder.createStream(CmdStreamId::SetVolume).append(volumeValue).build();
+
+    return _commandSend(command);
+}
+
+bool T4B::getVolume(uint8_t *const volume)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::GetVolume).build();
+    return (_commandSend(command) && _responseUint8(0U, volume));
+}
+
+bool T4B::setHeadroom(uint8_t const headroomLevel)
+{
+    uint8_t headroomLevelValue = (headroomLevel > 12U) ? 12U : headroomLevel;
+    Command command = _commandBuilder.createStream(CmdStreamId::SetHeadroom).append(headroomLevelValue).build();
+
+    return _commandSend(command);
+}
+
+bool T4B::getHeadroom(uint8_t *const headroomLevel)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::GetHeadroom).build();
+    return (_commandSend(command) && _responseUint8(0U, headroomLevel));
+}
+
 bool T4B::_commandSend(Command const &command)
 {
+
+    _cmdError = CmdErrorCode::NONE;
+
     while (_serial->available())
     {
         _serial->read();
     }
     _serial->write(command.data, command.size);
     _serial->flush();
-    bool b =_responseReceive();
-    Serial.println(b);
-    b = b && !(_responseHeader[1U] == ResponseAck && _responseHeader[2U] == ResponseAckNack);
-    Serial.println(b);
-    return b;
-    // return (_responseReceive() &&
-    //         !(_responseHeader[1U] == ResponseAck && _responseHeader[2U] == ResponseAckNack));
-}
 
-bool T4B::_commandSend(Command const &command, CmdErrorCode *const error)
-{
-    *error = CmdErrorCode::TimeOut;
-    if(_commandSend(command)) return true;
-    _responseUint8(0, reinterpret_cast<uint8_t*>(error));
+    bool v = (_responseReceive() &&
+            !(_responseHeader[1U] == ResponseAck && _responseHeader[2U] == ResponseAckNack));
+
+    if(v) return true;
+
+    _cmdError = CmdErrorCode::TimeOut;
+    _responseUint8(0, reinterpret_cast<uint8_t*>(&_cmdError));
+
+    debug.printlnError("T4B : " + String(ToString(_cmdError)));
+
     return false;
 }
+
+
+
+// bool T4B::_commandSend(Command const &command, CmdErrorCode *const error)
+// {
+//     *error = CmdErrorCode::TimeOut;
+//     if(_commandSend(command)) return true;
+//     _responseUint8(0, reinterpret_cast<uint8_t*>(error));
+//     return false;
+// }
 
 bool T4B::_responseReceive()
 {
     uint16_t index = 0U;
     uint8_t data = 0U;
-    uint32_t endMillis = millis() + 200U; // timeout for answer from module = 200ms.
+    uint32_t endMillis = millis() + 250U; // timeout for answer from module = 200ms.
     _responseSize = 0U;
 
     while (millis() < endMillis && index < T4BMaxDataSize)
@@ -212,10 +272,8 @@ bool T4B::_responseReceive()
 
             if (data == CommandEndValue)
             {
-                Serial.println("End Value.");
                 if ((index - T4BHeaderSize - _responseSize) == 0U)
                 {
-                    Serial.println("End Value 2.");
                     return true;
                 }
             }
@@ -240,36 +298,33 @@ bool T4B::_responseText(char* const buffer, uint16_t const size)
 
 bool T4B::_responseUint8(uint8_t const index, uint8_t *const resp)
 {
-    if (_responseSize > index)
-    {
-        *resp = _response[index];
-        return true;
-    }
-    return false;
+    if (_responseSize < index) return false;
+
+    *resp = _response[index];
+    return true;
+
 }
 
 bool T4B::_responseUint16(uint8_t const index, uint16_t *const resp)
 {
-    if (_responseSize > (index + 1U))
-    {
-        *resp = static_cast<uint16_t>(_response[index + 1U]);
-        *resp |= static_cast<uint16_t>(_response[index]) << 8U;
-        return true;
-    }
-    return false;
+    if (_responseSize < (index + 1U)) return false;
+    
+    *resp = static_cast<uint16_t>(_response[index + 1U]);
+    *resp |= static_cast<uint16_t>(_response[index]) << 8U;
+    return true;
+
 }
 
 bool T4B::_responseUint32(uint8_t const index, uint32_t *const resp)
 {
-    if (_responseSize > (index + 3U))
-    {
-        *resp = static_cast<uint32_t>(_response[index + 3U]);
-        *resp |= static_cast<uint32_t>(_response[index + 2U]) << 8U;
-        *resp |= static_cast<uint32_t>(_response[index + 1U]) << 16U;
-        *resp |= static_cast<uint32_t>(_response[index + 0U]) << 24U;
-        return true;
-    }
-    return false;
+    if (_responseSize < (index + 3U)) return false;
+    
+    *resp = static_cast<uint32_t>(_response[index + 3U]);
+    *resp |= static_cast<uint32_t>(_response[index + 2U]) << 8U;
+    *resp |= static_cast<uint32_t>(_response[index + 1U]) << 16U;
+    *resp |= static_cast<uint32_t>(_response[index + 0U]) << 24U;
+    return true;
+
 }
 
 char T4B::_uint16ToChar(uint8_t const byte0, uint8_t const byte1)

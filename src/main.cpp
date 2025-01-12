@@ -2,27 +2,7 @@
 
 #include "T4B/T4B.h"
 
-// #define ESP8266_USE_DEBUGSERIAL
-// #include "SoftwareSerial.h"
-// #include "ESP8266_Wifi_Module/ESP866WebServer.h"
-
-//                                    RX | TX
-// EspSoftwareSerial::UART	ESP8266Serial(18, 19);
-// ESP866WebServer webServer(80);
-// ESP8266Wifi ESPWifi(&ESP8266Serial);
-
 // https://www.circuitstate.com/pinouts/doit-esp32-devkit-v1-wifi-development-board-pinout-diagram-and-reference/#ADC
-
-// const char* SSID = "S24+ Triton";
-// const char* PWD = "axyktb87k2rxbp2";
-
-// const char* SSID = "C chez toi ici";
-// const char* PWD = "DecoP9DecoP9";
-
-const char* SSID = "Alpha Gaming";
-const char* PWD = "loliloli";
-
-T4B t4b(&Serial1, 25);
 
 void setup() {
 
@@ -37,12 +17,20 @@ void setup() {
 
     t4b.Init();
 
-    CmdErrorCode error;
+    if(!t4b.setVolume(16)) {Serial.println(ToString(t4b.getError()));}
 
-    Serial.println("FM!!!!!!!!!");
-    if(!t4b.PlayFm(104200, &error)) { Serial.println("failed to Play nostalgie : " + String(ToString(error))); }
-    if(!t4b.PlayDab(0, &error)) { Serial.println("failed to Play DAB : " + String(ToString(error))); }
+    // Serial.println("FM!!!!!!!!!");
     
+    // if(!t4b.PlayFm(104200)) {Serial.println(ToString(t4b.getError()));}
+    // if(!t4b.FmSearch()) {Serial.println(ToString(t4b.getError()));}
+
+    // if(!t4b.PlayDab(1)) {Serial.println(ToString(t4b.getError()));}
+
+    // if(!t4b.PlayeSingleTone(1)) {Serial.println(ToString(t4b.getError()));}
+    
+    // while(true) {}
+
+    Serial.println("Starting Nextion...");
     nextion.Begin(115200);
 
 
@@ -66,6 +54,7 @@ void setup() {
 
 //--------------------------------------------------------- SD
 
+    Serial.println("Starting SD...");
     while (!SD.begin()) {
         debug.println("SD.begin failed");
         delay(1000);
@@ -132,6 +121,13 @@ void setup() {
     // if(audioSource == nullptr) audioSource = &bluetoothAudioSource;
 
     audioManager.setSourceAndOutput(audioSource, audioOutput, true);
+
+    if(!t4b.PlayFm(104200U)) {Serial.println(ToString(t4b.getError()));}
+    // if(!t4b.setHeadroom(12U)) {Serial.println(ToString(t4b.getError()));}
+    uint8_t headroomLevel;
+    if(t4b.getHeadroom(&headroomLevel)) {Serial.printf("Headroom Level : %u\n", headroomLevel);}
+
+
     // audioManager.SetSourceAndOutput(&sdSource, &i2sOutput, true);
     // audioManager.SetSourceAndOutput(&webRadioSource, &i2sOutput, true);
 

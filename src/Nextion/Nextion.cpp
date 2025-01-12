@@ -288,8 +288,8 @@ void Nextion::_UpdatePendingAudioSource(String source)
     if      ( source == "Bluetooth" ) audioManager.setAudioSource(&bluetoothAudioSource, true);
     else if ( source == "WebRadio"  ) audioManager.setAudioSource(&webRadioSource, true);
     else if ( source == "SD card"   ) audioManager.setAudioSource(&sdSource, true);
-    else if ( source == "FM"        ) debug.printlnError("NO FM AUDIO SOURCE.");
-    else if ( source == "DAB"       ) debug.printlnError("NO DAB AUDIO SOURCE.");
+    else if ( source == "FM"        ) audioManager.setAudioSource(&FM, true);
+    else if ( source == "DAB"       ) audioManager.setAudioSource(nullptr, true);
 }
 
 String Nextion::_formatHexCodeToString(uint8_t value)

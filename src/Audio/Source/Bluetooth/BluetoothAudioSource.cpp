@@ -57,13 +57,11 @@ void BluetoothAudioSource::Begin()
     debug.printlnInfo("Bluetooth actif!");
 }
 
-void BluetoothAudioSource::Loop() {}
-
 void BluetoothAudioSource::End() {
     a2dp_sink.end();
 }
 
-void BluetoothAudioSource::UpdateVolume(float volume)
+void BluetoothAudioSource::setVolume(float volume)
 {
     _potVolume = volume;
 }

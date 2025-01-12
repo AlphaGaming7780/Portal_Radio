@@ -97,11 +97,11 @@ void AudioManager::Update()
 void AudioManager::Loop()
 {   
 
-    if( _useAudioPlayer) {
+    if( _useAudioPlayer || _useStreamCopier) {
         
         if(!_isMuted) UpdateVolume();
 
-        if(!_isPaused && !audioPlayer.isActive()) {
+        if(!_isPaused && !audioPlayer.isActive() && _useAudioPlayer) {
             if(_audioLoopMode == AUDIO_LOOP_MODE_PLAYLIST) {
                 audioPlayer.setIndex(0);
             } else if( _audioLoopMode == AUDIO_LOOP_MODE_TRACK) {
@@ -121,16 +121,17 @@ void AudioManager::End()
 
 void AudioManager::UpdateVolume() {
 
-    float vol = userDataManager.getVolume(); //_currentSource->getVolume();
-    vol += ec11.getDirection() * 5/100.0;
+    float oldVol = userDataManager.getVolume(); //_currentSource->getVolume();
+    float newVol = oldVol + ec11.getDirection() * _currentSource->volumeInc();
 
-    if(vol < 0) vol = 0;
-    else if( vol > 1 ) vol = 1;
+    if(newVol < 0) newVol = 0;
+    else if( newVol > 1 ) newVol = 1;
 
-    if( _currentSource != nullptr && _currentSource->getVolume() != vol) {
-        Serial.printf("New Volume : %f.\n", vol);
-        userDataManager.setVolume(vol);
-        _currentSource->UpdateVolume(vol);
+    if( _currentSource != nullptr && oldVol != newVol) {
+        Serial.printf("New Volume : %f.\n", newVol);
+        userDataManager.setVolume(newVol);
+        userDataManager.Save();
+        _currentSource->setVolume(newVol);
     }
 }
 
@@ -176,7 +177,7 @@ void AudioManager::CreateAudioPlayerTask()
     if(audioPlayerLoopTask != NULL) return;
 
     xTaskCreatePinnedToCore(
-        AudioPlayerTLoopTask,     /* Function to implement the task */
+        AudioPlayerLoopTask,     /* Function to implement the task */
         "AudioPlayerLoopTask",    /* Name of the task */
         10000,                    /* Stack size in words */
         NULL,                     /* Task input parameter */
@@ -199,11 +200,47 @@ void AudioManager::DeleteAudioPlayerTask()
     _useAudioPlayer = false;
 }
 
-void AudioPlayerTLoopTask(void *parameter)
+void AudioManager::CreateStreamCopierTask()
+{
+    if(streamCopierLoopTask != NULL) return;
+
+    xTaskCreatePinnedToCore(
+        StreamCopierLoopTask,     /* Function to implement the task */
+        "StreamCopierLoopTask",    /* Name of the task */
+        10000,                    /* Stack size in words */
+        NULL,                     /* Task input parameter */
+        255,                        /* Priority of the task */
+        &streamCopierLoopTask,     /* Task handle. */
+        0                         // Core ID
+    );
+
+    _useStreamCopier = true;
+}
+
+void AudioManager::DeleteStreamCopierTask()
+{
+    if(streamCopierLoopTask == NULL) return;
+
+    vTaskDelete(streamCopierLoopTask);
+
+    streamCopierLoopTask = NULL;
+    _useStreamCopier = false;
+}
+
+void AudioPlayerLoopTask(void *parameter)
 {
     while (true)
     {
-        // debug.printlnInfo("AudioPlayerTask is running.");
         audioManager.audioPlayer.copy();
+        delay(1);
+    }
+}
+
+void StreamCopierLoopTask(void *parameter)
+{
+    while (true)
+    {
+        audioManager.audioPlayer.copy();
+        delay(1);
     }
 }

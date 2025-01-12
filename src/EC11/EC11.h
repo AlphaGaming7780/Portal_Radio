@@ -5,8 +5,9 @@ class EC11
 {
 private:
     int _pinA, _pinB, _pinSW = -1;
-    bool _oldPinA = false;
+    bool _oldPinA, _oldPinB = false;
     
+    bool _firstDirection = 0;
     int _direction = 0;
     bool _oldSwState, _swRisingEdge = false;
 

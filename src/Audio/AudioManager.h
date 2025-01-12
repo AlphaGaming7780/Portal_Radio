@@ -5,6 +5,7 @@
 #include "Source/SD/SDSource.h"
 #include "Source/SPIFFSSource/SPIFFSSource.h"
 #include "Source/WebRadioSource/WebRadioSource.h"
+#include "Source/FM/FMSource.h"
 
 #ifndef dAudioManager
 #define dAudioManager
@@ -38,20 +39,23 @@ private:
     AUDIO_LOOP_MODE _audioLoopMode = AUDIO_LOOP_MODE_NONE;
 
     bool _useAudioPlayer = false;
+    bool _useStreamCopier = false;
 
     bool _isMuted = false;
     bool _isPaused = false;
 
     TaskHandle_t audioPlayerLoopTask;
+    TaskHandle_t streamCopierLoopTask;
 
 public:
     AudioManager(/* args */);
     ~AudioManager();
 
-    pAudioSource *sourceList[4] { &bluetoothAudioSource, &sdSource, &webRadioSource, &spiffsSource };
+    pAudioSource *sourceList[5] { &bluetoothAudioSource, &sdSource, &webRadioSource, &spiffsSource, &FM };
     pAudioOutput *outputList[1] { &i2sOutput };
 
     AudioPlayer audioPlayer;
+    StreamCopy streamCopie;
 
     bool useEquilizer = false;
 
@@ -81,11 +85,15 @@ public:
     void CreateAudioPlayerTask();
     void DeleteAudioPlayerTask();
 
+    void CreateStreamCopierTask();
+    void DeleteStreamCopierTask();
+
     AudioDecoder *getDecoder(AUDIO_CODEC codec);
 
 };
 
-void AudioPlayerTLoopTask(void * parameter);
+void AudioPlayerLoopTask(void * parameter);
+void StreamCopierLoopTask(void * parameter);
 
 extern AudioManager audioManager;
 #endif

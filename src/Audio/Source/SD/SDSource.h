@@ -28,8 +28,6 @@ public:
     // void Loop() override;
     // void End() override;
 
-    // void updateVolume(float volume) override;
-
     void setPathAndPlay(char *path);
 
 };

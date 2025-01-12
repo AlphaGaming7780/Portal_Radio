@@ -15,22 +15,22 @@ public:
     ~pAudioSource();
 
     virtual String getID() = 0;
-    virtual AudioSource &getAudioSource() = 0;
+    virtual AudioSource &getAudioSource() {};
 
     void Begin(pAudioOutput *pAudioOutput);
     virtual void Setup();
     virtual void setOutput(audio_tools::AudioOutput &output);
     virtual void setOutput(audio_tools::AudioStream &StreamBufferDef_t);
     virtual void Begin();
-    virtual void Loop();
     virtual void End();
 
-    virtual void UpdateVolume(float volume);
     virtual void Play();
     virtual void Pause();
     virtual void Next();
     virtual void Previous();
 
+    virtual float volumeInc();
+    virtual void setVolume(float volume);
     virtual float getVolume();
 
 };

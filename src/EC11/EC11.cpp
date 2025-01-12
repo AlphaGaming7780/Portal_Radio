@@ -38,24 +38,41 @@ void EC11::Loop()
     bool pinA = digitalRead(_pinA);
     bool pinB = digitalRead(_pinB);
 
-    if (_oldPinA == pinA) {
-        _direction = 0; 
-        return; }
+    if ( ( pinA == 1 && pinB == 1 ) || ( _oldPinA == pinA && _oldPinB == _pinB )) {
+        _direction = 0;
+        return; 
+    }
 
     _oldPinA = pinA;
+    _oldPinB = pinB;
+
+    // Serial.printf("EC11 : PinA : %i, PinB %i, _firstDirection %i\n", pinA, pinB, _firstDirection);
 
     if( 
-        ( pinA && !pinB ) 
-        // || ( !pinA && pinB )
+        ( pinA && !pinB) 
     ) { 
-        _direction = _invertDirection ? -1 : 1; 
+
+        if(_firstDirection == 0) {
+            _firstDirection = true;
+            // Serial.println("_firstDirection = 1");
+        } else {
+            _direction = _invertDirection ? 1 : -1; 
+            _firstDirection = false;
+            // Serial.printf("_direction = %i.\n", _direction);
+        }
         return; 
     }
     else if ( 
-        ( pinA && pinB ) 
-        // || ( !pinA && !pinB )
+        ( !pinA && pinB ) 
     ) { 
-        _direction = _invertDirection ? 1 : -1; 
+        if(_firstDirection == 0) {
+            _firstDirection = true;
+            // Serial.println("_firstDirection = -1");
+        } else {
+            _direction = _invertDirection ? -1 : 1;
+            _firstDirection = false;
+            // Serial.printf("_direction = %i.\n", _direction);
+        }
         return; 
     }
 }

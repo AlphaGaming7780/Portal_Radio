@@ -26,15 +26,14 @@ public:
     void setOutput(audio_tools::AudioOutput &output) override;
     void setOutput(audio_tools::AudioStream &stream) override;
     void Begin() override;
-    void Loop() override;
     void End() override;
 
-    void UpdateVolume(float volume) override;
     void Play() override;
     void Pause() override;
     void Next() override;
     void Previous() override;
 
+    void setVolume(float volume) override;
     float getVolume() override;
 
     // static void OnDeviceVolumeChange(int volume);
