@@ -59,6 +59,9 @@ void AudioManager::Update()
 
     bool oldIsMuted = _isMuted;
 
+    nextion.setTitle("");
+    nextion.setArtist("");
+
     if(!oldIsMuted) Mute();
 
     if(_currentSource != nullptr) 
