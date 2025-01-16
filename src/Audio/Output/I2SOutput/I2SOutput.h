@@ -21,13 +21,13 @@ public:
     audio_tools::AudioOutput &getAudioOutput() override {}
     audio_tools::AudioStream &getAudioStream() override
     {
-        return I2SManager::_stream;
+        return I2SManager::_streamOut;
     }
 
-    AudioInfo getAudioInfo() override { return I2SManager::_stream.audioInfo(); }
+    AudioInfo getAudioInfo() override { return I2SManager::_streamOut.audioInfo(); }
 
     void Begin() override {
-        I2SManager::Begin();
+        I2SManager::BeginOut();
     }
 };
 

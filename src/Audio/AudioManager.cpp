@@ -9,6 +9,7 @@ AudioManager::AudioManager(/* args */)
 {
     audioPlayer.setVolumeControl(_volumeControl);
     pinMode(_mutePin, OUTPUT);
+    Mute();
 }
 
 AudioManager::~AudioManager()
@@ -56,6 +57,10 @@ void AudioManager::Update()
 {
     // if( _pendingSource == nullptr && _pendingOutput == nullptr) return;
 
+    bool oldIsMuted = _isMuted;
+
+    if(!oldIsMuted) Mute();
+
     if(_currentSource != nullptr) 
     {
         debug.printlnInfo("Ending audio source.");
@@ -76,7 +81,7 @@ void AudioManager::Update()
     if(_currentSource != nullptr && _currentOutput != nullptr) {
         _currentSource->Begin(_currentOutput);
         debug.printlnInfo("Updating the volume.");
-        UpdateVolume();
+        _currentSource->setVolume(userDataManager.getVolume());
 
         nextion.setAudioSource(_currentSource->getID());
         nextion.setPlayStatus(true);
@@ -92,6 +97,8 @@ void AudioManager::Update()
     if (_currentSource != nullptr) userDataManager.setLastSelectedSource(_currentSource->getID());
     else userDataManager.setLastSelectedSource("NULL");
     userDataManager.Save();
+
+    if(!oldIsMuted) UnMute();
 }
 
 void AudioManager::Loop()
@@ -121,14 +128,16 @@ void AudioManager::End()
 
 void AudioManager::UpdateVolume() {
 
-    float oldVol = userDataManager.getVolume(); //_currentSource->getVolume();
+    float oldVol = _currentSource->getVolume();
+    float savedVol = userDataManager.getVolume();
+    if(oldVol != savedVol) oldVol = savedVol;
     float newVol = oldVol + ec11.getDirection() * _currentSource->volumeInc();
 
     if(newVol < 0) newVol = 0;
     else if( newVol > 1 ) newVol = 1;
 
     if( _currentSource != nullptr && oldVol != newVol) {
-        Serial.printf("New Volume : %f.\n", newVol);
+        Serial.printf("Old volume : %f, Saved Volume : %f, New Volume : %f.\n", oldVol, savedVol, newVol);
         userDataManager.setVolume(newVol);
         userDataManager.Save();
         _currentSource->setVolume(newVol);
@@ -240,7 +249,7 @@ void StreamCopierLoopTask(void *parameter)
 {
     while (true)
     {
-        audioManager.audioPlayer.copy();
+        audioManager.streamCopie.copy();
         delay(1);
     }
 }

@@ -98,6 +98,7 @@ void Nextion::Loop()
             else if ( c == "setAlarmMin" ) alarmManager.setAlarmMinute(_selectedAlarmIndex, v.toInt());
             else if ( c == "setAlarmEnable" ) alarmManager.setAlarmEnabled( _selectedAlarmIndex, bool(v.toInt()));
             else if ( c == "setAlarmDay" ) alarmManager.setAlarmDay( _selectedAlarmIndex, dayOfWeekFromTimeInfoFormat(v.toInt()) );
+            else if ( c == "setFmFreq") FM.setFreq(v.toInt());
         }
         else Serial.printf("Unknown data : %s.\n", s);
     }
@@ -127,7 +128,7 @@ void Nextion::setVolume(int volume, bool isMuted)
 
     _serial->print("Audio.audioVolume.val=" + String(volume) + _endChar);
 
-    if(!isMuted) {
+    if(!isMuted && _isInAudioPage()) {
 
         int pic = 0;
         if(volume == 0) pic = 5; 
@@ -148,7 +149,7 @@ void Nextion::setTitle(String title)
     }
 
     _serial->print("Audio.audioTitle.txt=\"" + title + "\"" + _endChar);
-    _serial->print("gTitle.txt=\"" + title + "\"" + _endChar);
+    if(_isInAudioPage()) _serial->print("gTitle.txt=\"" + title + "\"" + _endChar);
 }
 
 void Nextion::setArtist(String artist)
@@ -159,7 +160,7 @@ void Nextion::setArtist(String artist)
     }
 
     _serial->print("Audio.audioArtist.txt=\"" + artist + "\"" + _endChar);
-    _serial->print("gArtist.txt=\"" + artist + "\"" + _endChar);
+    if(_isInAudioPage()) _serial->print("gArtist.txt=\"" + artist + "\"" + _endChar);
 }
 
 void Nextion::setPlayStatus(bool playStatus)
@@ -171,10 +172,10 @@ void Nextion::setPlayStatus(bool playStatus)
 
     if(playStatus) {
         _serial->print("Audio.playStatus.val=1" + _endChar);
-        _serial->print("pPlay.pic=1" + _endChar);
+        if(_isInAudioPage()) _serial->print("pPlay.pic=1" + _endChar);
     } else {
         _serial->print("Audio.playStatus.val=0" + _endChar);
-        _serial->print("pPlay.pic=0" + _endChar);
+        if(_isInAudioPage()) _serial->print("pPlay.pic=0" + _endChar);
     }
 }
 
@@ -266,57 +267,6 @@ void Nextion::setDatOfWeek(int dayOfWeek)
     _print("rtc6=" + String( dayOfWeek ) );
 }
 
-void Nextion::Sleep(bool sleep)
-{
-    if(sleep) {
-        _serial->print("sleep=1" + _endChar);
-        _isSleeping = true;
-    } else {
-        _serial->print("sleep=0" + _endChar);
-        _isSleeping = false;
-        _UpdatePendingData();
-    }    
-}
-
-void Nextion::Reset()
-{
-    _serial->print("rest" + _endChar);
-}
-
-void Nextion::_UpdatePendingAudioSource(String source)
-{
-    if      ( source == "Bluetooth" ) audioManager.setAudioSource(&bluetoothAudioSource, true);
-    else if ( source == "WebRadio"  ) audioManager.setAudioSource(&webRadioSource, true);
-    else if ( source == "SD card"   ) audioManager.setAudioSource(&sdSource, true);
-    else if ( source == "FM"        ) audioManager.setAudioSource(&FM, true);
-    else if ( source == "DAB"       ) audioManager.setAudioSource(nullptr, true);
-}
-
-String Nextion::_formatHexCodeToString(uint8_t value)
-{
-    return String(char(value));
-}
-
-void Nextion::_print(String c)
-{
-    _serial->print(c + _endChar);
-}
-
-int Nextion::_getInt(String command, int size)
-{
-    _print(command);
-    while (_serial->available() == 0) {}
-    char value[size];
-    _serial->readBytes(value, size);
-
-    int x = 0;
-    for(int i = 0; i < size; i++) {
-        x += int(value[i]) * pow(256, i);
-    }
-
-    return x;
-}
-
 void Nextion::SelectAlarm(int index)
 {
     if(index < 0) index = 0;
@@ -372,4 +322,60 @@ void Nextion::SendAlarmData(Alarm alarm)
 
     if( alarm.dayOfWeek & DayOfWeek_Sunday )    _print("cAlarmSun.val=1");
     else _print("cAlarmSun.val=0");
+}
+
+
+void Nextion::Sleep(bool sleep)
+{
+    if(sleep) {
+        _serial->print("sleep=1" + _endChar);
+        _isSleeping = true;
+    } else {
+        _serial->print("sleep=0" + _endChar);
+        _isSleeping = false;
+        _UpdatePendingData();
+    }    
+}
+
+void Nextion::Reset()
+{
+    _serial->print("rest" + _endChar);
+}
+
+void Nextion::_UpdatePendingAudioSource(String source)
+{
+    if      ( source == "Bluetooth" ) audioManager.setAudioSource(&bluetoothAudioSource, true);
+    else if ( source == "WebRadio"  ) audioManager.setAudioSource(&webRadioSource, true);
+    else if ( source == "SD card"   ) audioManager.setAudioSource(&sdSource, true);
+    else if ( source == "FM"        ) audioManager.setAudioSource(&FM, true);
+    else if ( source == "DAB"       ) audioManager.setAudioSource(&DAB, true);
+}
+
+String Nextion::_formatHexCodeToString(uint8_t value)
+{
+    return String(char(value));
+}
+
+void Nextion::_print(String c)
+{
+    _serial->print(c + _endChar);
+}
+
+int Nextion::_getInt(String command, int size)
+{
+    _print(command);
+    while (_serial->available() == 0) {}
+    char value[size];
+    _serial->readBytes(value, size);
+
+    int x = 0;
+    for(int i = 0; i < size; i++) {
+        x += int(value[i]) * pow(256, i);
+    }
+
+    return x;
+}
+bool Nextion::_isInAudioPage()
+{
+    return _selectedPage == "Audio" || _selectedPage == "Bluetooth" || _selectedPage == "DAB" || _selectedPage == "FM" || _selectedPage == "SD card";
 }

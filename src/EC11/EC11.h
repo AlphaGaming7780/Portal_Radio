@@ -7,7 +7,7 @@ private:
     int _pinA, _pinB, _pinSW = -1;
     bool _oldPinA, _oldPinB = false;
     
-    bool _firstDirection = 0;
+    bool _reseted = true;
     int _direction = 0;
     bool _oldSwState, _swRisingEdge = false;
 

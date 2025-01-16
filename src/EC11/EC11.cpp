@@ -27,7 +27,7 @@ void EC11::Begin()
 
 void EC11::Loop()
 {
-
+    _direction = 0;
     bool sw = digitalRead(_pinSW);
 
     if(!_oldSwState && sw) _swRisingEdge = true;
@@ -38,42 +38,23 @@ void EC11::Loop()
     bool pinA = digitalRead(_pinA);
     bool pinB = digitalRead(_pinB);
 
-    if ( ( pinA == 1 && pinB == 1 ) || ( _oldPinA == pinA && _oldPinB == _pinB )) {
-        _direction = 0;
-        return; 
+    if ( pinA == 0 && pinB == 0 ) {
+        _reseted = true;
+        return;
     }
 
+    if( _oldPinA == pinA && _oldPinB == pinB ) return;
     _oldPinA = pinA;
     _oldPinB = pinB;
 
-    // Serial.printf("EC11 : PinA : %i, PinB %i, _firstDirection %i\n", pinA, pinB, _firstDirection);
+    // Serial.printf("EC11 : PinA : %i, PinB %i, _reseted %i\n", pinA, pinB, _reseted);
 
-    if( 
-        ( pinA && !pinB) 
-    ) { 
-
-        if(_firstDirection == 0) {
-            _firstDirection = true;
-            // Serial.println("_firstDirection = 1");
-        } else {
-            _direction = _invertDirection ? 1 : -1; 
-            _firstDirection = false;
-            // Serial.printf("_direction = %i.\n", _direction);
-        }
-        return; 
-    }
-    else if ( 
-        ( !pinA && pinB ) 
-    ) { 
-        if(_firstDirection == 0) {
-            _firstDirection = true;
-            // Serial.println("_firstDirection = -1");
-        } else {
-            _direction = _invertDirection ? -1 : 1;
-            _firstDirection = false;
-            // Serial.printf("_direction = %i.\n", _direction);
-        }
-        return; 
+    if( pinA && !pinB && _reseted ) {
+        _direction = _invertDirection ? 1 : -1;
+        _reseted = false;
+    } else if(!pinA && pinB && _reseted ) {
+        _direction = _invertDirection ? -1 : 1;
+        _reseted = false;
     }
 }
 

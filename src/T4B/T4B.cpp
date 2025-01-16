@@ -1,12 +1,16 @@
 
 #include "T4B.h"
+#include "Nextion/Nextion.h"
+#include "DataManager/UserDataManager.h"
 
-T4B t4b(&Serial1, 25);
+T4B t4b(&Serial1, 12);
 
 static const uint8_t HeaderSizeIndex = 5U;
 static const uint8_t ResponseAck = 0x00;
 static const uint8_t ResponseAckNack = 0x02;
 static const uint8_t UnusedPin = 255;
+static const uint32_t FmFrequencyMin = 87500U;
+static const uint32_t FmFrequencyMax = 108000U;
 
 T4B::T4B(HardwareSerial *serial, uint8_t resetPin)
 {
@@ -35,6 +39,72 @@ void T4B::Init(ulong baud)
         Serial.println("T4B isn't ready");
     }
     Serial.println("T4B is ready.");
+}
+
+void T4B::Loop()
+{
+    _NotificationReceive();
+
+    StreamStatus streamStatus;
+    EventType eventType;
+    if(!getPlayStatus(&streamStatus, &eventType)) return;
+
+    if(eventType == EventType::NONE) return;
+
+    Serial.printf("Processing Event : %u.\n", eventType);
+
+    uint32_t currentFreqOrProgIndex;
+    if(!getPlayIndex(&currentFreqOrProgIndex)) return;
+    
+    char buffer[T4BMaxTextSize];
+    if( ( eventType & EventType::ProgramNameChange ) > 0) {
+        StreamMode streamMode;
+        if(getPlayMode(&streamMode)) {
+            if(streamMode == StreamMode::Dab) {
+                getProgrameNameDAB(buffer, sizeof(buffer), currentFreqOrProgIndex);
+            } else if(streamMode == StreamMode::Fm) {
+                getProgrameNameFM(buffer, sizeof(buffer));
+            }
+        };
+        Serial.printf("Program Name Changed : %s.\n", buffer);
+        nextion.setTitle(buffer);    
+    }
+    
+    if( ( eventType & EventType::ProgramTextChange ) > 0 ) {
+        getProgrameText(buffer, sizeof(buffer));
+        Serial.printf("Program Text Changed : %s.\n", buffer);
+        nextion.setArtist(buffer);
+    }
+    
+    if ( ( eventType & EventType::DLSCommandChange ) > 0 ) {
+        Serial.printf("DLS Command CHanged.\n");
+    }
+    
+    if ( ( eventType & EventType::StereoModeChange ) > 0 ) {
+        StereoMode stereoMode;
+        if(getStereo(&stereoMode)) {
+            Serial.printf("Stereo Mode Changed : %u.\n", stereoMode);
+        }
+    }
+
+    if ( ( eventType & EventType::ServiceUpdate ) > 0 ) {
+
+    }
+
+    if ( ( eventType & EventType::SortChange ) > 0 ) {
+
+    }
+
+    if ( ( eventType & EventType::FrequencyChange ) > 0 ) {
+        uint8_t freqIndex;
+        getFrequency(currentFreqOrProgIndex, &freqIndex);
+        Serial.printf("Frequency Changed : %u.\n", freqIndex);
+    }
+
+    if ( ( eventType & EventType::TimeChange ) > 0 ) {
+
+    }
+
 }
 
 CmdErrorCode T4B::getError()
@@ -105,6 +175,7 @@ bool T4B::PlayDab(uint32_t const stationId)
  */
 bool T4B::PlayFm(uint32_t const frequency)
 {
+    if(frequency < FmFrequencyMin || frequency > FmFrequencyMax) return false;
     Command command = _commandBuilder.createStream(CmdStreamId::Play)
                           .append(static_cast<uint8_t>(StreamMode::Fm))
                           .append(frequency)
@@ -175,11 +246,84 @@ bool T4B::DabSearch(DabBand const band)
     return _commandSend(command);
 }
 
+bool T4B::setLRMode(LRMode const lrMode)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::SetLRMode).append(static_cast<uint8_t>(lrMode)).build();
+    return _commandSend(command);
+}
+
+bool T4B::getPlayStatus(StreamStatus *const streamStatus, EventType *const eventType)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::GetPlayStatus).build();
+    return (_commandSend(command) && _responseUint8(0U, reinterpret_cast<uint8_t*>(streamStatus)) && _responseUint16(1U, reinterpret_cast<uint16_t*>(eventType)));
+}
+
+bool T4B::getPlayMode(StreamMode* const streamMode)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::GetPlayMode).build();
+    return (_commandSend(command) && _responseUint8(0U, reinterpret_cast<uint8_t*>(streamMode)));
+}
+
+bool T4B::getPlayIndex(uint32_t *const playIndex)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::GetPlayIndex).build();
+    return (_commandSend(command) && _responseUint32(0U, playIndex));
+}
+
+bool T4B::getTotalProgram(uint32_t *const totalProgram)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::GetTotalProgram).build();
+    return (_commandSend(command) && _responseUint32(0U, totalProgram));
+}
+
+bool T4B::getSearchProgram(uint8_t *const nbrDabFoundProgram)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::GetSearchProgram).build();
+    return (_commandSend(command) && _responseUint8(0U, nbrDabFoundProgram));
+}
+
+bool T4B::getSignalStrength(uint8_t *const signalStrength, float *const error)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::GetSignalStrength).build();
+
+    bool outValue = _commandSend(command);
+
+    uint16_t errorRate = 0;
+    bool errorBool = _responseUint16(1U, &errorRate);
+
+    if(errorRate == 0xFFFF || errorRate == 0x00FF || errorRate == 0x0000) *error = -1;
+    else if(errorRate == 0xFF00) *error = 0;
+    else {
+        float firstValue = powf(10, ( errorRate & 0xFF ) / 100.0);
+        float secondValue = 1/pow(10, ( ( errorRate >> 8 ) & 0xFF ) );
+        *error = firstValue * secondValue;
+    }
+
+    return (outValue && errorBool && _responseUint8(0U, signalStrength));
+}
+
+bool T4B::getStereo(StereoMode *const stereoMode)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::GetStereo).build();
+    return (_commandSend(command) && _responseUint8(0U, reinterpret_cast<uint8_t*>(stereoMode)));
+}
+
+bool T4B::setStereoMode(bool const stereoMode)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::SetStereoMode).append(stereoMode).build();
+    return _commandSend(command);
+}
+
+bool T4B::getStereoMode(bool *const stereoMode)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::GetStereoMode).build();
+    return (_commandSend(command) && _responseBool(0U, stereoMode));
+}
+
 bool T4B::setVolume(uint8_t const volume)
 {
     uint8_t volumeValue = (volume > 16U) ? 16U : volume;
     Command command = _commandBuilder.createStream(CmdStreamId::SetVolume).append(volumeValue).build();
-
     return _commandSend(command);
 }
 
@@ -187,6 +331,58 @@ bool T4B::getVolume(uint8_t *const volume)
 {
     Command command = _commandBuilder.createStream(CmdStreamId::GetVolume).build();
     return (_commandSend(command) && _responseUint8(0U, volume));
+}
+
+bool T4B::setPreset(StreamMode const streamMode, uint8_t const presetIndex, uint32_t const data)
+{
+    if(streamMode == StreamMode::Dab) {
+
+    } else if (streamMode == StreamMode::Fm) {
+        if(data < FmFrequencyMin || data > FmFrequencyMax) return false;
+    } else return false;
+
+    if(presetIndex > 9) return false;
+
+    Command command = _commandBuilder.createStream(CmdStreamId::SetPreset)
+                        .append(static_cast<uint8_t>(streamMode))
+                        .append(presetIndex)
+                        .append(data)
+                        .build();
+
+    return _commandSend(command);
+}
+
+bool T4B::setPresetDAB(uint8_t const presetIndex, uint32_t const programIndex)
+{
+    return setPreset(StreamMode::Dab, presetIndex, programIndex);
+}
+
+bool T4B::setPresetFM(uint8_t const presetIndex, uint32_t const frequency)
+{
+    return setPreset(StreamMode::Fm, presetIndex, frequency);
+}
+
+bool T4B::getPreset(StreamMode const streamMode, uint8_t const presetIndex, uint32_t *const data)
+{
+    if(streamMode != StreamMode::Dab && streamMode != StreamMode::Fm) return false;
+    if(presetIndex > 9) return false;
+
+    Command command = _commandBuilder.createStream(CmdStreamId::GetPreset)
+                        .append(static_cast<uint8_t>(streamMode))
+                        .append(presetIndex)
+                        .build();
+
+    return (_commandSend(command) && _responseUint32(0U, data));
+}
+
+bool T4B::getPresetDAB(uint8_t const presetIndex, uint32_t *const programIndex)
+{
+    return getPreset(StreamMode::Dab, presetIndex, programIndex);
+}
+
+bool T4B::getPresetFM(uint8_t const presetIndex, uint32_t *const frequency)
+{
+    return getPreset(StreamMode::Fm, presetIndex, frequency);
 }
 
 bool T4B::setHeadroom(uint8_t const headroomLevel)
@@ -201,6 +397,153 @@ bool T4B::getHeadroom(uint8_t *const headroomLevel)
 {
     Command command = _commandBuilder.createStream(CmdStreamId::GetHeadroom).build();
     return (_commandSend(command) && _responseUint8(0U, headroomLevel));
+}
+
+bool T4B::getProgrameNameFM(char *const programeName, uint16_t const size)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::GetProgrameName).append(0xFFFFFFFF).append(false).build();
+    return _commandSend(command) && _responseText(programeName, size);
+}
+
+bool T4B::getProgrameNameDAB(char* const programeName, uint16_t const size, uint32_t programIndex, bool AbbreviatedName)
+{
+    uint32_t totalProg;
+
+    if(!getTotalProgram(&totalProg)) return false;
+    if(programIndex >= totalProg) return false;
+
+    Command command = _commandBuilder.createStream(CmdStreamId::GetProgrameName).append(programIndex).append(!AbbreviatedName).build();
+    return _commandSend(command) && _responseText(programeName, size);
+}
+
+bool T4B::getProgrameText(char *const programeText, uint16_t const size)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::GetProgrameText).build();
+    return _commandSend(command) && _responseText(programeText, size);
+}
+
+bool T4B::getEnsembleName(char* const ensembleName, uint16_t const size, uint32_t const programIndex, bool const AbbreviatedName)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::GetEnsembleName).append(programIndex).append(!AbbreviatedName).build();
+    return _commandSend(command) && _responseText(ensembleName, size);
+}
+
+bool T4B::getServiceName(char* const serviceName, uint16_t const size, uint32_t const programIndex, bool const AbbreviatedName)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::GetServiceName).append(programIndex).append(!AbbreviatedName).build();
+    return _commandSend(command) && _responseText(serviceName, size);
+}
+
+bool T4B::getFrequency(uint32_t const programIndex, uint8_t* const freqIndex)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::GetFrequency).append(programIndex).build();
+    return (_commandSend(command) && _responseUint8(0U, freqIndex));
+}
+
+bool T4B::setNotification(NotificationType const notificationType)
+{
+    Command command = _commandBuilder.createNotification(CmdNotificationId::SetNotification).append(static_cast<uint16_t>(notificationType)).build();
+    return _commandSend(command);
+}
+
+bool T4B::getNotification(NotificationType *const notificationType)
+{
+    Command command = _commandBuilder.createNotification(CmdNotificationId::GetNotification).build();
+    return _commandSend(command) && _responseUint16(0U, reinterpret_cast<uint16_t*>(notificationType));
+}
+
+bool T4B::setFunction(uint8_t gpioIndex, GpioFunction gpioFunction, GpioDrivingStrength gpioDrivingStrength)
+{
+    Command command = _commandBuilder.createGPIO(CmdGpioId::SetFunction)
+                        .append(gpioIndex)
+                        .append(static_cast<uint8_t>(gpioFunction))
+                        .append(static_cast<uint8_t>(gpioDrivingStrength))
+                        .build();
+    return _commandSend(command);
+}
+
+bool T4B::EnableI2S(bool enable)
+{
+    if(!setFunction(43, GpioFunction::I2S_DATA_OUT, GpioDrivingStrength::DRIVE_8MA))
+		return false;
+	if(!setFunction(55, GpioFunction::I2S_LRCLK_OUT, GpioDrivingStrength::DRIVE_8MA))
+		return false;
+	if(!setFunction(54, GpioFunction::I2S_SSCLK_OUT, GpioDrivingStrength::DRIVE_8MA))
+		return false;
+	if(!setFunction(53, GpioFunction::I2S_BCLK_OUT, GpioDrivingStrength::DRIVE_8MA))
+		return false;
+	return true;
+}
+
+bool T4B::_processNotification()
+{
+    if(_responseHeader[0x01] != static_cast<uint8_t>(CommandType::Notification)) return false;
+
+    NotificationType eventType = static_cast<NotificationType>(1 << _responseHeader[2]);
+
+    Serial.printf("Process Notification : %u.\n", eventType);
+    uint32_t freq;
+    uint8_t dabIndex;
+    StreamMode curentStreaMode;
+    char buffer[T4BMaxTextSize];
+    switch (eventType)
+    {
+        case NotificationType::ScanFinished:
+            if(!getPlayIndex(&freq)) break;
+
+            if(!getPlayMode(&curentStreaMode)) break;
+
+            if(curentStreaMode == StreamMode::Dab) {
+                Serial.printf("Playing program index : %u.\n", freq);
+                userDataManager.setLastDabProgramIndex(freq);
+                userDataManager.Save();
+                if(getProgrameNameDAB(buffer, sizeof(buffer), freq)) nextion.setTitle(buffer);
+                else nextion.setTitle("");
+                nextion.setArtist("");
+            } else if(curentStreaMode == StreamMode::Fm) {
+                Serial.printf("Playing Frequence : %u.\n", freq);
+                userDataManager.setLastFmFreq(freq);
+                userDataManager.Save();
+                if(getProgrameNameFM(buffer, sizeof(buffer))) nextion.setTitle(buffer);
+                else nextion.setTitle("");
+                nextion.setArtist("");
+            }
+
+            break;
+        
+        case NotificationType::NewFmProgrameText:
+            getProgrameText(buffer, sizeof(buffer));
+            nextion.setArtist(String(buffer));
+            Serial.printf("ProgrameText : %s.\n", buffer);
+            break;
+            
+        case NotificationType::DABReconfiguration:
+            break;
+
+        case NotificationType::DABChannelListOrderChange:
+            break;
+
+        case NotificationType::RDSGroup:
+            break;
+
+        case NotificationType::NewDABRadioText:
+            getProgrameText(buffer, sizeof(buffer));
+            nextion.setArtist(String(buffer));
+            Serial.printf("Value : %s", buffer);
+            break; 
+
+        case NotificationType::ScanFrequency:
+            if(_responseUint32(0U, &freq)) {
+                Serial.printf("Searching Frequence : %u.\n", freq);
+            }
+            else if(_responseUint8(0U, &dabIndex)) Serial.printf("Searching DAB index : %u.\n", dabIndex);
+            break;    
+
+        default:
+            break;
+    }
+
+    return true;
 }
 
 bool T4B::_commandSend(Command const &command)
@@ -241,58 +584,88 @@ bool T4B::_commandSend(Command const &command)
 bool T4B::_responseReceive()
 {
     uint16_t index = 0U;
-    uint8_t data = 0U;
     uint32_t endMillis = millis() + 250U; // timeout for answer from module = 200ms.
     _responseSize = 0U;
 
     while (millis() < endMillis && index < T4BMaxDataSize)
     {
-        if (_serial->available())
+        if(!_serial->available()) continue;
+        if(_processRecievedData(index)) return true;
+    }
+    return false;
+}
+
+bool T4B::_NotificationReceive()
+{
+    uint16_t index = 0U;
+    unsigned long endMillis = millis() + 1U; // timeout for next byte of the notification from module.
+    _responseSize = 0U;
+
+    while (millis() < endMillis && index < T4BMaxEventSize)
+    {
+        if(!_serial->available()) continue;
+        endMillis = millis() + 1U;
+        if(_processRecievedData(index)) return true;
+    }
+    return false;
+}
+
+bool T4B::_processRecievedData(uint16_t &index)
+{
+    uint8_t data = 0U;
+    data = _serial->read();
+    if (data == CommandStartValue)
+    {
+        index = 0U;
+    }
+
+    if (index < T4BHeaderSize)
+    {
+        _responseHeader[index] = data;
+
+        if (index == HeaderSizeIndex)
         {
-            data = _serial->read();
-            if (data == CommandStartValue)
-            {
-                index = 0U;
-            }
-
-            if (index < T4BHeaderSize)
-            {
-                _responseHeader[index] = data;
-
-                if (index == HeaderSizeIndex)
-                {
-                    _responseSize = static_cast<uint16_t>(_responseHeader[5U]);
-                    _responseSize |= static_cast<uint16_t>(_responseHeader[4U]) << 8U;
-                }
-            }
-            else if ((index - T4BHeaderSize) < _responseSize)
-            {
-                _response[index - T4BHeaderSize] = data;
-            }
-
-            if (data == CommandEndValue)
-            {
-                if ((index - T4BHeaderSize - _responseSize) == 0U)
-                {
-                    return true;
-                }
-            }
-            index++;
+            _responseSize = static_cast<uint16_t>(_responseHeader[5U]);
+            _responseSize |= static_cast<uint16_t>(_responseHeader[4U]) << 8U;
         }
     }
+    else if ((index - T4BHeaderSize) < _responseSize)
+    {
+        _response[index - T4BHeaderSize] = data;
+    }
+
+    if (data == CommandEndValue)
+    {
+        if ((index - T4BHeaderSize - _responseSize) == 0U)
+        {
+            if(_responseHeader[1] != static_cast<uint8_t>(CommandType::Notification)) return true;
+                
+            if(_responseHeader[2] == 0x01 && _responseSize > 0) return true;
+
+            _processNotification();
+
+            return _responseReceive();
+
+            // return true;
+        }
+    }
+    index++;
     return false;
 }
 
 bool T4B::_responseText(char* const buffer, uint16_t const size)
 {
+    // if(buffer) free(buffer);
+    // char iBuffer[size];
     uint16_t j = 0U;
     for (uint16_t i = 0U; i < _responseSize; i = i + 2U)
     {
-        if (size <= j)
-            return false;
-        buffer[j++] = _uint16ToChar(_response[i], _response[i + 1U]);
-        _discardTrailingSpaces(buffer);
+        if (size <= j) return false;
+        buffer[j++] = _uint16ToChar(_response[i], _response[i + 1U]);;
     }
+    _discardTrailingSpaces(buffer);
+    return true;
+    // buffer = iBuffer;
     return true;
 }
 
@@ -327,7 +700,12 @@ bool T4B::_responseUint32(uint8_t const index, uint32_t *const resp)
 
 }
 
-char T4B::_uint16ToChar(uint8_t const byte0, uint8_t const byte1)
+bool T4B::_responseBool(uint8_t const index, bool *const resp)
+{
+    return _responseUint8(index, reinterpret_cast<uint8_t*>(resp));
+}
+
+char T4B::_uint16ToChar(uint8_t const byte1, uint8_t const byte0)
 {
     if (byte1 == 0x00)
     {

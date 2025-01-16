@@ -13,22 +13,16 @@ void setup() {
     debug.print("\n");
     debug.printlnInfo("Starting...");
 
+    Serial.println("Starting EC11...");
     ec11.Begin();
 
+    Serial.println("Starting T4B...");
     t4b.Init();
-
-    if(!t4b.setVolume(16)) {Serial.println(ToString(t4b.getError()));}
-
-    // Serial.println("FM!!!!!!!!!");
-    
-    // if(!t4b.PlayFm(104200)) {Serial.println(ToString(t4b.getError()));}
-    // if(!t4b.FmSearch()) {Serial.println(ToString(t4b.getError()));}
-
-    // if(!t4b.PlayDab(1)) {Serial.println(ToString(t4b.getError()));}
-
-    // if(!t4b.PlayeSingleTone(1)) {Serial.println(ToString(t4b.getError()));}
-    
-    // while(true) {}
+    if(!t4b.EnableI2S()) debug.println("T4B : Failed to enable I2S.");
+    t4b.setVolume(16);
+    t4b.setLRMode();
+    t4b.setStereoMode();
+    // if(!t4b.setNotification(static_cast<NotificationType>(127))) Serial.println("Failed to set notif.");
 
     Serial.println("Starting Nextion...");
     nextion.Begin(115200);
@@ -122,23 +116,21 @@ void setup() {
 
     audioManager.setSourceAndOutput(audioSource, audioOutput, true);
 
-    if(!t4b.PlayFm(104200U)) {Serial.println(ToString(t4b.getError()));}
-    // if(!t4b.setHeadroom(12U)) {Serial.println(ToString(t4b.getError()));}
-    uint8_t headroomLevel;
-    if(t4b.getHeadroom(&headroomLevel)) {Serial.printf("Headroom Level : %u\n", headroomLevel);}
-
-
     // audioManager.SetSourceAndOutput(&sdSource, &i2sOutput, true);
     // audioManager.SetSourceAndOutput(&webRadioSource, &i2sOutput, true);
 
     // audioManager.setLoopMode(AUDIO_LOOP_MODE_PLAYLIST);
 
+    audioManager.UnMute();
     debug.printlnInfo("Portal Radio started!");
+
+    // t4b.DabSearch();
 }
 
 
 void loop() {
     ec11.Loop();
+    t4b.Loop();
     audioManager.Loop();
     nextion.Loop();
     alarmManager.Loop();

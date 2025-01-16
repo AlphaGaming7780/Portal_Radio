@@ -76,7 +76,7 @@ void pAudioSource::End()
 
 float pAudioSource::volumeInc()
 {
-    return 0.05f;
+    return 0.025f;
 }
 
 void pAudioSource::setVolume(float volume)

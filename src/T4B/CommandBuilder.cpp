@@ -41,6 +41,11 @@ CommandBuilder& CommandBuilder::createNotification(CmdNotificationId const id)
     return create(CommandType::Notification, static_cast<uint8_t>(id));
 }
 
+CommandBuilder &CommandBuilder::createGPIO(CmdGpioId const id)
+{
+    return create(CommandType::GPIO, static_cast<uint8_t>(id));
+}
+
 CommandBuilder& CommandBuilder::append(uint8_t const value)
 {
     if ((command.size + 1) < CommandMaxSize)
@@ -67,6 +72,12 @@ CommandBuilder& CommandBuilder::append(uint32_t const value)
     append(static_cast<uint8_t>(((value >> 8U) & 0xFF)));
     append(static_cast<uint8_t>(((value >> 0U) & 0xFF)));
 
+    return *this;
+}
+
+CommandBuilder &CommandBuilder::append(bool const value)
+{
+    append(static_cast<uint8_t>(value));
     return *this;
 }
 

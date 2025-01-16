@@ -17,63 +17,29 @@ public:
     bool Load();
     bool Save();
 
-    const char* getLastSelectedSource() { return _userData["LastSelectedSource"]; };
-    void setLastSelectedSource(String value) { _userData["LastSelectedSource"] = value; };
+    const char* getLastSelectedSource() { return _userData["LastSelectedSource"]; }
+    void setLastSelectedSource(String value) { _userData["LastSelectedSource"] = value; }
 
-    const char* getLastSelectedOutput() { return _userData["LastSelectedOutput"]; };
-    void setLastSelectedOutput(String value) { _userData["LastSelectedOutput"] = value; };
+    const char* getLastSelectedOutput() { return _userData["LastSelectedOutput"]; }
+    void setLastSelectedOutput(String value) { _userData["LastSelectedOutput"] = value; }
 
-    float getVolume() { return _userData["Volume"]; };
-    void setVolume(float value) { _userData["Volume"] = value; };
+    float getVolume() { return _userData["Volume"]; }
+    void setVolume(float value) { _userData["Volume"] = value; }
 
-    bool getEC11InvertDirection() { return _userData["EC11InvertDirection"]; };
-    void setEC11InvertDirection(bool value) { _userData["EC11InvertDirection"] = value; };
+    bool getEC11InvertDirection() { return _userData["EC11InvertDirection"]; }
+    void setEC11InvertDirection(bool value) { _userData["EC11InvertDirection"] = value; }
 
-    int getTimeZone() { return _userData["TimeZone"]; };
-    void setTimeZone(int value) { _userData["TimeZone"] = value; };
+    int getTimeZone() { return _userData["TimeZone"]; }
+    void setTimeZone(int value) { _userData["TimeZone"] = value; }
 
-    Vector<Alarm> getAlarmList() { 
-        JsonArray arr = _userData["AlarmList"]; 
+    Vector<Alarm> getAlarmList();
+    void setAlarmList(Vector<Alarm> value);
 
-        debug.printlnInfo("Loading " + String(arr.size()) + " alarm.");
+    uint32_t getLastFmFreq() {return _userData["LastFmFreq"];}
+    void setLastFmFreq(uint32_t lastFmFreq){ _userData["LastFmFreq"] = lastFmFreq; }
 
-        Vector<Alarm> vec;
-
-        for (size_t i = 0; i < arr.size(); i++)
-        {
-            Alarm alarm;
-            JsonVariant AlarmData = arr[i];
-            alarm.enable = AlarmData["enable"];
-            alarm.hour = AlarmData["hour"];
-            alarm.minute = AlarmData["minute"];
-            alarm.dayOfWeek = AlarmData["dayOfWeek"];
-            vec.push_back(alarm);
-        }
-        
-        return vec;
-    }
-
-    void setAlarmList(Vector<Alarm> value) {
-        
-        JsonArray arr = _userData["AlarmList"].to<JsonArray>();
-        arr.clear();
-        
-        debug.printlnInfo("Saving " + String(value.size()) + " alarm.");
-
-        for (size_t i = 0; i < value.size(); i++)
-        {
-            Alarm alarm = value[i];
-            JsonVariant AlarmData = arr.add<JsonVariant>();
-            AlarmData["enable"] = alarm.enable;
-            AlarmData["hour"] = alarm.hour;
-            AlarmData["minute"] = alarm.minute;
-            AlarmData["dayOfWeek"] = alarm.dayOfWeek;
-            // arr.add(AlarmData);
-        }
-        
-        // _userData["AlarmList"] = arr; 
-         
-    };
+    uint32_t getLastDabProgramIndex() { return _userData["LastDabProgramIndex"]; }
+    void setLastDabProgramIndex(uint32_t lastDabProgramIndex) { _userData["LastDabProgramIndex"] = lastDabProgramIndex; }
 
 };
 

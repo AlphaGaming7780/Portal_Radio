@@ -22,7 +22,7 @@ String FMSource::getID()
 
 void FMSource::Setup()
 {
-    
+    I2SManager::BeginIn();
 }
 
 void FMSource::setOutput(audio_tools::AudioOutput &output)
@@ -30,58 +30,68 @@ void FMSource::setOutput(audio_tools::AudioOutput &output)
     
 }
 
-void FMSource::setOutput(audio_tools::AudioStream &StreamBufferDef_t)
+void FMSource::setOutput(audio_tools::AudioStream &stream)
 {
-    audioManager.streamCopie.begin(I2SManager::_stream, StreamBufferDef_t);
+    _volumeStream.setStream(stream);
+    _volumeStream.setVolumeControl(_volumeControl);
+    auto vcfg = _volumeStream.defaultConfig();
+    vcfg.copyFrom(stream.audioInfo());
+    _volumeStream.begin(vcfg);
+    audioManager.streamCopie.begin(_volumeStream, I2SManager::_streamIn );
 }
 
 void FMSource::Begin()
 {
-    !t4b.PlayFm(104200U);
+    uint32_t lastFmFreq = userDataManager.getLastFmFreq();
+    if(lastFmFreq < 87500) lastFmFreq = 87500;
+    else if(lastFmFreq > 108000) lastFmFreq = 108000;
+    t4b.PlayFm(lastFmFreq);
     audioManager.CreateStreamCopierTask();
+    nextion.setTitle("");
+    nextion.setArtist("");
 }
 
 void FMSource::End()
 {
     audioManager.DeleteStreamCopierTask();
+    audioManager.streamCopie.end();
     t4b.Stop();
+    I2SManager::_streamIn.end();
 }
 
-void FMSource::Play()
+void FMSource::setFreq(uint32_t freq)
 {
-}
-
-void FMSource::Pause()
-{
+    if(!t4b.PlayFm(freq)) return;
+    userDataManager.setLastFmFreq(freq);
+    userDataManager.Save();
 }
 
 void FMSource::Next()
 {
+    t4b.FmSearch(true);
+    nextion.setTitle("");
+    nextion.setArtist("");
 }
 
 void FMSource::Previous()
 {
+    t4b.FmSearch(false);
+    nextion.setTitle("");
+    nextion.setArtist("");
 }
 
-float FMSource::volumeInc()
-{
-    return 0.0625f;
-}
+// float FMSource::volumeInc()
+// {
+//     return 0.0625f;
+// }
 
 void FMSource::setVolume(float volume)
 {
-    uint8_t volumeEnd = roundf(volume * 16);
-    Serial.println(volumeEnd);
-    t4b.setVolume(volumeEnd);
-    volume = roundf( roundf(volumeEnd/16.0 * 100) / 5 ) * 5 / 100.0;
-    userDataManager.setVolume(volume);
+    _volumeStream.setVolume(volume);
     nextion.setVolume(volume * 100, audioManager.isMuted());
 }
 
 float FMSource::getVolume()
-{
-    uint8_t vol = 0;
-    t4b.getVolume(&vol);
-    float volume = roundf( roundf(vol/16.0 * 100) / 5 ) * 5 / 100.0;
-    return volume;
+{   
+    return _volumeStream.volume();
 }

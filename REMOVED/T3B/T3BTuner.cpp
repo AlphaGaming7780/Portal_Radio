@@ -257,7 +257,9 @@ bool T3BTuner::stereoTypeGet(StereoType* const stereotype)
 bool T3BTuner::volumeSet(uint8_t const volume)
 {
     uint8_t volumeValue = (volume > 16U) ? 16U : volume;
-    Command command = commandBuilder.createStream(CmdStreamId::VolumeSet).append(volumeValue).build();
+    Command command = commandBuilder.createStream(CmdStreamId::VolumeSet)
+                            .append(volumeValue)
+                            .build();
 
     return commandSend(command);
 }

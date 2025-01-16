@@ -4,6 +4,8 @@
 class FMSource : public pAudioSource 
 {
 private:
+    VolumeStream _volumeStream;
+    LinearVolumeControl _volumeControl;
 public:
     FMSource(/* args */);
     ~FMSource();
@@ -12,16 +14,15 @@ public:
 
     void Setup() override;
     void setOutput(audio_tools::AudioOutput &output) override;
-    void setOutput(audio_tools::AudioStream &StreamBufferDef_t) override;
+    void setOutput(audio_tools::AudioStream &stream) override;
     void Begin() override;
     void End() override;
 
-    void Play();
-    void Pause();
-    void Next();
-    void Previous();
+    void setFreq(uint32_t freq);
+    void Next() override;
+    void Previous() override;
 
-    float volumeInc() override;
+    // float volumeInc() override;
     void setVolume(float volume) override;
     float getVolume() override;
 

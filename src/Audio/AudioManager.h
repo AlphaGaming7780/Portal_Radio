@@ -6,6 +6,7 @@
 #include "Source/SPIFFSSource/SPIFFSSource.h"
 #include "Source/WebRadioSource/WebRadioSource.h"
 #include "Source/FM/FMSource.h"
+#include "Source/DAB/DABSource.h"
 
 #ifndef dAudioManager
 #define dAudioManager
@@ -51,7 +52,7 @@ public:
     AudioManager(/* args */);
     ~AudioManager();
 
-    pAudioSource *sourceList[5] { &bluetoothAudioSource, &sdSource, &webRadioSource, &spiffsSource, &FM };
+    pAudioSource *sourceList[6] { &bluetoothAudioSource, &sdSource, &webRadioSource, &spiffsSource, &FM, &DAB };
     pAudioOutput *outputList[1] { &i2sOutput };
 
     AudioPlayer audioPlayer;

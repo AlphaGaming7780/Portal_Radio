@@ -2,7 +2,9 @@
 #define CommandBuilder_h
 
 #include "Command.h"
-#include <stdint.h>
+// #include <fmt/format.h>
+#include <WString.h>
+
 
 enum class CommandType : uint8_t
 {
@@ -32,15 +34,21 @@ enum class CmdStreamId : uint8_t
     SearchFm = 0x03,
     SearchDab = 0x04,
     SearchStop = 0x05,
-    // Status = 0x05,
-    // Mode = 0x06,
-    // NowPlaying = 0x07,
-    // SignalStrength = 0x08,
-    // StereoModeSet = 0x09,
-    // StereoModeGet = 0x0A,
-    // StereoType = 0x0B,
+    SetLRMode = 0x06,
+    GetPlayStatus = 0x10,
+    GetPlayMode = 0x11,
+    GetPlayIndex = 0x12,
+    GetTotalProgram = 0x13,
+    GetSearchProgram = 0x14,
+    GetSignalStrength = 0x15,
+    GetStereo = 0x16,
+    
+    SetStereoMode = 0x20,
+    GetStereoMode = 0x21,
     SetVolume = 0x22,
     GetVolume = 0x23,
+    SetPreset = 0x24,
+    GetPreset = 0x25,
     // StationType = 0x0E,
     // DabStationName = 0x0F,
     // DabStationText = 0x10,
@@ -63,9 +71,10 @@ enum class CmdStreamId : uint8_t
     // DabDrcSet = 0x27,
     SetHeadroom = 0x28,
     GetHeadroom = 0x29,
-    // DabRemoveOffAir = 0x2B,
-    // DabExtendedCountryCode = 0x2D,
-    // FmRdsPiCode = 0x2E,
+
+    GetProgrameName = 0x2D,
+    GetProgrameText = 0x2E,
+
     // FmStereoThresholdLevelSet = 0x30,
     // FmStereoThresholdLevelGet = 0x31,
     // FmRdsData = 0x32,
@@ -74,6 +83,10 @@ enum class CmdStreamId : uint8_t
     // FmStereoThresholdSet = 0x37,
     // FmStereoThresholdGet = 0x38,
     // FmExactStation = 0x39
+    GetEnsembleName = 0x41,
+    GetServiceName = 0x42,
+
+    GetFrequency = 0x46
 };
 
 enum class CmdRtcId : uint8_t
@@ -87,7 +100,15 @@ enum class CmdRtcId : uint8_t
 
 enum class CmdNotificationId : uint8_t
 {
-    Notification = 0x00
+    SetNotification = 0x00,
+    GetNotification = 0x01
+};
+
+enum class CmdGpioId : uint8_t
+{
+    SetFunction = 0x00,
+    SetLevel = 0x01,
+    GetLevel = 0x02,
 };
 
 enum class CmdErrorCode : uint8_t
@@ -107,6 +128,7 @@ enum class CmdErrorCode : uint8_t
 
 inline const char* ToString(CmdErrorCode v)
 {
+    String s = "No CmdErrorCode matching : " + String(static_cast<uint8_t>(v)) + ".";
     switch (v)
     {
         case CmdErrorCode::NONE:                        return "NONE";
@@ -120,7 +142,7 @@ inline const char* ToString(CmdErrorCode v)
         case CmdErrorCode::DataNotUpdate:               return "DataNotUpdate : The data not update.";
         case CmdErrorCode::ParameterIncorrect:          return "ParameterIncorrect : The input parameter incorrect.";
         case CmdErrorCode::StationFull:                 return "StationFull : The total number of programs reaches the maximum.";
-        default:      return "No CmdErrorCode matching the input one.";
+        default:                                        return s.c_str();
     }
 }
 
@@ -131,10 +153,13 @@ class CommandBuilder
     CommandBuilder& createStream(CmdStreamId const id);
     CommandBuilder& createRtc(CmdRtcId const id);
     CommandBuilder& createNotification(CmdNotificationId const id);
+    CommandBuilder& createGPIO(CmdGpioId const id);
 
     CommandBuilder& append(uint8_t const value);
     CommandBuilder& append(uint16_t const value);
     CommandBuilder& append(uint32_t const value);
+
+    CommandBuilder& append(bool const value);
 
     Command& build();
 

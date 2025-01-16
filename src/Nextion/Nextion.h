@@ -71,6 +71,8 @@ private:
 
     int _getInt(String command, int size);
 
+    bool _isInAudioPage();
+
     void _UpdatePendingData() {
         
         if(_pendingData.audioSource != emptyString)   { setAudioSource(_pendingData.audioSource); _pendingData.audioSource = emptyString; }
