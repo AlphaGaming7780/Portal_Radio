@@ -77,8 +77,9 @@ void DABSource::Next()
     uint32_t totalProg;
     if(!t4b.getTotalProgram(&totalProg) || !t4b.getPlayIndex(&currentProg)) return;
 
+    currentProg++;
+    if(currentProg >= totalProg) currentProg = 0;
     Serial.printf("Total prog : %u, current Prog : %u.\n", totalProg, currentProg);
-    if(currentProg++ >= totalProg) currentProg = 0;
 
     if(!t4b.PlayDab(currentProg)) return;
     userDataManager.setLastDabProgramIndex(currentProg);
@@ -94,8 +95,9 @@ void DABSource::Previous()
     uint32_t totalProg;
     if(!t4b.getTotalProgram(&totalProg) || !t4b.getPlayIndex(&currentProg)) return;
 
+    if(currentProg == 0 ) currentProg = (totalProg - 1);
+    else currentProg--;
     Serial.printf("Total prog : %u, current Prog : %u.\n", totalProg, currentProg);
-    if(currentProg-- < 0 ) currentProg = totalProg - 1;
 
     if(!t4b.PlayDab(currentProg)) return;
     userDataManager.setLastDabProgramIndex(currentProg);
