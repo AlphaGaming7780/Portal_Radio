@@ -22,7 +22,7 @@ void setup() {
     t4b.setVolume(16);
     t4b.setLRMode();
     t4b.setStereoMode();
-    // if(!t4b.setNotification(static_cast<NotificationType>(127))) Serial.println("Failed to set notif.");
+    if(!t4b.setNotification(NotificationType::ScanFinished | NotificationType::ScanFrequency)) Serial.println("Failed to set notif.");
 
     Serial.println("Starting Nextion...");
     nextion.Begin(115200);
