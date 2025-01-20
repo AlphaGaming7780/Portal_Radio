@@ -62,7 +62,6 @@ void pAudioSource::setOutput(audio_tools::AudioStream &stream)
 void pAudioSource::Begin()
 {
     audioManager.audioPlayer.begin();
-
     audioManager.CreateAudioPlayerTask();
 
 }
@@ -70,8 +69,8 @@ void pAudioSource::Begin()
 void pAudioSource::End()
 {
     audioManager.DeleteAudioPlayerTask();
-    _decoder->removeNotifyAudioChange(audioManager.audioPlayer);
     audioManager.audioPlayer.end();
+    _decoder->removeNotifyAudioChange(audioManager.audioPlayer);
 }
 
 float pAudioSource::volumeInc()

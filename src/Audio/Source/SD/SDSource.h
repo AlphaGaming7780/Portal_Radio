@@ -10,7 +10,7 @@
 class SDSource : public pAudioSource 
 {
 private:
-    AudioDecoder *_decoder;
+    // AudioDecoder *_decoder;
 
 public:
     // AudioPlayer audioPlayer;

@@ -24,10 +24,10 @@ void pAudioOutput::End()
     switch (getOutputType())
     {
     case OutputType:
-        getAudioOutput().end();
+        // getAudioOutput().end();
         break;
     case StreamType:
-        getAudioStream().end();
+        // getAudioStream().end();
         break;
     default:
         Serial.printf("pAudioOutput::end() : Unknown audio type : %i.\n", getOutputType());
