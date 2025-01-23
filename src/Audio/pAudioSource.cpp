@@ -89,6 +89,11 @@ void pAudioSource::Next() { audioManager.audioPlayer.next(); }
 void pAudioSource::Previous() { audioManager.audioPlayer.previous(); }
 float pAudioSource::getVolume() { return audioManager.audioPlayer.volume(); }
 
+bool pAudioSource::isCurrentSource()
+{
+    return audioManager.getCurrentSource()->getID() == getID();
+}
+
 void PrintMetaData(MetaDataType type, const char *str, int len)
 {
     Serial.print("==> ");

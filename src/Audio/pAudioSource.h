@@ -33,6 +33,8 @@ public:
     virtual void setVolume(float volume);
     virtual float getVolume();
 
+    bool isCurrentSource();
+
 };
 
 void PrintMetaData(MetaDataType type, const char* str, int len);

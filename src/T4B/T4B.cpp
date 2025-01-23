@@ -9,8 +9,6 @@ static const uint8_t HeaderSizeIndex = 5U;
 static const uint8_t ResponseAck = 0x00;
 static const uint8_t ResponseAckNack = 0x02;
 static const uint8_t UnusedPin = 255;
-static const uint32_t FmFrequencyMin = 87500U;
-static const uint32_t FmFrequencyMax = 108000U;
 
 T4B::T4B(HardwareSerial *serial, uint8_t resetPin)
 {
@@ -507,6 +505,7 @@ bool T4B::_processNotification()
                 if(getProgrameNameFM(buffer, sizeof(buffer))) nextion.setTitle(buffer);
                 else nextion.setTitle("");
                 nextion.setArtist("");
+                nextion.setFmFreq(freq);
             }
 
             break;
@@ -535,6 +534,7 @@ bool T4B::_processNotification()
         case NotificationType::ScanFrequency:
             if(_responseUint32(0U, &freq)) {
                 Serial.printf("Searching Frequence : %u.\n", freq);
+                nextion.setFmFreq(freq);
             }
             else if(_responseUint8(0U, &dabIndex)) Serial.printf("Searching DAB index : %u.\n", dabIndex);
             break;    

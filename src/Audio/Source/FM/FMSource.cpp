@@ -43,12 +43,13 @@ void FMSource::setOutput(audio_tools::AudioStream &stream)
 void FMSource::Begin()
 {
     uint32_t lastFmFreq = userDataManager.getLastFmFreq();
-    if(lastFmFreq < 87500) lastFmFreq = 87500;
-    else if(lastFmFreq > 108000) lastFmFreq = 108000;
+    if(lastFmFreq < FmFrequencyMin) lastFmFreq = FmFrequencyMin;
+    else if(lastFmFreq > FmFrequencyMax) lastFmFreq = FmFrequencyMax;
     t4b.PlayFm(lastFmFreq);
     audioManager.CreateStreamCopierTask();
     nextion.setTitle("");
     nextion.setArtist("");
+    nextion.setFmFreq(lastFmFreq);
 }
 
 void FMSource::End()
@@ -61,9 +62,36 @@ void FMSource::End()
 
 void FMSource::setFreq(uint32_t freq)
 {
-    if(!t4b.PlayFm(freq)) return;
-    userDataManager.setLastFmFreq(freq);
-    userDataManager.Save();
+    if(!t4b.PlayFm(freq)) {
+        t4b.getPlayIndex(&freq);
+    } else {
+        userDataManager.setLastFmFreq(freq);
+        userDataManager.Save();
+    }
+    nextion.setFmFreq(freq);
+}
+
+uint32_t FMSource::getFreq()
+{
+    uint32_t freq = 0;
+    if(!t4b.getPlayIndex(&freq)) return 0;
+    return freq;
+}
+
+void FMSource::playPreset(uint8_t presetId)
+{
+    uint32_t freq;
+    if(!t4b.getPresetFM(presetId, &freq)) return;
+    setFreq(freq);
+}
+
+void FMSource::setPreset(uint8_t presetId)
+{
+    uint32_t freq;
+    if(!isCurrentSource()) return;
+    if(!t4b.getPlayIndex(&freq)) return;
+    if(!t4b.setPresetFM(presetId, freq)) return;
+    nextion.SendFmPresets();
 }
 
 void FMSource::Next()

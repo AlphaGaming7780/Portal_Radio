@@ -26,6 +26,9 @@ public:
     float getVolume() { return _userData["Volume"]; }
     void setVolume(float value) { _userData["Volume"] = value; }
 
+    bool getMute() { return _userData["Mute"]; }
+    void setMute(bool value) { _userData["Mute"] = value; }
+
     bool getEC11InvertDirection() { return _userData["EC11InvertDirection"]; }
     void setEC11InvertDirection(bool value) { _userData["EC11InvertDirection"] = value; }
 

@@ -151,12 +151,16 @@ void AudioManager::Mute()
 {
     digitalWrite(_mutePin, HIGH);
     _isMuted = true;
+    userDataManager.setMute(true);
+    userDataManager.Save();
 }
 
 void AudioManager::UnMute()
 {
     digitalWrite(_mutePin, LOW);
     _isMuted = false;
+    userDataManager.setMute(false);
+    userDataManager.Save();
 }
 
 void AudioManager::setLoopMode(AUDIO_LOOP_MODE mode)

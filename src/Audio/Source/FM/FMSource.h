@@ -19,6 +19,9 @@ public:
     void End() override;
 
     void setFreq(uint32_t freq);
+    uint32_t getFreq();
+    void playPreset(uint8_t presetId);
+    void setPreset(uint8_t presetId);
     void Next() override;
     void Previous() override;
 

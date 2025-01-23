@@ -5,6 +5,7 @@
 #include "Alarm/Alarm.h"
 #include "pDebug/pDebug.h"
 #include "Nextion/NextionPendingData.h"
+#include "T4B/T4B.h"
 
 class Nextion
 {
@@ -25,6 +26,11 @@ public:
     void setTitle(String title);
     void setArtist(String artist);
     void setPlayStatus(bool playStatus);
+
+    void setFmFreq(uint32_t freq);
+    void SendFmPresets();
+
+    void SendDabPresets();
 
     int getYear();
     int getMonth();

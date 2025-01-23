@@ -121,7 +121,9 @@ void setup() {
 
     // audioManager.setLoopMode(AUDIO_LOOP_MODE_PLAYLIST);
 
-    audioManager.UnMute();
+    
+    if(!userDataManager.getMute()) audioManager.UnMute();
+
     debug.printlnInfo("Portal Radio started!");
 
     // t4b.DabSearch();

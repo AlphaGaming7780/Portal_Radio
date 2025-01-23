@@ -85,6 +85,9 @@ void Nextion::Loop()
         else if ( s == "newAlarm" ) alarmManager.NewAlarm();
         else if ( s == "removeAlarm" ) alarmManager.RemoveAlarm(_selectedAlarmIndex);
         else if ( s == "saveAlarm" ) alarmManager.SaveAlarm(_selectedAlarmIndex);
+        else if ( s == "getFmFreq" ) setFmFreq(FM.getFreq());
+        else if ( s == "getFmPresets" ) SendFmPresets();
+        else if ( s == "getDabPresets" ) SendDabPresets();
         else if ( x != -1 ) {
             String c = s.substring(0, x);
             String v = s.substring(x+1);
@@ -99,6 +102,8 @@ void Nextion::Loop()
             else if ( c == "setAlarmEnable" ) alarmManager.setAlarmEnabled( _selectedAlarmIndex, bool(v.toInt()));
             else if ( c == "setAlarmDay" ) alarmManager.setAlarmDay( _selectedAlarmIndex, dayOfWeekFromTimeInfoFormat(v.toInt()) );
             else if ( c == "setFmFreq") FM.setFreq(v.toInt());
+            else if ( c == "playFmPreset") FM.playPreset(v.toInt());
+            else if ( c == "setFmPreset" ) FM.setPreset(v.toInt());
         }
         else Serial.printf("Unknown data : %s.\n", s);
     }
@@ -176,6 +181,41 @@ void Nextion::setPlayStatus(bool playStatus)
     } else {
         _serial->print("Audio.playStatus.val=0" + _endChar);
         if(_isInAudioPage()) _serial->print("pPlay.pic=0" + _endChar);
+    }
+}
+
+void Nextion::setFmFreq(uint32_t freq)
+{
+    if(_selectedPage != "FM") return;
+    _serial->printf("sFmNum4.val=%i%s", (freq/100) % 10, _endChar);
+    _serial->printf("sFmNum3.val=%i%s", (freq/1000) % 10, _endChar);
+    _serial->printf("sFmNum2.val=%i%s", (freq/10000) % 10, _endChar);
+    _serial->printf("sFmNum1.val=%i%s", (freq/100000) % 10, _endChar);
+}
+
+void Nextion::SendFmPresets()
+{
+    if(_selectedPage != "FM") return;
+    uint32_t freq = 0;
+    for (int i = 0; i < 10; i++) {
+        if(t4b.getPresetFM(i, &freq)) {
+            _serial->printf("bPreset%i.txt=\"%.1f\"%s", i, freq/1000.0, _endChar);
+            continue;
+        }
+        _serial->printf("bPreset%i.txt=\"%s\"%s", i, "None", _endChar);
+    }
+}
+
+void Nextion::SendDabPresets()
+{
+    if(_selectedPage != "DAB") return;
+    uint32_t programIndex = 0;
+    for (int i = 0; i < 10; i++) {
+        if(t4b.getPresetDAB(i, &programIndex)) {
+            _serial->printf("bPreset%i.txt=\"%i\"%s", i, programIndex, _endChar);
+            continue;
+        }
+        _serial->printf("bPreset%i.txt=\"%s\"%s", i, "None", _endChar);
     }
 }
 
