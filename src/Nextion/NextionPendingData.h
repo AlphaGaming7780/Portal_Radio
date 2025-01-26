@@ -29,6 +29,7 @@ public:
 
     BOOL3 playStatus = BOOL3_NULL;
 
+    int dabSorter = -1;
 };
 
 // #endif

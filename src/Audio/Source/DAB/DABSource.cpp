@@ -1,5 +1,4 @@
 #include "DABSource.h"
-#include "T4B/T4B.h"
 #include "../../I2SManager.h"
 #include "Audio/AudioManager.h"
 #include "Nextion/Nextion.h"
@@ -42,6 +41,8 @@ void DABSource::setOutput(audio_tools::AudioStream &stream)
 
 void DABSource::Begin()
 {
+    _EnsembleNameFilter = userDataManager.getLastDabEnsembleIdFilter();
+    _CurrentDabProgramList = t4b.getFilteredByEnsembleIdDabProgramList(_EnsembleNameFilter.c_str());
     uint32_t lastDabProgIndex = userDataManager.getLastDabProgramIndex();
     uint32_t totalProg;
     
@@ -51,6 +52,11 @@ void DABSource::Begin()
 
     t4b.PlayDab(lastDabProgIndex);
     audioManager.CreateStreamCopierTask();
+
+    DabSorter dabSorter;
+    t4b.getSorter(&dabSorter);
+    nextion.setDabSorter(dabSorter);
+
     UpdateProgramData(lastDabProgIndex);
 }
 
@@ -74,51 +80,87 @@ void DABSource::setProgIndex(uint32_t progIndex)
 void DABSource::Next()
 {
     uint32_t currentProg;
-    uint32_t totalProg;
-    if(!t4b.getTotalProgram(&totalProg) || !t4b.getPlayIndex(&currentProg)) return;
+    if(!t4b.getPlayIndex(&currentProg)) return;
 
-    currentProg++;
-    if(currentProg >= totalProg) currentProg = 0;
-    Serial.printf("Total prog : %u, current Prog : %u.\n", totalProg, currentProg);
+    uint32_t totalProg = _CurrentDabProgramList.size();
+    uint32_t listNextIndex = getIndexInListOfProgram(currentProg) + 1;
 
-    if(!t4b.PlayDab(currentProg)) return;
-    userDataManager.setLastDabProgramIndex(currentProg);
-    userDataManager.Save();
+    if(listNextIndex >= totalProg) listNextIndex = 0;
+    Serial.printf("Total prog : %u, current Prog : %u.\n", totalProg, listNextIndex);
 
-    UpdateProgramData(currentProg);
-
+    setProgIndex(_CurrentDabProgramList[listNextIndex].ProgramIndex);
 }
 
 void DABSource::Previous()
 {
     uint32_t currentProg;
-    uint32_t totalProg;
-    if(!t4b.getTotalProgram(&totalProg) || !t4b.getPlayIndex(&currentProg)) return;
+    if(!t4b.getPlayIndex(&currentProg)) return;
 
-    if(currentProg == 0 ) currentProg = (totalProg - 1);
-    else currentProg--;
-    Serial.printf("Total prog : %u, current Prog : %u.\n", totalProg, currentProg);
+    uint32_t totalProg = _CurrentDabProgramList.size();
+    uint32_t listIndex = getIndexInListOfProgram(currentProg);
 
-    if(!t4b.PlayDab(currentProg)) return;
-    userDataManager.setLastDabProgramIndex(currentProg);
-    userDataManager.Save();
+    if(listIndex == 0 ) listIndex = (totalProg - 1);
+    else listIndex--;
+    Serial.printf("Total prog : %u, current Prog : %u.\n", totalProg, listIndex);
 
-    UpdateProgramData(currentProg);
-
+    setProgIndex(_CurrentDabProgramList[listIndex].ProgramIndex);
 }
 
 void DABSource::UpdateProgramData(uint32_t programIndex)
 {
+    nextion.setDabProgramIndex(programIndex);
     char buffer[T4BMaxTextSize];
     if(t4b.getProgrameNameDAB(buffer, sizeof(buffer), programIndex)) nextion.setTitle(buffer);
     else nextion.setTitle("");
     nextion.setArtist("");
+    nextion.setEnsembleName("");
+    nextion.setServiceName("");
 
     t4b.getEnsembleName(buffer, sizeof(buffer), programIndex);
     Serial.printf("Ensemble Name : %s.\n", buffer);
+    nextion.setEnsembleName(buffer);
 
     t4b.getServiceName(buffer, sizeof(buffer), programIndex);
     Serial.printf("Service Name : %s.\n", buffer);
+    nextion.setServiceName(buffer);
+}
+
+void DABSource::setEnsembleIdFilter(String ensembleId, bool update)
+{
+    _EnsembleNameFilter = ensembleId;
+    _CurrentDabProgramList = t4b.getFilteredByEnsembleIdDabProgramList(ensembleId.c_str());
+    userDataManager.setLastDabEnsembleIdFilter(_EnsembleNameFilter);
+    if(update) nextion.SendDabStationList();
+}
+
+String DABSource::getEnsembleIdFilter()
+{
+    return _EnsembleNameFilter;
+}
+
+Vector<DabProgramInfo> DABSource::getCurrentProgramList()
+{
+    return _CurrentDabProgramList;
+}
+
+uint32_t DABSource::getIndexInListOfProgram(uint32_t programIndex)
+{
+    int i = 0;
+    for( auto obj : _CurrentDabProgramList) {
+        if(obj.ProgramIndex == programIndex) return i;
+        i++;
+    }
+    return 0;
+}
+
+uint32_t DABSource::getIndexInListOfProgram(String serviceName)
+{
+    int i = 0;
+    for (auto obj : _CurrentDabProgramList) {
+        if(obj.ServiceName == serviceName) return i;
+    }
+    debug.printlnError("Failed to get the index in list for " + String(serviceName) + " service name!");
+    return 0;
 }
 
 // float DABSource::volumeInc()

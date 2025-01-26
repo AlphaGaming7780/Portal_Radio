@@ -16,6 +16,7 @@ pDebug::~pDebug()
 bool pDebug::begin(unsigned long baud)
 {
     _serial->begin(baud);
+    debug.print("\n");
     return true;
 }
 

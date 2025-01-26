@@ -71,7 +71,9 @@ enum class CmdStreamId : uint8_t
     // DabDrcSet = 0x27,
     SetHeadroom = 0x28,
     GetHeadroom = 0x29,
-
+    SetSorter = 0x2A,
+    GetSorter = 0x2B,
+    GetProgrameType = 0x2C,
     GetProgrameName = 0x2D,
     GetProgrameText = 0x2E,
 
@@ -85,6 +87,8 @@ enum class CmdStreamId : uint8_t
     // FmExactStation = 0x39
     GetEnsembleName = 0x41,
     GetServiceName = 0x42,
+
+    IsActive = 0x44,
 
     GetFrequency = 0x46
 };

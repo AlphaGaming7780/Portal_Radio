@@ -4,6 +4,7 @@
 #include "CommandBuilder.h"
 #include "pDebug/pDebug.h"
 #include "Preprocessor Macros/ENUM_CLASS_FLAGS.h"
+#include "AudioTools.h"
 
 static uint16_t const T4BMaxTextSize = 128U;
 static uint16_t const T4BMaxDataSize = 2 * T4BMaxTextSize;
@@ -55,6 +56,13 @@ enum class StereoMode : uint8_t
     JointStereo = 1,
     DualChannel = 2,
     SingleChannel = 3
+};
+
+enum class DabSorter : uint8_t
+{
+    EnsembleId = 0,
+    ServiceName = 1,
+    ActiveAndInactiveProgram = 2
 };
 
 enum class EventType : uint16_t
@@ -120,6 +128,13 @@ enum class GpioDrivingStrength : uint8_t
     DRIVE_8MA = 3
 };
 
+class T4BEventAndNotificationSupport
+{
+public:
+    virtual void OnT4BEvent(EventType eventType) = 0;
+    virtual void OnT4BNotification(NotificationType notifType) = 0;
+};
+
 class T4B
 {
 
@@ -131,6 +146,9 @@ public:
     void Loop();
 
     CmdErrorCode getError();
+
+    void AddOnEventAndNotification(T4BEventAndNotificationSupport &val);
+    void RemoveOnEventAndNotification(T4BEventAndNotificationSupport &val);
 
     // *************************
     // ***** SYSTEM ************
@@ -183,13 +201,18 @@ public:
 
     bool setHeadroom(uint8_t const headroomLevel);
     bool getHeadroom(uint8_t* const headroomLevel);
-
+    bool setSorter(DabSorter const dabSorter);
+    bool getSorter(DabSorter* const dabSorter);
+    bool getProgrameType(uint8_t* const programType);
     bool getProgrameNameFM(char* const programeName, uint16_t const size);
     bool getProgrameNameDAB(char* const programeName, uint16_t const size, uint32_t programIndex, bool const AbbreviatedName = false);
     bool getProgrameText(char* const programeText, uint16_t const size);
 
     bool getEnsembleName(char* const ensembleName, uint16_t const size, uint32_t const programIndex, bool const AbbreviatedName = false);
     bool getServiceName(char* const serviceName, uint16_t const size, uint32_t const programIndex, bool const AbbreviatedName = false);
+
+    bool getIsActive(bool* const isActive);
+
     bool getFrequency(uint32_t const programIndex, uint8_t* const freqIndex);
 
     bool setNotification(NotificationType const notificationType);
@@ -204,6 +227,8 @@ private:
 
     HardwareSerial *_serial;
     uint8_t _pinReset;
+
+    Vector<T4BEventAndNotificationSupport*> _OnEvent;
 
     CommandBuilder _commandBuilder;
     uint8_t _response[T4BMaxDataSize];
@@ -229,4 +254,4 @@ private:
     void _discardTrailingSpaces(char* const text);
 };
 
-extern T4B t4b;
+extern T4B bt4b;

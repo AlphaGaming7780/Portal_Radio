@@ -88,6 +88,7 @@ void Nextion::Loop()
         else if ( s == "getFmFreq" ) setFmFreq(FM.getFreq());
         else if ( s == "getFmPresets" ) SendFmPresets();
         else if ( s == "getDabPresets" ) SendDabPresets();
+        else if ( s == "getDabStationsList" ) { uint32_t playIndex; t4b.getPlayIndex(&playIndex); SendDabStationList(playIndex); }
         else if ( x != -1 ) {
             String c = s.substring(0, x);
             String v = s.substring(x+1);
@@ -104,6 +105,11 @@ void Nextion::Loop()
             else if ( c == "setFmFreq") FM.setFreq(v.toInt());
             else if ( c == "playFmPreset") FM.playPreset(v.toInt());
             else if ( c == "setFmPreset" ) FM.setPreset(v.toInt());
+            else if ( c == "setDabProgIndex" ) DAB.setProgIndex(t4b.getProgramIndexByServiceName(v.c_str()));
+            else if ( c == "setDabSorter" ) { if(t4b.setSorter(static_cast<DabSorter>(v.toInt()))) SendDabStationList(); }
+            else if ( c == "setDabFilter" ) DAB.setEnsembleIdFilter(v);
+
+            else Serial.printf("Unknown command : %s, with value : %s.\n", c, v);
         }
         else Serial.printf("Unknown data : %s.\n", s);
     }
@@ -132,9 +138,14 @@ void Nextion::setVolume(int volume, bool isMuted)
     else if(volume < 0) volume = 0;
 
     _serial->print("Audio.audioVolume.val=" + String(volume) + _endChar);
+    _serial->printf("Audio.audioMute.val=%i%s", isMuted, _endChar);
 
-    if(!isMuted && _isInAudioPage()) {
+    if(!_isInAudioPage()) return;
 
+    if(isMuted) {
+        _serial->print("pVolume.pic=4" + _endChar);
+        _serial->print("jVolume.val=0" + _endChar);
+    } else {
         int pic = 0;
         if(volume == 0) pic = 5; 
         else if( volume <= 33) pic = 6;
@@ -184,6 +195,12 @@ void Nextion::setPlayStatus(bool playStatus)
     }
 }
 
+void Nextion::setMute(bool mute)
+{   
+    int vol = roundf(userDataManager.getVolume() * 100);
+    setVolume(vol, mute);
+}
+
 void Nextion::setFmFreq(uint32_t freq)
 {
     if(_selectedPage != "FM") return;
@@ -217,6 +234,92 @@ void Nextion::SendDabPresets()
         }
         _serial->printf("bPreset%i.txt=\"%s\"%s", i, "None", _endChar);
     }
+}
+
+void Nextion::SendDabStationList(uint32_t programIndex)
+{
+    if(_selectedPage != "DAB") return;
+
+    String ServiceNameList = "";
+    String EnsembleNameList = "";
+
+    Vector<String> ensembleList = t4b.getEnsembleIdList();
+
+    Serial.printf("SendDabStationList : ensembleList lenght : %i.\n", ensembleList.size());
+
+    String dabEnsembleNameFilter = DAB.getEnsembleIdFilter();
+
+    if(dabEnsembleNameFilter == "null" || dabEnsembleNameFilter == emptyString) {
+        dabEnsembleNameFilter = ensembleList[0];
+        DAB.setEnsembleIdFilter(dabEnsembleNameFilter, false);
+    }
+
+    Vector<DabProgramInfo> currentDabProgramList = DAB.getCurrentProgramList();
+
+    Serial.printf("SendDabStationList : _CurrentDabProgramList lenght : %i.\n", currentDabProgramList.size());
+
+    bool notFound = true;
+    int i = 0;
+    for(auto obj : currentDabProgramList) {
+        if ( i > 0 ) ServiceNameList += "\\r";
+        ServiceNameList += obj.ServiceName;
+        if(obj.ProgramIndex == programIndex) {
+            notFound = false;
+            _serial->printf("DabStationList.val=%i%s", i, _endChar);
+            DAB.setProgIndex(obj.ProgramIndex);
+        }
+        i++;
+    }
+
+    if(notFound) DAB.setProgIndex(currentDabProgramList[0].ProgramIndex);
+
+    i = 0;
+    for(auto obj : ensembleList) {
+        if ( i > 0 ) EnsembleNameList += "\\r";
+        EnsembleNameList += obj;
+        if(dabEnsembleNameFilter == obj) _serial->printf("cbDabFilter.val=%i%s", i, _endChar);
+        i++;
+    }
+
+    _serial->print("DabStationList.path=\"" + ServiceNameList + "\"" + _endChar);
+    _serial->print("cbDabFilter.path=\"" + EnsembleNameList + "\"" + _endChar);
+}
+
+void Nextion::setDabProgramIndex(uint32_t programIndex)
+{
+    // if(_selectedPage != "DAB") return;
+
+    int i = 0;
+    for(auto obj : DAB.getCurrentProgramList()) {
+        if(obj.ProgramIndex == programIndex) {
+            _serial->printf("DabStationList.val=%i%s", i, _endChar);
+            break;
+        }
+        i++;
+    }
+}
+
+void Nextion::setEnsembleName(String ensembleName)
+{
+    _serial->print("DAB.EnsembleName.txt=\"" + ensembleName + "\"" + _endChar);
+    if(_selectedPage == "DAB") _serial->print("tEnsembleName.txt=\"" + ensembleName + "\"" + _endChar);
+}
+
+void Nextion::setServiceName(String serviceName)
+{
+    _serial->print("DAB.ServiceName.txt=\"" + serviceName + "\"" + _endChar);
+    if(_selectedPage == "DAB") _serial->print("tServiceName.txt=\"" + serviceName + "\"" + _endChar);
+}
+
+void Nextion::setDabSorter(DabSorter dabSorter)
+{
+    if(_isSleeping || !_isReady) {
+        _pendingData.dabSorter = static_cast<int>(dabSorter);
+        return;
+    }
+
+    _serial->printf("DAB.DabSorter.val=%i%s", dabSorter, _endChar);
+    if(_selectedPage == "DAB") _serial->printf("cbDabSorter.val=%i%s", dabSorter, _endChar);
 }
 
 int Nextion::getYear()

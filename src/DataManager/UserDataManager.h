@@ -44,6 +44,9 @@ public:
     uint32_t getLastDabProgramIndex() { return _userData["LastDabProgramIndex"]; }
     void setLastDabProgramIndex(uint32_t lastDabProgramIndex) { _userData["LastDabProgramIndex"] = lastDabProgramIndex; }
 
+    String getLastDabEnsembleIdFilter() { return _userData["LastDabEnsembleIdFilter"]; }
+    void setLastDabEnsembleIdFilter(String ensembleId) { _userData["LastDabEnsembleIdFilter"] = ensembleId; }
+
 };
 
 extern UserDataManager userDataManager;

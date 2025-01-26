@@ -109,7 +109,8 @@ void AudioManager::Loop()
 
     if( _useAudioPlayer || _useStreamCopier) {
         
-        if(!_isMuted) UpdateVolume();
+        // if(!_isMuted) 
+        UpdateVolume();
 
         if(!_isPaused && !audioPlayer.isActive() && _useAudioPlayer) {
             if(_audioLoopMode == AUDIO_LOOP_MODE_PLAYLIST) {

@@ -3,7 +3,7 @@
 #include "Nextion/Nextion.h"
 #include "DataManager/UserDataManager.h"
 
-T4B t4b(&Serial1, 12);
+T4B bt4b(&Serial1, 12);
 
 static const uint8_t HeaderSizeIndex = 5U;
 static const uint8_t ResponseAck = 0x00;
@@ -49,58 +49,8 @@ void T4B::Loop()
 
     if(eventType == EventType::NONE) return;
 
-    Serial.printf("Processing Event : %u.\n", eventType);
-
-    uint32_t currentFreqOrProgIndex;
-    if(!getPlayIndex(&currentFreqOrProgIndex)) return;
-    
-    char buffer[T4BMaxTextSize];
-    if( ( eventType & EventType::ProgramNameChange ) > 0) {
-        StreamMode streamMode;
-        if(getPlayMode(&streamMode)) {
-            if(streamMode == StreamMode::Dab) {
-                getProgrameNameDAB(buffer, sizeof(buffer), currentFreqOrProgIndex);
-            } else if(streamMode == StreamMode::Fm) {
-                getProgrameNameFM(buffer, sizeof(buffer));
-            }
-        };
-        Serial.printf("Program Name Changed : %s.\n", buffer);
-        nextion.setTitle(buffer);    
-    }
-    
-    if( ( eventType & EventType::ProgramTextChange ) > 0 ) {
-        getProgrameText(buffer, sizeof(buffer));
-        Serial.printf("Program Text Changed : %s.\n", buffer);
-        nextion.setArtist(buffer);
-    }
-    
-    if ( ( eventType & EventType::DLSCommandChange ) > 0 ) {
-        Serial.printf("DLS Command CHanged.\n");
-    }
-    
-    if ( ( eventType & EventType::StereoModeChange ) > 0 ) {
-        StereoMode stereoMode;
-        if(getStereo(&stereoMode)) {
-            Serial.printf("Stereo Mode Changed : %u.\n", stereoMode);
-        }
-    }
-
-    if ( ( eventType & EventType::ServiceUpdate ) > 0 ) {
-
-    }
-
-    if ( ( eventType & EventType::SortChange ) > 0 ) {
-
-    }
-
-    if ( ( eventType & EventType::FrequencyChange ) > 0 ) {
-        uint8_t freqIndex;
-        getFrequency(currentFreqOrProgIndex, &freqIndex);
-        Serial.printf("Frequency Changed : %u.\n", freqIndex);
-    }
-
-    if ( ( eventType & EventType::TimeChange ) > 0 ) {
-
+    for(auto n : _OnEvent){
+        n->OnT4BEvent(eventType);
     }
 
 }
@@ -108,6 +58,20 @@ void T4B::Loop()
 CmdErrorCode T4B::getError()
 {
     return _cmdError;
+}
+
+void T4B::AddOnEventAndNotification(T4BEventAndNotificationSupport &val)
+{
+    if(_OnEvent.contains(&val)) return;
+    _OnEvent.push_back(&val);
+}
+
+void T4B::RemoveOnEventAndNotification(T4BEventAndNotificationSupport &val)
+{
+    int pos = _OnEvent.indexOf(&val);
+    if (pos<0) return;
+    _OnEvent.erase(pos);
+    return;
 }
 
 // *************************
@@ -397,6 +361,24 @@ bool T4B::getHeadroom(uint8_t *const headroomLevel)
     return (_commandSend(command) && _responseUint8(0U, headroomLevel));
 }
 
+bool T4B::setSorter(DabSorter const dabSorter)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::SetSorter).append(static_cast<uint8_t>(dabSorter)).build();
+    return _commandSend(command);
+}
+
+bool T4B::getSorter(DabSorter *const dabSorter)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::GetSorter).build();
+    return (_commandSend(command) && _responseUint8(0U, reinterpret_cast<uint8_t*>(dabSorter)));
+}
+
+bool T4B::getProgrameType(uint8_t *const programType)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::GetProgrameType).build();
+    return (_commandSend(command) && _responseUint8(0U, programType));
+}
+
 bool T4B::getProgrameNameFM(char *const programeName, uint16_t const size)
 {
     Command command = _commandBuilder.createStream(CmdStreamId::GetProgrameName).append(0xFFFFFFFF).append(false).build();
@@ -430,6 +412,12 @@ bool T4B::getServiceName(char* const serviceName, uint16_t const size, uint32_t 
 {
     Command command = _commandBuilder.createStream(CmdStreamId::GetServiceName).append(programIndex).append(!AbbreviatedName).build();
     return _commandSend(command) && _responseText(serviceName, size);
+}
+
+bool T4B::getIsActive(bool *const isActive)
+{
+    Command command = _commandBuilder.createStream(CmdStreamId::IsActive).build();
+    return (_commandSend(command) && _responseBool(0U, isActive));
 }
 
 bool T4B::getFrequency(uint32_t const programIndex, uint8_t* const freqIndex)
@@ -477,70 +465,21 @@ bool T4B::_processNotification()
 {
     if(_responseHeader[0x01] != static_cast<uint8_t>(CommandType::Notification)) return false;
 
-    NotificationType eventType = static_cast<NotificationType>(1 << _responseHeader[2]);
+    NotificationType notifType = static_cast<NotificationType>(1 << _responseHeader[2]);
 
-    Serial.printf("Process Notification : %u.\n", eventType);
-    uint32_t freq;
-    uint8_t dabIndex;
-    StreamMode curentStreaMode;
-    char buffer[T4BMaxTextSize];
-    switch (eventType)
-    {
-        case NotificationType::ScanFinished:
-            if(!getPlayIndex(&freq)) break;
-
-            if(!getPlayMode(&curentStreaMode)) break;
-
-            if(curentStreaMode == StreamMode::Dab) {
-                Serial.printf("Playing program index : %u.\n", freq);
-                userDataManager.setLastDabProgramIndex(freq);
-                userDataManager.Save();
-                if(getProgrameNameDAB(buffer, sizeof(buffer), freq)) nextion.setTitle(buffer);
-                else nextion.setTitle("");
-                nextion.setArtist("");
-            } else if(curentStreaMode == StreamMode::Fm) {
-                Serial.printf("Playing Frequence : %u.\n", freq);
-                userDataManager.setLastFmFreq(freq);
-                userDataManager.Save();
-                if(getProgrameNameFM(buffer, sizeof(buffer))) nextion.setTitle(buffer);
-                else nextion.setTitle("");
-                nextion.setArtist("");
-                nextion.setFmFreq(freq);
-            }
-
-            break;
+    if((notifType & NotificationType::ScanFrequency) > 0) {
+        uint32_t freq;
+        uint8_t dabIndex;
         
-        case NotificationType::NewFmProgrameText:
-            getProgrameText(buffer, sizeof(buffer));
-            nextion.setArtist(String(buffer));
-            Serial.printf("ProgrameText : %s.\n", buffer);
-            break;
-            
-        case NotificationType::DABReconfiguration:
-            break;
+        if(_responseUint32(0U, &freq)) {
+            Serial.printf("Searching Frequence : %u.\n", freq);
+            nextion.setFmFreq(freq);
+        }
+        else if(_responseUint8(0U, &dabIndex)) Serial.printf("Searching DAB index : %u.\n", dabIndex);
+    }
 
-        case NotificationType::DABChannelListOrderChange:
-            break;
-
-        case NotificationType::RDSGroup:
-            break;
-
-        case NotificationType::NewDABRadioText:
-            getProgrameText(buffer, sizeof(buffer));
-            nextion.setArtist(String(buffer));
-            Serial.printf("Value : %s", buffer);
-            break; 
-
-        case NotificationType::ScanFrequency:
-            if(_responseUint32(0U, &freq)) {
-                Serial.printf("Searching Frequence : %u.\n", freq);
-                nextion.setFmFreq(freq);
-            }
-            else if(_responseUint8(0U, &dabIndex)) Serial.printf("Searching DAB index : %u.\n", dabIndex);
-            break;    
-
-        default:
-            break;
+    for(auto obj : _OnEvent) {
+        obj->OnT4BNotification(notifType);
     }
 
     return true;

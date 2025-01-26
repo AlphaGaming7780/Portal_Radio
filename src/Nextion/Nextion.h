@@ -5,7 +5,8 @@
 #include "Alarm/Alarm.h"
 #include "pDebug/pDebug.h"
 #include "Nextion/NextionPendingData.h"
-#include "T4B/T4B.h"
+#include "T4B/ExtendedT4B.h"
+#include "DataManager/UserDataManager.h"
 
 class Nextion
 {
@@ -26,11 +27,17 @@ public:
     void setTitle(String title);
     void setArtist(String artist);
     void setPlayStatus(bool playStatus);
+    void setMute(bool mute);
 
     void setFmFreq(uint32_t freq);
     void SendFmPresets();
 
     void SendDabPresets();
+    void SendDabStationList(uint32_t programIndex = 0);
+    void setDabProgramIndex(uint32_t programIndex);
+    void setEnsembleName(String ensembleName);
+    void setServiceName(String serviceName);
+    void setDabSorter(DabSorter dabSorter);
 
     int getYear();
     int getMonth();
@@ -92,6 +99,8 @@ private:
         if(_pendingData.title != emptyString)   { setTitle(_pendingData.title); _pendingData.title = emptyString; }
         if(_pendingData.artist != emptyString)  { setArtist(_pendingData.artist); _pendingData.artist = emptyString; }
         if(_pendingData.playStatus != BOOL3_NULL)     { setPlayStatus(_pendingData.playStatus); _pendingData.playStatus = BOOL3_NULL; } 
+
+        if(_pendingData.dabSorter != -1) { setDabSorter(static_cast<DabSorter>(_pendingData.dabSorter)); _pendingData.dabSorter =-1; }
 
     }
 
