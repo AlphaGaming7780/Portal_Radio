@@ -88,7 +88,7 @@ void Nextion::Loop()
         else if ( s == "getFmFreq" ) setFmFreq(FM.getFreq());
         else if ( s == "getFmPresets" ) SendFmPresets();
         else if ( s == "getDabPresets" ) SendDabPresets();
-        else if ( s == "getDabStationsList" ) { uint32_t playIndex; t4b.getPlayIndex(&playIndex); SendDabStationList(playIndex); }
+        else if ( s == "getDabStationsList" ) { uint32_t playIndex = 0; t4b.getPlayIndex(&playIndex); SendDabStationList(playIndex); }
         else if ( x != -1 ) {
             String c = s.substring(0, x);
             String v = s.substring(x+1);
@@ -106,7 +106,7 @@ void Nextion::Loop()
             else if ( c == "playFmPreset") FM.playPreset(v.toInt());
             else if ( c == "setFmPreset" ) FM.setPreset(v.toInt());
             else if ( c == "setDabProgIndex" ) DAB.setProgIndex(t4b.getProgramIndexByServiceName(v.c_str()));
-            else if ( c == "setDabSorter" ) { if(t4b.setSorter(static_cast<DabSorter>(v.toInt()))) SendDabStationList(); }
+            // else if ( c == "setDabSorter" ) { if(t4b.setSorter(static_cast<DabSorter>(v.toInt()))) SendDabStationList(); }
             else if ( c == "setDabFilter" ) DAB.setEnsembleIdFilter(v);
 
             else Serial.printf("Unknown command : %s, with value : %s.\n", c, v);
@@ -179,6 +179,28 @@ void Nextion::setArtist(String artist)
     if(_isInAudioPage()) _serial->print("gArtist.txt=\"" + artist + "\"" + _endChar);
 }
 
+void Nextion::setAlbum(String album)
+{
+    if(_isSleeping || !_isReady) {
+        _pendingData.album = album;
+        return;
+    }
+
+    _serial->print("Audio.audioAlbum.txt=\"" + album + "\"" + _endChar);
+    if(_selectedPage == "Bluetooth") _serial->print("gAlbum.txt=\"" + album + "\"" + _endChar);
+}
+
+void Nextion::setGenre(String genre)
+{
+    if(_isSleeping || !_isReady) {
+        _pendingData.genre = genre;
+        return;
+    }
+
+    _serial->print("Audio.audioGenre.txt=\"" + genre + "\"" + _endChar);
+    if(_selectedPage == "Bluetooth") _serial->print("gGenre.txt=\"" + genre + "\"" + _endChar);
+}
+
 void Nextion::setPlayStatus(bool playStatus)
 {
     if(_isSleeping || !_isReady) {
@@ -199,6 +221,21 @@ void Nextion::setMute(bool mute)
 {   
     int vol = roundf(userDataManager.getVolume() * 100);
     setVolume(vol, mute);
+}
+
+void Nextion::setNumTracks(uint nb)
+{
+    _serial->printf("Bluetooth.tNumTracks.txt=\"%u\"%s", nb, _endChar);
+}
+
+void Nextion::setTrackNum(uint nb)
+{
+    _serial->printf("Bluetooth.tTrackNum.txt=\"%u\"%s", nb, _endChar);
+}
+
+void Nextion::setPlayTime(uint nb)
+{
+    _serial->printf("Bluetooth.tPlayTime.txt=\"%us\"%s", nb, _endChar);
 }
 
 void Nextion::setFmFreq(uint32_t freq)
@@ -250,6 +287,7 @@ void Nextion::SendDabStationList(uint32_t programIndex)
     String dabEnsembleNameFilter = DAB.getEnsembleIdFilter();
 
     if(dabEnsembleNameFilter == "null" || dabEnsembleNameFilter == emptyString) {
+        debug.printlnInfo("dabEnsembleNameFilter is empty");
         dabEnsembleNameFilter = ensembleList[0];
         DAB.setEnsembleIdFilter(dabEnsembleNameFilter, false);
     }
@@ -260,13 +298,14 @@ void Nextion::SendDabStationList(uint32_t programIndex)
 
     bool notFound = true;
     int i = 0;
+    int dabStationVal = 0;
     for(auto obj : currentDabProgramList) {
         if ( i > 0 ) ServiceNameList += "\\r";
         ServiceNameList += obj.ServiceName;
         if(obj.ProgramIndex == programIndex) {
             notFound = false;
-            _serial->printf("DabStationList.val=%i%s", i, _endChar);
-            DAB.setProgIndex(obj.ProgramIndex);
+            dabStationVal = i;
+            // DAB.setProgIndex(obj.ProgramIndex);
         }
         i++;
     }
@@ -274,15 +313,18 @@ void Nextion::SendDabStationList(uint32_t programIndex)
     if(notFound) DAB.setProgIndex(currentDabProgramList[0].ProgramIndex);
 
     i = 0;
+    int dabFilterVal = 0;
     for(auto obj : ensembleList) {
         if ( i > 0 ) EnsembleNameList += "\\r";
         EnsembleNameList += obj;
-        if(dabEnsembleNameFilter == obj) _serial->printf("cbDabFilter.val=%i%s", i, _endChar);
+        if(dabEnsembleNameFilter == obj) dabFilterVal = i;
         i++;
     }
 
     _serial->print("DabStationList.path=\"" + ServiceNameList + "\"" + _endChar);
     _serial->print("cbDabFilter.path=\"" + EnsembleNameList + "\"" + _endChar);
+    _serial->printf("DabStationList.val=%i%s", dabStationVal, _endChar);
+    _serial->printf("cbDabFilter.val=%i%s", dabFilterVal, _endChar);
 }
 
 void Nextion::setDabProgramIndex(uint32_t programIndex)

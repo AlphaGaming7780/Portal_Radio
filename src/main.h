@@ -1,7 +1,6 @@
 #pragma once
 #include "Arduino.h"
 #include "AudioTools.h"
-#include "SPIFFS.h"
 #include <SD.h>
 
 #include "Audio/AudioManager.h"

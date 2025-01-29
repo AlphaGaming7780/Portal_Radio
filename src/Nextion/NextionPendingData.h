@@ -26,6 +26,8 @@ public:
 
     String title = emptyString;
     String artist = emptyString;
+    String album = emptyString;
+    String genre = emptyString;
 
     BOOL3 playStatus = BOOL3_NULL;
 

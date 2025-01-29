@@ -61,6 +61,8 @@ void AudioManager::Update()
 
     nextion.setTitle("");
     nextion.setArtist("");
+    nextion.setGenre("");
+    nextion.setAlbum("");
 
     if(!oldIsMuted) Mute();
 

@@ -148,31 +148,34 @@ void BluetoothAudioSource::onBluetoothMetadataCallback(uint8_t data1, const uint
     switch ((esp_avrc_md_attr_mask_t)data1)
     {
     case ESP_AVRC_MD_ATTR_TITLE:
-        // Serial.printf("==> Title: %s.\n", data2);
+        Serial.printf("==> Title: %s.\n", data2);
         UpdateMetaData(Title, (const char*)data2, -1);
         break;
     case ESP_AVRC_MD_ATTR_ALBUM:
-        // Serial.printf("==> Album: %s.\n", data2);
+        Serial.printf("==> Album: %s.\n", data2);
         UpdateMetaData(Album, (const char*)data2, -1);
         break;
     case ESP_AVRC_MD_ATTR_ARTIST:
-        // Serial.printf("==> Artist: %s.\n", data2);
+        Serial.printf("==> Artist: %s.\n", data2);
         UpdateMetaData(Artist, (const char*)data2, -1);
         break;
     case ESP_AVRC_MD_ATTR_GENRE:
-        // Serial.printf("==> Genre: %s.\n", data2);
+        Serial.printf("==> Genre: %s.\n", data2);
         UpdateMetaData(Genre, (const char*)data2, -1);
         break;
     case ESP_AVRC_MD_ATTR_TRACK_NUM:
         Serial.printf("==> Track num: %s.\n", data2);
+        nextion.setTrackNum(String((char*)data2).toInt());
         break;
     case ESP_AVRC_MD_ATTR_NUM_TRACKS:
         Serial.printf("==> Num of tracks: %s.\n", data2);
+        nextion.setNumTracks(String((char*)data2).toInt());
         break;
     case ESP_AVRC_MD_ATTR_PLAYING_TIME:
     {
         uint32_t playtime = String((char*)data2).toInt();
         Serial.printf("==> Playing time is %d ms (%d seconds)\n", playtime, (int)round(playtime/1000.0));
+        nextion.setPlayTime((int)round(playtime/1000.0));
     } break;
     default:
         break;

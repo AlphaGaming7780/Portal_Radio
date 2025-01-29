@@ -96,10 +96,10 @@ bool pAudioSource::isCurrentSource()
 
 void PrintMetaData(MetaDataType type, const char *str, int len)
 {
-    Serial.print("==> ");
-    Serial.print(toStr(type));
-    Serial.print(": ");
-    Serial.println(str);
+    debug.print("==> ");
+    debug.print(toStr(type));
+    debug.print(": ");
+    debug.println(str);
 }
 
 void UpdateMetaData(MetaDataType type, const char *str, int len)
@@ -118,6 +118,12 @@ void UpdateMetaData(MetaDataType type, const char *str, int len)
         break;
     case Description:
         nextion.setArtist(str);
+        break;
+    case Album:
+        nextion.setAlbum(str);
+        break;
+    case Genre:
+        nextion.setGenre(str);
         break;
 
     default:

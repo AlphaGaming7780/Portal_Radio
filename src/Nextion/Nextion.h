@@ -26,8 +26,14 @@ public:
     void setVolume(int volume, bool isMuted);
     void setTitle(String title);
     void setArtist(String artist);
+    void setAlbum(String album);
+    void setGenre(String genre);
     void setPlayStatus(bool playStatus);
     void setMute(bool mute);
+
+    void setNumTracks(uint nb);
+    void setTrackNum(uint nb);
+    void setPlayTime(uint nb);
 
     void setFmFreq(uint32_t freq);
     void SendFmPresets();
@@ -98,6 +104,8 @@ private:
 
         if(_pendingData.title != emptyString)   { setTitle(_pendingData.title); _pendingData.title = emptyString; }
         if(_pendingData.artist != emptyString)  { setArtist(_pendingData.artist); _pendingData.artist = emptyString; }
+        if(_pendingData.genre != emptyString)  { setGenre(_pendingData.genre); _pendingData.genre = emptyString; }
+        if(_pendingData.album != emptyString)  { setAlbum(_pendingData.album); _pendingData.album = emptyString; }
         if(_pendingData.playStatus != BOOL3_NULL)     { setPlayStatus(_pendingData.playStatus); _pendingData.playStatus = BOOL3_NULL; } 
 
         if(_pendingData.dabSorter != -1) { setDabSorter(static_cast<DabSorter>(_pendingData.dabSorter)); _pendingData.dabSorter =-1; }
