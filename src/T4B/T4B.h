@@ -215,6 +215,12 @@ public:
 
     bool getFrequency(uint32_t const programIndex, uint8_t* const freqIndex);
 
+    bool SetClock(uint8_t second, uint8_t minute, uint8_t hour, uint8_t day, uint8_t month, uint8_t year);
+    bool GetClock(uint8_t* second, uint8_t* minute, uint8_t* hour, uint8_t* day, uint8_t* week, uint8_t* month, uint8_t* year);
+    bool EnableSyncClock(bool enabled);
+    bool GetSyncClockStatus(bool* enabled);
+    bool GetClockStatus(bool* set);
+
     bool setNotification(NotificationType const notificationType);
     bool getNotification(NotificationType* const notificationType);
 

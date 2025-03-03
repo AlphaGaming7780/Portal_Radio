@@ -76,7 +76,7 @@ void ExtendedT4B::OnT4BEvent(EventType eventType)
     }
 
     if ( ( eventType & EventType::TimeChange ) > 0 ) {
-
+        alarmManager.SetClockDirty();
     }
 }
 
@@ -146,6 +146,7 @@ void ExtendedT4B::Setup(bool cacheDabInfo)
     setVolume(16);
     setLRMode();
     setStereoMode();
+    EnableSyncClock(true);
     setSorter(DabSorter::EnsembleId);
     if(!setNotification(NotificationType::ScanFinished | NotificationType::ScanFrequency)) Serial.println("Failed to set notif.");
     if(cacheDabInfo) UpdateDabCache();

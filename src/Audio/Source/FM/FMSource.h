@@ -18,9 +18,14 @@ public:
     void Begin() override;
     void End() override;
 
+    // void static StaticSetFreq(uint32_t freq);
     void setFreq(uint32_t freq);
     uint32_t getFreq();
+
+    // void static StaticPlayPreset(uint8_t presetId);
     void playPreset(uint8_t presetId);
+
+    void static StaticSetPreset(uint8_t presetId);
     void setPreset(uint8_t presetId);
     void Next() override;
     void Previous() override;

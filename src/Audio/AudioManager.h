@@ -53,7 +53,7 @@ public:
     ~AudioManager();
 
     pAudioSource *sourceList[6] { &bluetoothAudioSource, &sdSource, &webRadioSource, &spiffsSource, &FM, &DAB };
-    pAudioOutput *outputList[1] { &i2sOutput };
+    // pAudioOutput *outputList[1] { &i2sOutput };
 
     AudioPlayer audioPlayer;
     StreamCopy streamCopie;

@@ -31,6 +31,6 @@ public:
     }
 };
 
-extern I2SOutput i2sOutput;
+// extern I2SOutput i2sOutput;
 
 #endif

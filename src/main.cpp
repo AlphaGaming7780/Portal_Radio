@@ -11,6 +11,9 @@ void setup() {
     // AudioLogger::instance().begin(Serial, AudioLogger::Info);
     debug.begin(115200);
     debug.printlnInfo("Starting...");
+    // debug.printInfo("Executing on core : ");
+    // Serial.println(xPortGetCoreID());
+    // Serial.printf("CPU Frequency: %i MHz\n", getCpuFrequencyMhz());
 
     debug.printlnInfo("Starting Nextion...");
     nextion.Begin(115200);
@@ -36,39 +39,46 @@ void setup() {
     if(!userDataManager.Load()) debug.printlnError("Failed to load user data!");
 
     ec11.setInvertDirection(userDataManager.getEC11InvertDirection());
-    // ec11.setInvertDirection(true);
+
+    alarmManager.Begin();
 
     pAudioOutput *audioOutput = audioManager.getAudioOutput(userDataManager.getLastSelectedOutput());
     pAudioSource *audioSource = audioManager.getAudioSource(userDataManager.getLastSelectedSource());
 
-    if(audioOutput == nullptr) audioOutput = &i2sOutput;
-    // if(audioSource == nullptr) audioSource = &bluetoothAudioSource;
+    // Force I2S Output since we don't have any other output type.
+    if(audioOutput == nullptr) audioOutput = new I2SOutput();
 
     audioManager.setSourceAndOutput(audioSource, audioOutput, true);
 
-    // audioManager.SetSourceAndOutput(&sdSource, &i2sOutput, true);
-    // audioManager.SetSourceAndOutput(&webRadioSource, &i2sOutput, true);
-
     // audioManager.setLoopMode(AUDIO_LOOP_MODE_PLAYLIST);
-
-    
-    if(!userDataManager.getMute()) { 
-        audioManager.UnMute();
-        nextion.setMute(false);
-    }
 
     // t4b.DabSearch();
 
     nextion.StartupFinished();
 
-    alarmManager.Begin();
+    if(!userDataManager.getMute()) { 
+        audioManager.UnMute();
+        nextion.setMute(false);
+    }
 
     debug.printlnInfo("Portal Radio started!");
 }
 
+#ifdef dDebug
+uint32_t oldFreeHeap = 0;
+#endif
 
 void loop() {
-    ec11.Loop();
+
+    #ifdef dDebug
+    uint32_t freeHeap = esp_get_free_heap_size();
+    if(freeHeap != oldFreeHeap) {
+        debug.printInfo("ESP32 free heap : "); Serial.print(freeHeap); Serial.println("B.");
+        oldFreeHeap = freeHeap;
+    }
+    #endif
+
+    // ec11.Loop();
     t4b.Loop();
     audioManager.Loop();
     nextion.Loop();

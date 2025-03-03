@@ -61,6 +61,7 @@ void pAudioSource::setOutput(audio_tools::AudioStream &stream)
 
 void pAudioSource::Begin()
 {
+    audioManager.audioPlayer.setBufferSize(2048);
     audioManager.audioPlayer.begin();
     audioManager.CreateAudioPlayerTask();
 
@@ -70,12 +71,13 @@ void pAudioSource::End()
 {
     audioManager.DeleteAudioPlayerTask();
     audioManager.audioPlayer.end();
+    _decoder->end();
     _decoder->removeNotifyAudioChange(audioManager.audioPlayer);
 }
 
 float pAudioSource::volumeInc()
 {
-    return 0.025f;
+    return 0.0125f;
 }
 
 void pAudioSource::setVolume(float volume)
@@ -91,7 +93,9 @@ float pAudioSource::getVolume() { return audioManager.audioPlayer.volume(); }
 
 bool pAudioSource::isCurrentSource()
 {
-    return audioManager.getCurrentSource()->getID() == getID();
+    pAudioSource* source = audioManager.getCurrentSource();
+    if(source == nullptr) return false;
+    return source->getID() == getID();
 }
 
 void PrintMetaData(MetaDataType type, const char *str, int len)

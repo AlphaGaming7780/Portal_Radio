@@ -36,6 +36,7 @@ void Nextion::StartupFinished()
         Loop();
     }
     
+    _print("wup=1");
     _print("thup=1");
     _print("thsp=60");
     setYear(2024);
@@ -117,6 +118,9 @@ void Nextion::Loop()
 
 void Nextion::setAudioSource(String source)
 {
+
+    if(_selectedPage == source) return;
+
     if(_isSleeping || !_isReady) {
         _pendingData.audioSource = source;
         return;
@@ -223,6 +227,16 @@ void Nextion::setMute(bool mute)
     setVolume(vol, mute);
 }
 
+void Nextion::setBtConnectionStatus(String status)
+{
+    _serial->printf("Bluetooth.tStatus.txt=\"%s\"%s", status, _endChar);
+}
+
+void Nextion::setBtPeerName(String peerName)
+{
+    _serial->printf("Bluetooth.tConectionName.txt=\"%s\"%s", peerName, _endChar);
+}
+
 void Nextion::setNumTracks(uint nb)
 {
     _serial->printf("Bluetooth.tNumTracks.txt=\"%u\"%s", nb, _endChar);
@@ -240,11 +254,11 @@ void Nextion::setPlayTime(uint nb)
 
 void Nextion::setFmFreq(uint32_t freq)
 {
-    if(_selectedPage != "FM") return;
-    _serial->printf("sFmNum4.val=%i%s", (freq/100) % 10, _endChar);
-    _serial->printf("sFmNum3.val=%i%s", (freq/1000) % 10, _endChar);
-    _serial->printf("sFmNum2.val=%i%s", (freq/10000) % 10, _endChar);
-    _serial->printf("sFmNum1.val=%i%s", (freq/100000) % 10, _endChar);
+    // if(_selectedPage != "FM") return;
+    _serial->printf("FM.sFmNum4.val=%i%s", (freq/100) % 10, _endChar);
+    _serial->printf("FM.sFmNum3.val=%i%s", (freq/1000) % 10, _endChar);
+    _serial->printf("FM.sFmNum2.val=%i%s", (freq/10000) % 10, _endChar);
+    _serial->printf("FM.sFmNum1.val=%i%s", (freq/100000) % 10, _endChar);
 }
 
 void Nextion::SendFmPresets()
@@ -284,7 +298,7 @@ void Nextion::SendDabStationList(uint32_t programIndex)
 
     Serial.printf("SendDabStationList : ensembleList lenght : %i.\n", ensembleList.size());
 
-    String dabEnsembleNameFilter = DAB.getEnsembleIdFilter();
+    String dabEnsembleNameFilter =  DAB.getEnsembleIdFilter();
 
     if(dabEnsembleNameFilter == "null" || dabEnsembleNameFilter == emptyString) {
         debug.printlnInfo("dabEnsembleNameFilter is empty");
@@ -522,6 +536,11 @@ void Nextion::Sleep(bool sleep)
     }    
 }
 
+bool Nextion::IsSleeping()
+{
+    return _isSleeping;
+}
+
 void Nextion::Reset()
 {
     _serial->print("rest" + _endChar);
@@ -529,11 +548,19 @@ void Nextion::Reset()
 
 void Nextion::_UpdatePendingAudioSource(String source)
 {
-    if      ( source == "Bluetooth" ) audioManager.setAudioSource(&bluetoothAudioSource, true);
+    if ( audioManager.getCurrentSource() != nullptr && source == audioManager.getCurrentSource()->getID()) audioManager.setAudioSource(nullptr, true);
+    else if ( source == "Bluetooth" ) audioManager.setAudioSource(&bluetoothAudioSource, true);
     else if ( source == "WebRadio"  ) audioManager.setAudioSource(&webRadioSource, true);
     else if ( source == "SD card"   ) audioManager.setAudioSource(&sdSource, true);
     else if ( source == "FM"        ) audioManager.setAudioSource(&FM, true);
     else if ( source == "DAB"       ) audioManager.setAudioSource(&DAB, true);
+
+    // if      ( source == "Bluetooth" ) audioManager.setAudioSource(new BluetoothAudioSource(), true);
+    // else if ( source == "WebRadio"  ) audioManager.setAudioSource(new WebRadioSource(), true);
+    // else if ( source == "SD card"   ) audioManager.setAudioSource(new SDSource(), true);
+    // else if ( source == "FM"        ) audioManager.setAudioSource(new FMSource(), true);
+    // else if ( source == "DAB"       ) audioManager.setAudioSource(new DABSource(), true);
+
 }
 
 String Nextion::_formatHexCodeToString(uint8_t value)

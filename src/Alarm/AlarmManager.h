@@ -28,11 +28,31 @@ public:
     void RemoveAlarm(int index);
     void SaveAlarm(int index);
 
+    void StopCurrentAlarm();
+
+    void SetClockDirty();
+
 private:
     ESP32Time rtc;
     int _oldMinute = -1;
+    int _oldHour = -1;
+
+    bool _isAlarmRinging = false;
+
+    bool _isClockDirty = false;
 
     Vector<Alarm> _alarmList;
+
+    bool _ShouldSyncTime(tm timeInfo);
+    tm _SyncTime();
+    bool _ShouldCheckAlarm(tm timeInfo);
+    bool _ShouldUpdateNextionDate(tm timeInfo);
+    void _UpdateNextionDate(tm timeInfo);
+    void _CheckAlarm(tm timeInfo);
+    void _CheckMissedAlarm(tm timeInfo, tm newTimeInfo);
+
+    void _RingAlarm(Alarm alarm);
+
 
 };
 

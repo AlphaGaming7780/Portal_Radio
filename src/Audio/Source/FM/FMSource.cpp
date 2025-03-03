@@ -60,6 +60,13 @@ void FMSource::End()
     I2SManager::_streamIn.end();
 }
 
+// void FMSource::StaticSetFreq(uint32_t freq)
+// {
+//     FMSource *Fm;
+//     if(!audioManager.TryGetCurrentSourceAs<FMSource>(Fm)) return;
+//     Fm->setFreq(freq);
+// }
+
 void FMSource::setFreq(uint32_t freq)
 {
     if(!t4b.PlayFm(freq)) {
@@ -78,12 +85,26 @@ uint32_t FMSource::getFreq()
     return freq;
 }
 
+// void FMSource::StaticPlayPreset(uint8_t presetId)
+// {
+//     FMSource *Fm;
+//     if(!audioManager.TryGetCurrentSourceAs<FMSource>(Fm)) return;
+//     Fm->playPreset(presetId);
+// }
+
 void FMSource::playPreset(uint8_t presetId)
 {
     uint32_t freq;
     if(!t4b.getPresetFM(presetId, &freq)) return;
     setFreq(freq);
 }
+
+// void FMSource::StaticSetPreset(uint8_t presetId)
+// {
+//     FMSource *Fm;
+//     if(!audioManager.TryGetCurrentSourceAs<FMSource>(Fm)) return;
+//     Fm->setPreset(presetId);
+// }
 
 void FMSource::setPreset(uint8_t presetId)
 {

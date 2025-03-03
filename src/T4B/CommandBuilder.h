@@ -95,11 +95,11 @@ enum class CmdStreamId : uint8_t
 
 enum class CmdRtcId : uint8_t
 {
-    Set = 0x00,
-    Get = 0x01,
-    Sync = 0x02,
-    SyncStatus = 0x03,
-    StatusClock = 0x04
+    SetClock = 0x00,
+    GetClock = 0x01,
+    EnableSyncClock = 0x02,
+    GetSyncClockStatus = 0x03,
+    GetClockStatus = 0x04
 };
 
 enum class CmdNotificationId : uint8_t

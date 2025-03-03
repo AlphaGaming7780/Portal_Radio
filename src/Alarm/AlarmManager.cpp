@@ -17,34 +17,35 @@ void AlarmManager::Begin()
     rtc.offset = userDataManager.getTimeZone() * 3600;
     _alarmList = userDataManager.getAlarmList();
 
-    int year = nextion.getYear();
-    int month = nextion.getMonth();
-    int day = nextion.getDay();
-    int hour = nextion.getHour();
-    int minute = nextion.getMinute();
-    int second = nextion.getSecond();
-    Serial.printf("year = %i; month = %i; day = %i; hour = %i; minute = %i; second = %i\n", year, month, day, hour, minute, second);
-    rtc.setTime(second, minute, hour, day, month, year);
+    // int year = nextion.getYear();
+    // int month = nextion.getMonth();
+    // int day = nextion.getDay();
+    // int hour = nextion.getHour();
+    // int minute = nextion.getMinute();
+    // int second = nextion.getSecond();
+
+    _SyncTime();
 }
 
 void AlarmManager::Loop()
 {
-
     tm timeInfo = rtc.getTimeStruct();
-    if(_oldMinute == timeInfo.tm_min) return;
-    _oldMinute = timeInfo.tm_min;
 
-    for (size_t i = 0; i < _alarmList.size(); i++)
-    {
-        Alarm a = _alarmList[i];
-        if(!a.enable) continue;
+    if(_ShouldSyncTime(timeInfo)) {
+        tm newTimeInfo = _SyncTime();
 
-        if(a.hour != timeInfo.tm_hour || a.minute != timeInfo.tm_min || ( ( a.dayOfWeek & dayOfWeekFromTimeInfoFormat(timeInfo.tm_wday) ) == 0) ) continue;
+        _CheckMissedAlarm(timeInfo, newTimeInfo);
 
-        debug.printlnInfo("ALARM !!!!!");
+        timeInfo = newTimeInfo;
 
     }
-    
+
+    if(_ShouldCheckAlarm(timeInfo)) _CheckAlarm(timeInfo);
+    if(_ShouldUpdateNextionDate(timeInfo)) _UpdateNextionDate(timeInfo);
+
+    _oldHour = timeInfo.tm_hour;
+    _oldMinute = timeInfo.tm_min;
+
 }
 
 Alarm AlarmManager::getAlarm(String alarmName)
@@ -123,4 +124,116 @@ void AlarmManager::SaveAlarm(int index)
     userDataManager.Save();
     nextion.SendAlarmList(_alarmList);
     nextion.SelectAlarm(index);
+}
+
+void AlarmManager::StopCurrentAlarm()
+{
+    _isAlarmRinging = false;
+}
+
+void AlarmManager::SetClockDirty()
+{
+    _isClockDirty = true;
+}
+
+bool AlarmManager::_ShouldSyncTime(tm timeInfo)
+{
+    bool should = _oldHour != timeInfo.tm_hour || _isClockDirty;
+    _isClockDirty = false;
+    return should;
+}
+
+tm AlarmManager::_SyncTime()
+{
+    uint8_t year, month, week, day, hour, minute, second;
+    t4b.GetClock(&second, &minute, &hour, &day, &week, &month, &year);
+
+    Serial.printf("year = %i; month = %i; day = %i; hour = %i; minute = %i; second = %i\n", year + 2000, month, day, hour, minute, second);
+    rtc.setTime(second, minute, hour, day, month, year + 2000);
+
+    return rtc.getTimeStruct();
+}
+
+bool AlarmManager::_ShouldCheckAlarm(tm timeInfo)
+{
+    bool should = _oldMinute != timeInfo.tm_min || _oldHour != timeInfo.tm_hour;
+    return should;
+}
+
+bool AlarmManager::_ShouldUpdateNextionDate(tm timeInfo)
+{
+    bool should = _oldHour != timeInfo.tm_hour;
+    return should;
+}
+
+void AlarmManager::_UpdateNextionDate(tm timeInfo)
+{
+    nextion.setYear(timeInfo.tm_year);
+    nextion.setMonth(timeInfo.tm_mon);
+    nextion.setDay(timeInfo.tm_mday);
+    nextion.setHour(timeInfo.tm_hour);
+    nextion.setMinute(timeInfo.tm_min);
+    nextion.setSecond(timeInfo.tm_sec);
+}
+
+void AlarmManager::_CheckAlarm(tm timeInfo)
+{
+    if(_isAlarmRinging) return;
+    for (size_t i = 0; i < _alarmList.size(); i++)
+    {
+        Alarm a = _alarmList[i];
+        if(!a.enable) continue;
+
+        if(a.hour != timeInfo.tm_hour || a.minute != timeInfo.tm_min || ( ( a.dayOfWeek & dayOfWeekFromTimeInfoFormat(timeInfo.tm_wday) ) == 0) ) continue;
+
+        debug.printlnInfo("ALARM !!!!!");
+
+        return _RingAlarm(a);
+
+    }
+}
+
+void AlarmManager::_CheckMissedAlarm(tm timeInfo, tm newTimeInfo)
+{
+    if(_isAlarmRinging) return;
+
+    int cTime = timeInfo.tm_hour * 60 + timeInfo.tm_min;
+    int nTime = newTimeInfo.tm_hour * 60 + timeInfo.tm_min;
+
+    if(timeInfo.tm_mday != newTimeInfo.tm_mday) {
+        nTime += 24 * 60;
+    }
+
+    int deltaTime = nTime - cTime;
+
+    if(deltaTime <= 0 ) {
+        debug.printlnError("[AlarmManager] deltaTime <= 0.");
+        return;
+    }
+
+    for (size_t i = 0; i < _alarmList.size(); i++)
+    {
+        Alarm a = _alarmList[i];
+        if(!a.enable) continue;
+
+        int alarmTime = timeInfo.tm_hour * 60 + timeInfo.tm_min;
+
+        // If alarm is lower than our current time, add 24 hours to the delat to take in account the next day.
+        if( alarmTime < cTime ) {
+            alarmTime += 24 * 60;
+        }
+
+        int alarmDeltaTime = alarmTime - cTime;
+
+        if( alarmDeltaTime < 0 || alarmDeltaTime > deltaTime || ( ( a.dayOfWeek & dayOfWeekFromTimeInfoFormat(timeInfo.tm_wday) ) == 0) ) continue;
+        
+        debug.printlnInfo("ALARM !!!!!");
+        
+        return _RingAlarm(a);
+    }
+}
+
+void AlarmManager::_RingAlarm(Alarm alarm)
+{
+    _isAlarmRinging = true;
 }

@@ -7,9 +7,9 @@ EC11 ec11(34, 35, 32);
 
 EC11::EC11(int pinA, int pinB, int pinSW)
 {
-    _pinA = pinA;
-    _pinB = pinB;
-    _pinSW = pinSW;
+	_pinA = pinA;
+	_pinB = pinB;
+	_pinSW = pinSW;
 }
 
 EC11::~EC11()
@@ -18,63 +18,94 @@ EC11::~EC11()
 
 void EC11::Begin()
 {
-    pinMode(_pinA, INPUT);
-    pinMode(_pinB, INPUT);
-    pinMode(_pinSW, INPUT);
+	pinMode(_pinA, INPUT);
+	pinMode(_pinB, INPUT);
+	pinMode(_pinSW, INPUT);
+	attachInterrupt(digitalPinToInterrupt(_pinA), DoPinAInterrupt, CHANGE);
+	attachInterrupt(digitalPinToInterrupt(_pinB), DoPinBInterrupt, CHANGE);
+	attachInterrupt(digitalPinToInterrupt(_pinSW), DoButtonInterrupt, CHANGE);
 
-    _oldPinA = digitalRead(_pinA);
+	_oldPinA = digitalRead(_pinA);
 }
 
-void EC11::Loop()
-{
-    _direction = 0;
-    bool sw = digitalRead(_pinSW);
+void EC11::DoPinAInterrupt() {
+	if (digitalRead(ec11._pinA) == HIGH) {
+		if (digitalRead(ec11._pinB) == LOW) {
+			ec11._direction = ec11._invertDirection ? 1 : -1;
+		}
+		else {
+			ec11._direction = ec11._invertDirection ? -1 : 1;
+		}
+	}
+	else
+	{
+		if (digitalRead(ec11._pinB) == HIGH) {
+			ec11._direction = ec11._invertDirection ? 1 : -1;
+		}
+		else {
+			ec11._direction = ec11._invertDirection ? -1 : 1;
+		}
+	}
+}
 
-    if(!_oldSwState && sw) _swRisingEdge = true;
-    else _swRisingEdge = false;
+void EC11::DoPinBInterrupt() {
+	if (digitalRead(ec11._pinB) == HIGH) {
+		if (digitalRead(ec11._pinA) == LOW) {
+			ec11._direction = ec11._invertDirection ? -1 : 1;
+		}
+		else {
+			ec11._direction = ec11._invertDirection ? 1 : -1;
+		}
+	}
+	else
+	{
+		if (digitalRead(ec11._pinA) == HIGH) {
+			ec11._direction = ec11._invertDirection ? -1 : 1;
+		}
+		else {
+			ec11._direction = ec11._invertDirection ? 1 : -1;
+		}
+	}	
+}
 
-    _oldSwState = sw;
+void EC11::DoButtonInterrupt() {
+	bool sw = digitalRead(ec11._pinSW);
+	if(ec11._oldSwState && !sw) 
+	{
+		//Falling edge
 
-    bool pinA = digitalRead(_pinA);
-    bool pinB = digitalRead(_pinB);
+	} 
+	else if (!ec11._oldSwState && sw) 
+	{
+		//Rising edge
+		if(nextion.IsSleeping()) {
+			nextion.Sleep(false);
+		}
 
-    if ( pinA == 0 && pinB == 0 ) {
-        _reseted = true;
-        return;
-    }
-
-    if( _oldPinA == pinA && _oldPinB == pinB ) return;
-    _oldPinA = pinA;
-    _oldPinB = pinB;
-
-    // Serial.printf("EC11 : PinA : %i, PinB %i, _reseted %i\n", pinA, pinB, _reseted);
-
-    if( pinA && !pinB && _reseted ) {
-        _direction = _invertDirection ? 1 : -1;
-        _reseted = false;
-    } else if(!pinA && pinB && _reseted ) {
-        _direction = _invertDirection ? -1 : 1;
-        _reseted = false;
-    }
+	}
+	debug.printlnInfo("SW");
+	ec11._oldSwState = sw;
 }
 
 int EC11::getDirection()
 {
-    return _direction;
+	int dir = _direction;
+	_direction = 0;
+	return dir;
 }
 
 bool EC11::isSwitchPressed()
 {
-    return _oldSwState;
+	return _oldSwState;
 }
 
 bool EC11::isSwitchRisingEdge()
 {
-    return _swRisingEdge;
+	return _swRisingEdge;
 }
 
 void EC11::setInvertDirection(bool value)
 {
-    userDataManager.setEC11InvertDirection(value);
-    _invertDirection = value;
+	userDataManager.setEC11InvertDirection(value);
+	_invertDirection = value;
 }

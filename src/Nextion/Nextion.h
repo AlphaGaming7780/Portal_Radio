@@ -30,6 +30,8 @@ public:
     void setGenre(String genre);
     void setPlayStatus(bool playStatus);
     void setMute(bool mute);
+    void setBtConnectionStatus(String status);
+    void setBtPeerName(String peerName);
 
     void setNumTracks(uint nb);
     void setTrackNum(uint nb);
@@ -67,6 +69,7 @@ public:
     void SendAlarmData(Alarm alarm);
 
     void Sleep(bool sleep);
+    bool IsSleeping();
     void Reset();
 
 private:

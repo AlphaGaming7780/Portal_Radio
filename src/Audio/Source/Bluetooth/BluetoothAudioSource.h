@@ -10,7 +10,7 @@ class BluetoothAudioSource : public pAudioSource
 private:
     /* data */
     A2DPLinearVolumeControl _volumeControl;
-    float _potVolume = 0;
+    float _volume = 0;
     // static int s_deviceVolume;
 
 public:
@@ -33,6 +33,7 @@ public:
     void Next() override;
     void Previous() override;
 
+    float volumeInc() override;
     void setVolume(float volume) override;
     float getVolume() override;
 

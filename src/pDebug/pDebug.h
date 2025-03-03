@@ -34,6 +34,10 @@ public:
     void setDebugLevel(pDebugLevel debugLevel);
 
     size_t print(String s);
+    size_t printInfo(String s);
+    size_t printWarn(String s);
+    size_t printError(String s);
+
     size_t println(String s);
     // size_t printf(const char *format, ...);
     // size_t printfln(const char *format, ...);

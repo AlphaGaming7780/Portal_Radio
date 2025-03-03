@@ -23,15 +23,40 @@ pAudioSource *AudioManager::getAudioSource(const char *s)
         if(i->getID() == s) return i;
     }
     return nullptr;
+
+    // if(s == "Bluetooth") {
+    //     return new BluetoothAudioSource();
+    // }
+
+    // if( s == "DAB" ) {
+    //     return new DABSource();
+    // }
+
+    // if( s == "FM" ) {
+    //     return new FMSource();
+    // }
+
+    // if( s == "SD card" ) {
+    //     return new SDSource();
+    // }
+        
+    // return nullptr;
 }
 
 pAudioOutput *AudioManager::getAudioOutput(const char *s)
 {
-    for (auto &&i : outputList)
-    {
-        if(i->getID() == s) return i;
+    // for (auto &&i : outputList)
+    // {
+    //     if(i->getID() == s) return i;
+    // }
+    // return nullptr;
+
+    if(s == "Speaker") {
+        return new I2SOutput();
     }
+       
     return nullptr;
+
 }
 
 void AudioManager::setAudioSource(pAudioSource *audioSource, bool update)
@@ -70,20 +95,21 @@ void AudioManager::Update()
     {
         debug.printlnInfo("Ending audio source.");
         _currentSource->End();
+        // if(_currentSource != _pendingSource) delete _currentSource;
     }
 
     if(_currentOutput != nullptr) 
     {
         debug.printlnInfo("Ending audio output.");
         _currentOutput->End();
+        if(_currentOutput != _pendingOutput) delete _currentOutput;
     }
-
 
     _currentSource = _pendingSource;
     _currentOutput = _pendingOutput;
 
-    debug.printlnInfo("Begin source.");
     if(_currentSource != nullptr && _currentOutput != nullptr) {
+        debug.printlnInfo("Begin source.");
         _currentSource->Begin(_currentOutput);
         debug.printlnInfo("Updating the volume.");
         _currentSource->setVolume(userDataManager.getVolume());
@@ -112,6 +138,7 @@ void AudioManager::Loop()
     if( _useAudioPlayer || _useStreamCopier) {
         
         // if(!_isMuted) 
+        // note needed since we use interrupt now on the EC11, wer still need, because saving user data cause crash, maybe as to change the way
         UpdateVolume();
 
         if(!_isPaused && !audioPlayer.isActive() && _useAudioPlayer) {
@@ -128,11 +155,16 @@ void AudioManager::End()
 {
     if(_currentSource != nullptr) _currentSource->End();
     if(_currentOutput != nullptr) _currentOutput->End();
+    if(_useAudioPlayer) DeleteAudioPlayerTask();
+    if(_useStreamCopier) DeleteStreamCopierTask();
+
     _currentOutput = nullptr;
     _currentSource = nullptr;
 }
 
 void AudioManager::UpdateVolume() {
+    
+    if(_currentSource == nullptr) return;
 
     float oldVol = _currentSource->getVolume();
     float savedVol = userDataManager.getVolume();
@@ -142,7 +174,7 @@ void AudioManager::UpdateVolume() {
     if(newVol < 0) newVol = 0;
     else if( newVol > 1 ) newVol = 1;
 
-    if( _currentSource != nullptr && oldVol != newVol) {
+    if( oldVol != newVol ) {
         Serial.printf("Old volume : %f, Saved Volume : %f, New Volume : %f.\n", oldVol, savedVol, newVol);
         userDataManager.setVolume(newVol);
         userDataManager.Save();
@@ -156,6 +188,7 @@ void AudioManager::Mute()
     _isMuted = true;
     userDataManager.setMute(true);
     userDataManager.Save();
+    nextion.setMute(true);
 }
 
 void AudioManager::UnMute()
@@ -164,6 +197,7 @@ void AudioManager::UnMute()
     _isMuted = false;
     userDataManager.setMute(false);
     userDataManager.Save();
+    nextion.setMute(false);
 }
 
 void AudioManager::setLoopMode(AUDIO_LOOP_MODE mode)
@@ -193,7 +227,7 @@ AudioDecoder *AudioManager::getDecoder(AUDIO_CODEC codec)
 
 void AudioManager::CreateAudioPlayerTask()
 {
-    if(audioPlayerLoopTask != NULL) return;
+    if(audioPlayerLoopTask != NULL) DeleteAudioPlayerTask();
 
     xTaskCreatePinnedToCore(
         AudioPlayerLoopTask,     /* Function to implement the task */
@@ -211,7 +245,10 @@ void AudioManager::CreateAudioPlayerTask()
 
 void AudioManager::DeleteAudioPlayerTask()
 {
-    if(audioPlayerLoopTask == NULL) return;
+    if(audioPlayerLoopTask == NULL) {
+        _useAudioPlayer = false;
+        return;
+    } 
 
     vTaskDelete(audioPlayerLoopTask);
 
@@ -221,7 +258,7 @@ void AudioManager::DeleteAudioPlayerTask()
 
 void AudioManager::CreateStreamCopierTask()
 {
-    if(streamCopierLoopTask != NULL) return;
+    if(streamCopierLoopTask != NULL) DeleteStreamCopierTask();
 
     xTaskCreatePinnedToCore(
         StreamCopierLoopTask,     /* Function to implement the task */
@@ -238,12 +275,15 @@ void AudioManager::CreateStreamCopierTask()
 
 void AudioManager::DeleteStreamCopierTask()
 {
-    if(streamCopierLoopTask == NULL) return;
+    if(streamCopierLoopTask == NULL) {
+        _useStreamCopier = false;
+        return;
+    } 
 
     vTaskDelete(streamCopierLoopTask);
 
     streamCopierLoopTask = NULL;
-    _useStreamCopier = false;
+    
 }
 
 void AudioPlayerLoopTask(void *parameter)

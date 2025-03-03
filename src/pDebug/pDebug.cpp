@@ -30,6 +30,24 @@ size_t pDebug::print(String s)
     return _serial->print(s);
 }
 
+size_t pDebug::printInfo(String s)
+{
+    if(!(_debugLevel & Debug_INFO)) return -1;
+    return print("==> INFO : " + s);
+}
+
+size_t pDebug::printWarn(String s)
+{
+    if(!(_debugLevel & Debug_WARN)) return -1;
+    return print("==> WARN : " + s);
+}
+
+size_t pDebug::printError(String s)
+{
+    if(!(_debugLevel & Debug_ERROR)) return -1;
+    return print("==> ERROR : " + s);
+}
+
 size_t pDebug::println(String s)
 {
     return _serial->println(s);

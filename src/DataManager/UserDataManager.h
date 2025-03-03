@@ -6,10 +6,13 @@
 #include "Alarm/AlarmManager.h"
 #include "AudioTools.h"
 
+#define userDataFileLocation "/SystemData/userdata.json"
+
 class UserDataManager
 {
 private:
     JsonDocument _userData;
+
 public:
     UserDataManager();
     ~UserDataManager();

@@ -426,6 +426,51 @@ bool T4B::getFrequency(uint32_t const programIndex, uint8_t* const freqIndex)
     return (_commandSend(command) && _responseUint8(0U, freqIndex));
 }
 
+bool T4B::SetClock(uint8_t second, uint8_t minute, uint8_t hour, uint8_t day, uint8_t month, uint8_t year)
+{
+    Command command = _commandBuilder   .createRtc(CmdRtcId::SetClock)
+                                        .append(second)
+                                        .append(minute)
+                                        .append(hour)
+                                        .append(day)
+                                        .append(0u)
+                                        .append(month)
+                                        .append(year)
+                                        .build();
+    return _commandSend(command);
+}
+
+bool T4B::GetClock(uint8_t *second, uint8_t *minute, uint8_t *hour, uint8_t *day, uint8_t *week, uint8_t *month, uint8_t *year)
+{
+    Command command = _commandBuilder.createRtc(CmdRtcId::GetClock).build();
+    return  _commandSend(command) && 
+            _responseUint8(0U, second) && 
+            _responseUint8(1U, minute) && 
+            _responseUint8(2U, hour) && 
+            _responseUint8(3U, day) && 
+            _responseUint8(4U, week) && 
+            _responseUint8(5U, month) &&
+            _responseUint8(6U, year);
+}
+
+bool T4B::EnableSyncClock(bool enabled)
+{
+    Command command = _commandBuilder.createRtc(CmdRtcId::EnableSyncClock).append(enabled).build();
+    return _commandSend(command);
+}
+
+bool T4B::GetSyncClockStatus(bool *enabled)
+{
+    Command command = _commandBuilder.createRtc(CmdRtcId::GetSyncClockStatus).build();
+    return _commandSend(command) && _responseBool(0U, enabled);
+}
+
+bool T4B::GetClockStatus(bool *set)
+{
+    Command command = _commandBuilder.createRtc(CmdRtcId::GetClockStatus).build();
+    return _commandSend(command) && _responseBool(0U, set);
+}
+
 bool T4B::setNotification(NotificationType const notificationType)
 {
     Command command = _commandBuilder.createNotification(CmdNotificationId::SetNotification).append(static_cast<uint16_t>(notificationType)).build();

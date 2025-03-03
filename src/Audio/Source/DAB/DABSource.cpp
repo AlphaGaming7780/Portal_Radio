@@ -68,6 +68,13 @@ void DABSource::End()
     I2SManager::_streamIn.end();
 }
 
+// void DABSource::StaticSetProgIndex(uint32_t progIndex)
+// {
+//     DABSource *Dab;
+//     if(!audioManager.TryGetCurrentSourceAs<DABSource>(Dab)) return;
+//     Dab->setProgIndex(progIndex);
+// }
+
 void DABSource::setProgIndex(uint32_t progIndex)
 {
     if(!t4b.PlayDab(progIndex)) return;
@@ -124,6 +131,13 @@ void DABSource::UpdateProgramData(uint32_t programIndex)
     Serial.printf("Service Name : %s.\n", buffer);
     nextion.setServiceName(buffer);
 }
+
+// void DABSource::StaticSetEnsembleIdFilter(String ensembleId, bool update)
+// {
+//     DABSource *Dab;
+//     if(!audioManager.TryGetCurrentSourceAs<DABSource>(Dab)) return;
+//     Dab->setEnsembleIdFilter(ensembleId, update);
+// }
 
 void DABSource::setEnsembleIdFilter(String ensembleId, bool update)
 {

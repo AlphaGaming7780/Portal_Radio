@@ -29,7 +29,7 @@ AudioSource &BluetoothAudioSource::getAudioSource()
 void BluetoothAudioSource::Setup()
 {
     debug.printlnInfo("Tentative de démarage du Bluetooth.");
-    a2dp_sink.set_task_core(0);
+    // a2dp_sink.set_task_core(0);
     a2dp_sink.set_on_connection_state_changed(onBluetoothConnectionChanged);
     a2dp_sink.set_on_audio_state_changed(onBluetoothAudioStateCallback);
     a2dp_sink.set_avrc_metadata_attribute_mask(127);
@@ -61,9 +61,14 @@ void BluetoothAudioSource::End() {
     a2dp_sink.end();
 }
 
+float BluetoothAudioSource::volumeInc()
+{
+    return 0.0f;
+}
+
 void BluetoothAudioSource::setVolume(float volume)
 {
-    _potVolume = volume;
+    _volume = volume;
 }
 
 void BluetoothAudioSource::Play()
@@ -88,7 +93,7 @@ void BluetoothAudioSource::Previous()
 
 float BluetoothAudioSource::getVolume()
 {
-    return _potVolume;
+    return _volume;
 }
 
 // void BluetoothAudioSource::OnDeviceVolumeChange(int volume)
@@ -103,15 +108,23 @@ void BluetoothAudioSource::onBluetoothConnectionChanged(esp_a2d_connection_state
     {
     case ESP_A2D_CONNECTION_STATE_CONNECTING:
         Serial.printf("ESP32 connecting.\n");
+        nextion.setBtConnectionStatus("Connecting...");
+        nextion.setBtPeerName("");
         break;
     case ESP_A2D_CONNECTION_STATE_CONNECTED:
         Serial.printf("ESP32 connected to %s.\n", bluetoothAudioSource.a2dp_sink.get_peer_name());
+        nextion.setBtConnectionStatus("Connected");
+        nextion.setBtPeerName(bluetoothAudioSource.a2dp_sink.get_peer_name());
         break;
     case ESP_A2D_CONNECTION_STATE_DISCONNECTING:
         Serial.printf("ESP32 disconecting of %s.\n", bluetoothAudioSource.a2dp_sink.get_peer_name());
+        nextion.setBtConnectionStatus("Disconecting...");
+        nextion.setBtPeerName(bluetoothAudioSource.a2dp_sink.get_peer_name());
         break;
     case ESP_A2D_CONNECTION_STATE_DISCONNECTED:
-        Serial.printf("ESP32 disconected.\n");
+        Serial.printf("ESP32 disconnected.\n");
+        nextion.setBtConnectionStatus("Disconnected");
+        nextion.setBtPeerName("");
         break;
     default:
         Serial.println("Unknow `esp_a2d_connection_state_t` for `OnBluetoothConnectionChanged`.");

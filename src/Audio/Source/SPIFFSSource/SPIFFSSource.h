@@ -32,5 +32,5 @@ public:
 
 };
 
-extern SPIFFSSource spiffsSource;;
+extern SPIFFSSource spiffsSource;
 #endif
