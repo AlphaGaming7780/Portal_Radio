@@ -23,14 +23,12 @@ public:
     void Begin() override;
     void End() override;
 
-    // static void StaticSetProgIndex(uint32_t progIndex);
     void setProgIndex(uint32_t freq);
     void Next() override;
     void Previous() override;
 
     void UpdateProgramData(uint32_t programIndex);
 
-    // static void StaticSetEnsembleIdFilter(String ensembleId, bool update = true);
     void setEnsembleIdFilter(String ensembleId, bool update = true);
     String getEnsembleIdFilter();
     Vector<DabProgramInfo> getCurrentProgramList();
