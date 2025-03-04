@@ -142,12 +142,11 @@ void ExtendedT4B::OnT4BNotification(NotificationType notifType)
 void ExtendedT4B::Setup(bool cacheDabInfo)
 {
     Init();
-    if(!EnableI2S()) debug.println("T4B : Failed to enable I2S.");
-    setVolume(16);
-    setLRMode();
-    setStereoMode();
-    EnableSyncClock(true);
-    setSorter(DabSorter::EnsembleId);
+    if(!EnableI2S()) debug.printlnError("T4B : Failed to enable I2S.");
+    if(!setVolume(16)) debug.printlnWarn("T4B : Failed to set volume.");
+    if(!setLRMode()) debug.printlnWarn("T4B : Failed to setLRMode.");
+    if(!setStereoMode()) debug.printlnWarn("T4B : Failed to setStereoMode.");
+    if(!setSorter(DabSorter::EnsembleId)) debug.printlnWarn("T4B : Failed to setSorter.");
     if(!setNotification(NotificationType::ScanFinished | NotificationType::ScanFrequency)) Serial.println("Failed to set notif.");
     if(cacheDabInfo) UpdateDabCache();
 }

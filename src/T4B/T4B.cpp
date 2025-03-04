@@ -33,7 +33,7 @@ void T4B::Init(ulong baud)
 
     while (!Ready())
     {
-        delay(500U);
+        delay(1U);
         Serial.println("T4B isn't ready");
     }
     Serial.println("T4B is ready.");

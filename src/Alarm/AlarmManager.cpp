@@ -145,11 +145,22 @@ bool AlarmManager::_ShouldSyncTime(tm timeInfo)
 
 tm AlarmManager::_SyncTime()
 {
+    t4b.EnableSyncClock(true);
+
+    bool clockSet = false;
+    while(!t4b.GetClockStatus(&clockSet) || !clockSet) {
+        debug.printlnInfo("Clock isn't set");
+    }
+
     uint8_t year, month, week, day, hour, minute, second;
     t4b.GetClock(&second, &minute, &hour, &day, &week, &month, &year);
 
+    t4b.EnableSyncClock(false);
+
     Serial.printf("year = %i; month = %i; day = %i; hour = %i; minute = %i; second = %i\n", year + 2000, month, day, hour, minute, second);
     rtc.setTime(second, minute, hour, day, month, year + 2000);
+
+    
 
     return rtc.getTimeStruct();
 }
