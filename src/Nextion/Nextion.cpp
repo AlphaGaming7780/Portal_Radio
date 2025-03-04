@@ -35,16 +35,10 @@ void Nextion::StartupFinished()
     {
         Loop();
     }
-    
+
     _print("wup=1");
     _print("thup=1");
     _print("thsp=60");
-    setYear(2024);
-    setMonth(11);
-    setDay(18);
-    setHour(8);
-    setMinute(30);
-    setSecond(30);
     _UpdatePendingData();
     _print("page 1");
     delay(1000);
@@ -357,14 +351,16 @@ void Nextion::setDabProgramIndex(uint32_t programIndex)
 
 void Nextion::setEnsembleName(String ensembleName)
 {
-    _serial->print("DAB.EnsembleName.txt=\"" + ensembleName + "\"" + _endChar);
-    if(_selectedPage == "DAB") _serial->print("tEnsembleName.txt=\"" + ensembleName + "\"" + _endChar);
+    // _serial->print("DAB.EnsembleName.txt=\"" + ensembleName + "\"" + _endChar);
+    // if(_selectedPage == "DAB") _serial->print("tEnsembleName.txt=\"" + ensembleName + "\"" + _endChar);
+    _serial->print("DAB.tEnsembleName.txt=\"" + ensembleName + "\"" + _endChar);
 }
 
 void Nextion::setServiceName(String serviceName)
 {
-    _serial->print("DAB.ServiceName.txt=\"" + serviceName + "\"" + _endChar);
-    if(_selectedPage == "DAB") _serial->print("tServiceName.txt=\"" + serviceName + "\"" + _endChar);
+    // _serial->print("DAB.ServiceName.txt=\"" + serviceName + "\"" + _endChar);
+    // if(_selectedPage == "DAB") _serial->print("tServiceName.txt=\"" + serviceName + "\"" + _endChar);
+    _serial->print("DAB.tServiceName.txt=\"" + serviceName + "\"" + _endChar);
 }
 
 void Nextion::setDabSorter(DabSorter dabSorter)
@@ -374,8 +370,9 @@ void Nextion::setDabSorter(DabSorter dabSorter)
         return;
     }
 
-    _serial->printf("DAB.DabSorter.val=%i%s", dabSorter, _endChar);
-    if(_selectedPage == "DAB") _serial->printf("cbDabSorter.val=%i%s", dabSorter, _endChar);
+    // _serial->printf("DAB.DabSorter.val=%i%s", dabSorter, _endChar);
+    // if(_selectedPage == "DAB") _serial->printf("cbDabSorter.val=%i%s", dabSorter, _endChar);
+    _serial->printf("DAB.cbDabSorter.val=%i%s", dabSorter, _endChar);
 }
 
 int Nextion::getYear()
@@ -464,6 +461,12 @@ void Nextion::setDatOfWeek(int dayOfWeek)
     else if(dayOfWeek < 0) dayOfWeek = 0;
 
     _print("rtc6=" + String( dayOfWeek ) );
+}
+
+void Nextion::setDateString(String dataString)
+{
+    _serial->printf("ClockPage.varTimeDate.txt=\"%s\"%s", dataString.c_str(), _endChar );
+    _serial->printf("timeDate.txt=\"%s\"%s", dataString.c_str(), _endChar);
 }
 
 void Nextion::SelectAlarm(int index)

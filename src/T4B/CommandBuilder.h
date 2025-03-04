@@ -132,7 +132,9 @@ enum class CmdErrorCode : uint8_t
 
 inline const char* ToString(CmdErrorCode v)
 {
+    //Bad but it works
     String s = "No CmdErrorCode matching : " + String(static_cast<uint8_t>(v)) + ".";
+
     switch (v)
     {
         case CmdErrorCode::NONE:                        return "NONE";

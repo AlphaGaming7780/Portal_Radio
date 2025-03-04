@@ -25,6 +25,11 @@ void pDebug::setDebugLevel(pDebugLevel debugLevel)
     _debugLevel = debugLevel;
 }
 
+pDebugLevel pDebug::getDebugLevel()
+{
+    return _debugLevel;
+}
+
 size_t pDebug::print(String s)
 {
     return _serial->print(s);

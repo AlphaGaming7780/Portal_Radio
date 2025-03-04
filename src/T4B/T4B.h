@@ -10,6 +10,8 @@ static uint16_t const T4BMaxTextSize = 128U;
 static uint16_t const T4BMaxDataSize = 2 * T4BMaxTextSize;
 static uint16_t const T4BMaxEventSize = 22;
 static uint8_t const T4BHeaderSize = 6U;
+static const uint32_t DabIndexMin = 0;
+static const uint32_t DabIndexMax = 94;
 static const uint32_t FmFrequencyMin = 87500U;
 static const uint32_t FmFrequencyMax = 108000U;
 
@@ -228,6 +230,7 @@ public:
 
     bool EnableI2S(bool enable = true);
 
+    void FlushBuffer();
 
 private:
 

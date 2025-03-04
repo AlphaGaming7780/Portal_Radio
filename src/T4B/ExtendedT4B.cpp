@@ -76,6 +76,7 @@ void ExtendedT4B::OnT4BEvent(EventType eventType)
     }
 
     if ( ( eventType & EventType::TimeChange ) > 0 ) {
+        debug.printlnInfo("T4B Event : TimeChange");
         alarmManager.SetClockDirty();
     }
 }
@@ -88,18 +89,21 @@ void ExtendedT4B::OnT4BNotification(NotificationType notifType)
     switch (notifType)
     {
         case NotificationType::ScanFinished:
-            if(!getPlayIndex(&_CurrentPlayIndex, true)) break;
+            if(!T4B::getPlayIndex(&_CurrentPlayIndex)) break;
 
-            if(!getPlayMode(&_CurrentStreamMode, true)) break;
+            // Removed because it cause a bug where it get DAB mode instead of FM when scanning for FM freq.
+            // if(!T4B::getPlayMode(&_CurrentStreamMode)) break;
 
             if(_CurrentStreamMode == StreamMode::Dab) {
                 Serial.printf("Playing program index : %u.\n", _CurrentPlayIndex);
+                if(_CurrentPlayIndex < DabIndexMin || _CurrentPlayIndex > DabIndexMax) break;
                 userDataManager.setLastDabProgramIndex(_CurrentPlayIndex);
                 userDataManager.Save();
                 DAB.UpdateProgramData(_CurrentPlayIndex);
 
             } else if(_CurrentStreamMode == StreamMode::Fm) {
                 Serial.printf("Playing Frequence : %u.\n", _CurrentPlayIndex);
+                if(_CurrentPlayIndex < FmFrequencyMin || _CurrentPlayIndex > FmFrequencyMax) break;
                 userDataManager.setLastFmFreq(_CurrentPlayIndex);
                 userDataManager.Save();
                 nextion.setTitle("");
@@ -142,6 +146,8 @@ void ExtendedT4B::OnT4BNotification(NotificationType notifType)
 void ExtendedT4B::Setup(bool cacheDabInfo)
 {
     Init();
+    AddOnEventAndNotification(*this);
+    EnableSyncClock(true);
     if(!EnableI2S()) debug.printlnError("T4B : Failed to enable I2S.");
     if(!setVolume(16)) debug.printlnWarn("T4B : Failed to set volume.");
     if(!setLRMode()) debug.printlnWarn("T4B : Failed to setLRMode.");

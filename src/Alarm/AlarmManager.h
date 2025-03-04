@@ -4,6 +4,8 @@
 #include "Nextion/Nextion.h"
 #include "Alarm/Alarm.h"
 
+#define alarmFileLocation "/SystemData/alarm.mp3"
+
 class AlarmManager
 {
 
@@ -28,6 +30,7 @@ public:
     void RemoveAlarm(int index);
     void SaveAlarm(int index);
 
+    bool IsAlarmRinging();
     void StopCurrentAlarm();
 
     void SetClockDirty();

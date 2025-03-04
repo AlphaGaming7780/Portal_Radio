@@ -14,7 +14,7 @@ AlarmManager::~AlarmManager()
 
 void AlarmManager::Begin()
 {
-    rtc.offset = userDataManager.getTimeZone() * 3600;
+    // rtc.offset = userDataManager.getTimeZone() * 3600;
     _alarmList = userDataManager.getAlarmList();
 
     // int year = nextion.getYear();
@@ -24,7 +24,9 @@ void AlarmManager::Begin()
     // int minute = nextion.getMinute();
     // int second = nextion.getSecond();
 
-    _SyncTime();
+    tm timeInfo = _SyncTime();
+    _oldHour = timeInfo.tm_hour;
+    _oldMinute = timeInfo.tm_min;
 }
 
 void AlarmManager::Loop()
@@ -126,9 +128,15 @@ void AlarmManager::SaveAlarm(int index)
     nextion.SelectAlarm(index);
 }
 
+bool AlarmManager::IsAlarmRinging()
+{
+    return _isAlarmRinging;
+}
+
 void AlarmManager::StopCurrentAlarm()
 {
     _isAlarmRinging = false;
+    audioManager.setAudioSource(nullptr, true);
 }
 
 void AlarmManager::SetClockDirty()
@@ -145,22 +153,11 @@ bool AlarmManager::_ShouldSyncTime(tm timeInfo)
 
 tm AlarmManager::_SyncTime()
 {
-    t4b.EnableSyncClock(true);
-
-    bool clockSet = false;
-    while(!t4b.GetClockStatus(&clockSet) || !clockSet) {
-        debug.printlnInfo("Clock isn't set");
-    }
-
     uint8_t year, month, week, day, hour, minute, second;
     t4b.GetClock(&second, &minute, &hour, &day, &week, &month, &year);
 
-    t4b.EnableSyncClock(false);
-
-    Serial.printf("year = %i; month = %i; day = %i; hour = %i; minute = %i; second = %i\n", year + 2000, month, day, hour, minute, second);
+    // Serial.printf("year = %i; month = %i; day = %i; hour = %i; minute = %i; second = %i\n", year + 2000, month, day, hour, minute, second);
     rtc.setTime(second, minute, hour, day, month, year + 2000);
-
-    
 
     return rtc.getTimeStruct();
 }
@@ -185,6 +182,7 @@ void AlarmManager::_UpdateNextionDate(tm timeInfo)
     nextion.setHour(timeInfo.tm_hour);
     nextion.setMinute(timeInfo.tm_min);
     nextion.setSecond(timeInfo.tm_sec);
+    nextion.setDateString(rtc.getTime("%A %d-%m-%Y"));
 }
 
 void AlarmManager::_CheckAlarm(tm timeInfo)
@@ -209,7 +207,7 @@ void AlarmManager::_CheckMissedAlarm(tm timeInfo, tm newTimeInfo)
     if(_isAlarmRinging) return;
 
     int cTime = timeInfo.tm_hour * 60 + timeInfo.tm_min;
-    int nTime = newTimeInfo.tm_hour * 60 + timeInfo.tm_min;
+    int nTime = newTimeInfo.tm_hour * 60 + newTimeInfo.tm_min;
 
     if(timeInfo.tm_mday != newTimeInfo.tm_mday) {
         nTime += 24 * 60;
@@ -218,7 +216,10 @@ void AlarmManager::_CheckMissedAlarm(tm timeInfo, tm newTimeInfo)
     int deltaTime = nTime - cTime;
 
     if(deltaTime <= 0 ) {
-        debug.printlnError("[AlarmManager] deltaTime <= 0.");
+        if( (debug.getDebugLevel() & pDebugLevel::Debug_ERROR) > 0) {
+            debug.printError("[AlarmManager] deltaTime <= 0, ");
+            Serial.printf("nTime: %i, cTime: %i.\n", nTime, cTime);
+        }
         return;
     }
 
@@ -247,4 +248,7 @@ void AlarmManager::_CheckMissedAlarm(tm timeInfo, tm newTimeInfo)
 void AlarmManager::_RingAlarm(Alarm alarm)
 {
     _isAlarmRinging = true;
+
+    audioManager.setAudioSource(&sdSource, true);
+    if(SD.exists(alarmFileLocation)) sdSource.setPathAndPlay(alarmFileLocation);
 }

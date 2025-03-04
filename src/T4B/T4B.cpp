@@ -300,7 +300,10 @@ bool T4B::setPreset(StreamMode const streamMode, uint8_t const presetIndex, uint
     if(streamMode == StreamMode::Dab) {
 
     } else if (streamMode == StreamMode::Fm) {
-        if(data < FmFrequencyMin || data > FmFrequencyMax) return false;
+        if(data < FmFrequencyMin || data > FmFrequencyMax) {
+            Serial.println("[T4B::setPreset] FM Frequency is out of bound.");
+            return false;
+        } 
     } else return false;
 
     if(presetIndex > 9) return false;
@@ -504,6 +507,11 @@ bool T4B::EnableI2S(bool enable)
 	if(!setFunction(53, GpioFunction::I2S_BCLK_OUT, GpioDrivingStrength::DRIVE_8MA))
 		return false;
 	return true;
+}
+
+void T4B::FlushBuffer()
+{
+    _serial->flush();
 }
 
 bool T4B::_processNotification()

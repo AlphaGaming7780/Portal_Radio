@@ -32,6 +32,7 @@ public:
 
     bool begin(unsigned long baud = 115200);
     void setDebugLevel(pDebugLevel debugLevel);
+    pDebugLevel getDebugLevel();
 
     size_t print(String s);
     size_t printInfo(String s);

@@ -24,7 +24,7 @@ bool UserDataManager::Save()
 {
     debug.printlnInfo("Saving user data.");
     String s;
-    serializeJson(_userData, s);
+    serializeJsonPretty(_userData, s);
 
     debug.printlnInfo("Removing the userdata.json.");
     if(SD.exists(userDataFileLocation)) SD.remove(userDataFileLocation);

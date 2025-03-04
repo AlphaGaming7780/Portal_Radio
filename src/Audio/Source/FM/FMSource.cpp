@@ -68,6 +68,8 @@ void FMSource::setFreq(uint32_t freq)
         userDataManager.setLastFmFreq(freq);
         userDataManager.Save();
     }
+    nextion.setTitle("");
+    nextion.setArtist("");
     nextion.setFmFreq(freq);
 }
 
@@ -88,9 +90,18 @@ void FMSource::playPreset(uint8_t presetId)
 void FMSource::setPreset(uint8_t presetId)
 {
     uint32_t freq;
-    if(!isCurrentSource()) return;
-    if(!t4b.getPlayIndex(&freq)) return;
-    if(!t4b.setPresetFM(presetId, freq)) return;
+    if(!isCurrentSource()) {
+        debug.printlnError("Isn't the current source.");
+        return;
+    }
+    if(!t4b.getPlayIndex(&freq)) {
+        debug.printlnError("Failed to get the play index.");
+        return;
+    }
+    if(!t4b.setPresetFM(presetId, freq)) {
+        debug.printlnError("Failed to setPresetFM.");
+        return;  
+    }
     nextion.SendFmPresets();
 }
 

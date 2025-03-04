@@ -24,8 +24,11 @@ void EC11::Begin()
 	attachInterrupt(digitalPinToInterrupt(_pinA), DoPinAInterrupt, CHANGE);
 	attachInterrupt(digitalPinToInterrupt(_pinB), DoPinBInterrupt, CHANGE);
 	attachInterrupt(digitalPinToInterrupt(_pinSW), DoButtonInterrupt, CHANGE);
+}
 
-	_oldPinA = digitalRead(_pinA);
+void EC11::Loop()
+{
+
 }
 
 void EC11::DoPinAInterrupt() {
@@ -78,9 +81,8 @@ void EC11::DoButtonInterrupt() {
 	else if (!ec11._oldSwState && sw) 
 	{
 		//Rising edge
-		if(nextion.IsSleeping()) {
-			nextion.Sleep(false);
-		}
+		if(alarmManager.IsAlarmRinging()) alarmManager.StopCurrentAlarm();
+		else if(nextion.IsSleeping()) nextion.Sleep(false);
 
 	}
 	debug.printlnInfo("SW");
@@ -94,15 +96,15 @@ int EC11::getDirection()
 	return dir;
 }
 
-bool EC11::isSwitchPressed()
-{
-	return _oldSwState;
-}
+// bool EC11::isSwitchPressed()
+// {
+// 	return _oldSwState;
+// }
 
-bool EC11::isSwitchRisingEdge()
-{
-	return _swRisingEdge;
-}
+// bool EC11::isSwitchRisingEdge()
+// {
+// 	return _swRisingEdge;
+// }
 
 void EC11::setInvertDirection(bool value)
 {

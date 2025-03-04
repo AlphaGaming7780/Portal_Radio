@@ -4,8 +4,7 @@
 class EC11
 {
 private:
-    int _pinA, _pinB, _pinSW = 32;
-    bool _oldPinA, _oldPinB = false;
+    int _pinA, _pinB, _pinSW = 0;
     
     bool _reseted = true;
     int _direction = 0;
@@ -22,10 +21,9 @@ public:
     ~EC11();
 
     void Begin();
+    void Loop();
 
     int getDirection();
-    bool isSwitchPressed();
-    bool isSwitchRisingEdge();
 
     void setInvertDirection(bool value);
 };

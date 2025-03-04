@@ -62,6 +62,7 @@ public:
     void setMinute(int minute);
     void setSecond(int second);
     void setDatOfWeek(int dayOfWeek);
+    void setDateString(String dataString);
 
     void SelectAlarm(int index);
     void SelectLastAlarm();
