@@ -147,7 +147,7 @@ void AlarmManager::ShouldStopCurrentAlarm()
 void AlarmManager::StopCurrentAlarm()
 {
     _isAlarmRinging = false;
-    if(_oldMute) audioManager.Mute();
+    if(_oldMute) audioManager.Mute(false);
     audioManager.setAudioSource(nullptr, true);
 }
 
@@ -261,7 +261,7 @@ void AlarmManager::_RingAlarm(Alarm alarm)
 
     audioManager.setAudioSource(&sdSource, true);
     _oldMute = audioManager.isMuted();
-    if(_oldMute) audioManager.UnMute();
+    if(_oldMute) audioManager.UnMute(false);
     sdSource.setVolume(0.5);
     if(SD.exists(alarmFileLocation)) sdSource.setPathAndPlay(alarmFileLocation);
 }

@@ -2,9 +2,13 @@
 
 #include "T4B/ExtendedT4B.h"
 
-// https://www.circuitstate.com/pinouts/doit-esp32-devkit-v1-wifi-development-board-pinout-diagram-and-reference/#ADC
+#define START_WDT_TIMEOUT 10
+#define LOOP_WDT_TIMEOUT 3
 
 void setup() {
+
+    esp_task_wdt_init(START_WDT_TIMEOUT, true); //enable panic so ESP32 restarts
+    esp_task_wdt_add(NULL); //add current thread to WDT watch
 
     // LOGLEVEL_HELIX = LogLevelHelix::Info;
     debug.setDebugLevel(Debug_INFO | Debug_WARN | Debug_ERROR);
@@ -56,10 +60,9 @@ void setup() {
 
     nextion.StartupFinished();
 
-    if(!userDataManager.getMute()) { 
-        audioManager.UnMute();
-        nextion.setMute(false);
-    }
+    if(!userDataManager.getMute()) audioManager.UnMute(false);
+
+    esp_task_wdt_init(LOOP_WDT_TIMEOUT, true);
 
     debug.printlnInfo("Portal Radio started!");
 }
@@ -70,6 +73,7 @@ uint32_t oldFreeHeap = 0;
 
 void loop() {
 
+    esp_task_wdt_reset();
     #ifdef dDebug
     uint32_t freeHeap = esp_get_free_heap_size();
     if(freeHeap != oldFreeHeap) {

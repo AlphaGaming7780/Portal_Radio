@@ -77,8 +77,8 @@ public:
     void Pause()    { if(_currentSource == nullptr) return; _currentSource->Pause(); _isPaused = true; };
     void Next()     { if(_currentSource == nullptr) return; _currentSource->Next(); };
     void Previous() { if(_currentSource == nullptr) return; _currentSource->Previous(); };
-    void Mute();
-    void UnMute();
+    void Mute(bool save = true);
+    void UnMute(bool save = true);
     bool isMuted() {return _isMuted; };
 
     void setLoopMode(AUDIO_LOOP_MODE mode);

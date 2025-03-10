@@ -85,10 +85,10 @@ void pAudioSource::setVolume(float volume)
     audioManager.audioPlayer.setVolume(volume);
     nextion.setVolume(volume * 100, audioManager.isMuted());
 }
-void pAudioSource::Play() { audioManager.audioPlayer.play(); }
-void pAudioSource::Pause() { audioManager.audioPlayer.stop(); }
-void pAudioSource::Next() { audioManager.audioPlayer.next(); }
-void pAudioSource::Previous() { audioManager.audioPlayer.previous(); }
+void pAudioSource::Play()       { bool muted = audioManager.isMuted(); if(!muted) audioManager.Mute(false); audioManager.audioPlayer.play();     if(!muted) audioManager.UnMute(false); }
+void pAudioSource::Pause()      { bool muted = audioManager.isMuted(); if(!muted) audioManager.Mute(false); audioManager.audioPlayer.stop();     if(!muted) audioManager.UnMute(false); }
+void pAudioSource::Next()       { bool muted = audioManager.isMuted(); if(!muted) audioManager.Mute(false); audioManager.audioPlayer.next();     if(!muted) audioManager.UnMute(false); }
+void pAudioSource::Previous()   { bool muted = audioManager.isMuted(); if(!muted) audioManager.Mute(false); audioManager.audioPlayer.previous(); if(!muted) audioManager.UnMute(false); }
 float pAudioSource::getVolume() { return audioManager.audioPlayer.volume(); }
 
 bool pAudioSource::isCurrentSource()

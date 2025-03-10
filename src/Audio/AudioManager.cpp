@@ -9,7 +9,7 @@ AudioManager::AudioManager(/* args */)
 {
     audioPlayer.setVolumeControl(_volumeControl);
     pinMode(_mutePin, OUTPUT);
-    Mute();
+    Mute(false);
 }
 
 AudioManager::~AudioManager()
@@ -84,12 +84,16 @@ void AudioManager::Update()
 
     bool oldIsMuted = _isMuted;
 
+    // Reset source in case we get stuck during the process of disabling on of them (SD) so it actually unstuck the user
+    userDataManager.setLastSelectedSource("NULL");
+    userDataManager.Save();
+
     nextion.setTitle("");
     nextion.setArtist("");
     nextion.setGenre("");
     nextion.setAlbum("");
 
-    if(!oldIsMuted) Mute();
+    if(!oldIsMuted) Mute(false);
 
     if(_currentSource != nullptr) 
     {
@@ -129,7 +133,7 @@ void AudioManager::Update()
     else userDataManager.setLastSelectedSource("NULL");
     userDataManager.Save();
 
-    if(!oldIsMuted) UnMute();
+    if(!oldIsMuted) UnMute(false);
 }
 
 void AudioManager::Loop()
@@ -182,21 +186,25 @@ void AudioManager::UpdateVolume() {
     }
 }
 
-void AudioManager::Mute()
+void AudioManager::Mute(bool save)
 {
     digitalWrite(_mutePin, HIGH);
     _isMuted = true;
-    userDataManager.setMute(true);
-    userDataManager.Save();
+    if(save) {
+        userDataManager.setMute(true);
+        userDataManager.Save();
+    }
     nextion.setMute(true);
 }
 
-void AudioManager::UnMute()
+void AudioManager::UnMute(bool save)
 {
     digitalWrite(_mutePin, LOW);
     _isMuted = false;
-    userDataManager.setMute(false);
-    userDataManager.Save();
+    if(save) {
+        userDataManager.setMute(false);
+        userDataManager.Save();
+    }
     nextion.setMute(false);
 }
 
@@ -291,7 +299,8 @@ void AudioPlayerLoopTask(void *parameter)
     while (true)
     {
         audioManager.audioPlayer.copy();
-        delay(1);
+        // delay(1);
+        esp_task_wdt_reset();
     }
 }
 
@@ -300,6 +309,7 @@ void StreamCopierLoopTask(void *parameter)
     while (true)
     {
         audioManager.streamCopie.copy();
-        delay(1);
+        // delay(1);
+        esp_task_wdt_reset();
     }
 }
