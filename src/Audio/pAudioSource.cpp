@@ -61,7 +61,7 @@ void pAudioSource::setOutput(audio_tools::AudioStream &stream)
 
 void pAudioSource::Begin()
 {
-    audioManager.audioPlayer.setBufferSize(2048);
+    // audioManager.audioPlayer.setBufferSize(2048);
     audioManager.audioPlayer.begin();
     audioManager.CreateAudioPlayerTask();
 

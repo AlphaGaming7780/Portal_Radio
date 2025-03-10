@@ -19,15 +19,17 @@ public:
     NextionPendingData(/* args */) {};
     ~NextionPendingData() {};
 
-    String audioSource = emptyString;
+    const String NullString = "NULL";
+
+    String audioSource = NullString;
 
     int volume = -1;
     BOOL3 isMuted = BOOL3_NULL;
 
-    String title = emptyString;
-    String artist = emptyString;
-    String album = emptyString;
-    String genre = emptyString;
+    String title = NullString;
+    String artist = NullString;
+    String album = NullString;
+    String genre = NullString;
 
     BOOL3 playStatus = BOOL3_NULL;
 

@@ -98,7 +98,7 @@ private:
 
     void _UpdatePendingData() {
         
-        if(_pendingData.audioSource != emptyString)   { setAudioSource(_pendingData.audioSource); _pendingData.audioSource = emptyString; }
+        if(_pendingData.audioSource != _pendingData.NullString)   { setAudioSource(_pendingData.audioSource); _pendingData.audioSource = _pendingData.NullString; }
 
         if(_pendingData.volume != -1 && _pendingData.isMuted != BOOL3_NULL) {
             setVolume(_pendingData.volume, _pendingData.isMuted);
@@ -106,10 +106,10 @@ private:
             _pendingData.isMuted = BOOL3_NULL;
         }
 
-        if(_pendingData.title != emptyString)   { setTitle(_pendingData.title); _pendingData.title = emptyString; }
-        if(_pendingData.artist != emptyString)  { setArtist(_pendingData.artist); _pendingData.artist = emptyString; }
-        if(_pendingData.genre != emptyString)  { setGenre(_pendingData.genre); _pendingData.genre = emptyString; }
-        if(_pendingData.album != emptyString)  { setAlbum(_pendingData.album); _pendingData.album = emptyString; }
+        if(_pendingData.title != _pendingData.NullString)   { setTitle(_pendingData.title); _pendingData.title = _pendingData.NullString; }
+        if(_pendingData.artist != _pendingData.NullString)  { setArtist(_pendingData.artist); _pendingData.artist = _pendingData.NullString; }
+        if(_pendingData.genre != _pendingData.NullString)  { setGenre(_pendingData.genre); _pendingData.genre = _pendingData.NullString; }
+        if(_pendingData.album != _pendingData.NullString)  { setAlbum(_pendingData.album); _pendingData.album = _pendingData.NullString; }
         if(_pendingData.playStatus != BOOL3_NULL)     { setPlayStatus(_pendingData.playStatus); _pendingData.playStatus = BOOL3_NULL; } 
 
         if(_pendingData.dabSorter != -1) { setDabSorter(static_cast<DabSorter>(_pendingData.dabSorter)); _pendingData.dabSorter =-1; }
