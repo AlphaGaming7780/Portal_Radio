@@ -31,6 +31,7 @@ public:
     void SaveAlarm(int index);
 
     bool IsAlarmRinging();
+    void ShouldStopCurrentAlarm();
     void StopCurrentAlarm();
 
     void SetClockDirty();
@@ -43,6 +44,10 @@ private:
     bool _isAlarmRinging = false;
 
     bool _isClockDirty = false;
+
+    bool _shouldStopCurrentAlarm = false;
+
+    bool _oldMute = false;
 
     Vector<Alarm> _alarmList;
 

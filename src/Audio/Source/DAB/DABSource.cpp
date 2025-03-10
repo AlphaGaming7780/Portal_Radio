@@ -42,7 +42,7 @@ void DABSource::setOutput(audio_tools::AudioStream &stream)
 void DABSource::Begin()
 {
     _EnsembleNameFilter = userDataManager.getLastDabEnsembleIdFilter();
-    _CurrentDabProgramList = t4b.getFilteredByEnsembleIdDabProgramList(_EnsembleNameFilter.c_str());
+    t4b.getFilteredByEnsembleIdDabProgramList( _CurrentDabProgramList, _EnsembleNameFilter.c_str());
     uint32_t lastDabProgIndex = userDataManager.getLastDabProgramIndex();
     uint32_t totalProg;
     
@@ -128,7 +128,7 @@ void DABSource::UpdateProgramData(uint32_t programIndex)
 void DABSource::setEnsembleIdFilter(String ensembleId, bool update)
 {
     _EnsembleNameFilter = ensembleId;
-    _CurrentDabProgramList = t4b.getFilteredByEnsembleIdDabProgramList(ensembleId.c_str());
+    t4b.getFilteredByEnsembleIdDabProgramList( _CurrentDabProgramList, ensembleId.c_str());
     userDataManager.setLastDabEnsembleIdFilter(_EnsembleNameFilter);
     if(update) nextion.SendDabStationList();
 }

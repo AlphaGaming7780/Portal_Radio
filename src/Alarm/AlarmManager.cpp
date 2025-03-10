@@ -25,6 +25,7 @@ void AlarmManager::Begin()
     // int second = nextion.getSecond();
 
     tm timeInfo = _SyncTime();
+    _UpdateNextionDate(timeInfo);
     _oldHour = timeInfo.tm_hour;
     _oldMinute = timeInfo.tm_min;
 }
@@ -32,6 +33,11 @@ void AlarmManager::Begin()
 void AlarmManager::Loop()
 {
     tm timeInfo = rtc.getTimeStruct();
+
+    if(_shouldStopCurrentAlarm) {
+        _shouldStopCurrentAlarm = false;
+        StopCurrentAlarm();
+    }
 
     if(_ShouldSyncTime(timeInfo)) {
         tm newTimeInfo = _SyncTime();
@@ -133,9 +139,15 @@ bool AlarmManager::IsAlarmRinging()
     return _isAlarmRinging;
 }
 
+void AlarmManager::ShouldStopCurrentAlarm()
+{
+    _shouldStopCurrentAlarm = true;
+}
+
 void AlarmManager::StopCurrentAlarm()
 {
     _isAlarmRinging = false;
+    if(_oldMute) audioManager.Mute();
     audioManager.setAudioSource(nullptr, true);
 }
 
@@ -239,8 +251,6 @@ void AlarmManager::_CheckMissedAlarm(tm timeInfo, tm newTimeInfo)
 
         if( alarmDeltaTime < 0 || alarmDeltaTime > deltaTime || ( ( a.dayOfWeek & dayOfWeekFromTimeInfoFormat(timeInfo.tm_wday) ) == 0) ) continue;
         
-        debug.printlnInfo("ALARM !!!!!");
-        
         return _RingAlarm(a);
     }
 }
@@ -250,5 +260,8 @@ void AlarmManager::_RingAlarm(Alarm alarm)
     _isAlarmRinging = true;
 
     audioManager.setAudioSource(&sdSource, true);
+    _oldMute = audioManager.isMuted();
+    if(_oldMute) audioManager.UnMute();
+    sdSource.setVolume(0.5);
     if(SD.exists(alarmFileLocation)) sdSource.setPathAndPlay(alarmFileLocation);
 }

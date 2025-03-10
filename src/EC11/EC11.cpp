@@ -81,7 +81,7 @@ void EC11::DoButtonInterrupt() {
 	else if (!ec11._oldSwState && sw) 
 	{
 		//Rising edge
-		if(alarmManager.IsAlarmRinging()) alarmManager.StopCurrentAlarm();
+		if(alarmManager.IsAlarmRinging()) alarmManager.ShouldStopCurrentAlarm();
 		else if(nextion.IsSleeping()) nextion.Sleep(false);
 
 	}

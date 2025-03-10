@@ -190,9 +190,9 @@ Vector<DabProgramInfo> ExtendedT4B::getDabProgramsList()
     return _DabProgramsList;
 }
 
-Vector<DabProgramInfo> ExtendedT4B::getFilteredByEnsembleIdDabProgramList(const char *ensembleId)
+void ExtendedT4B::getFilteredByEnsembleIdDabProgramList(Vector<DabProgramInfo> &data, const char *ensembleId)
 {
-    Vector<DabProgramInfo> data;
+    data.clear();
 
     debug.printlnInfo("Filtering dab programs with " + String(ensembleId) + " ensemble id.");
 
@@ -205,8 +205,6 @@ Vector<DabProgramInfo> ExtendedT4B::getFilteredByEnsembleIdDabProgramList(const 
         }
         // debug.printlnInfo(String(obj.ServiceName) + " as not the same ensemble id, " + String(obj.EnsembleId) + " != " + String(ensembleId) + ".");
     }
-
-    return data;
 }
 
 Vector<String> ExtendedT4B::getEnsembleIdList()

@@ -43,7 +43,7 @@ public:
 
     void UpdateDabCache();
     Vector<DabProgramInfo> getDabProgramsList();
-    Vector<DabProgramInfo> getFilteredByEnsembleIdDabProgramList(const char* ensembleId);
+    void getFilteredByEnsembleIdDabProgramList(Vector<DabProgramInfo> &data, const char *ensembleId);
 
     Vector<String> getEnsembleIdList();
 
