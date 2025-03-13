@@ -58,6 +58,7 @@ void DABSource::Begin()
     nextion.setDabSorter(dabSorter);
 
     UpdateProgramData(lastDabProgIndex);
+    debug.printlnInfo("DAB Begin done");
 }
 
 void DABSource::End()

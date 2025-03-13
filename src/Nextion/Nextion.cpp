@@ -260,6 +260,7 @@ void Nextion::SendFmPresets()
     if(_selectedPage != "FM") return;
     uint32_t freq = 0;
     for (int i = 0; i < 10; i++) {
+        esp_task_wdt_reset(); // reset because this bad boy here take some time
         if(t4b.getPresetFM(i, &freq)) {
             _serial->printf("bPreset%i.txt=\"%.1f\"%s", i, freq/1000.0, _endChar);
             continue;

@@ -237,79 +237,115 @@ void AudioManager::CreateAudioPlayerTask()
 {
     if(audioPlayerLoopTask != NULL) DeleteAudioPlayerTask();
 
+    _useAudioPlayer = true;
+
     xTaskCreatePinnedToCore(
         AudioPlayerLoopTask,     /* Function to implement the task */
         "AudioPlayerLoopTask",    /* Name of the task */
         10000,                    /* Stack size in words */
-        NULL,                     /* Task input parameter */
+        (void*)&_useAudioPlayer,                     /* Task input parameter */
         255,                        /* Priority of the task */
         &audioPlayerLoopTask,     /* Task handle. */
         0                         // Core ID
     );
 
-    _useAudioPlayer = true;
-
 }
 
 void AudioManager::DeleteAudioPlayerTask()
 {
+    _useAudioPlayer = false;
+
     if(audioPlayerLoopTask == NULL) {
-        _useAudioPlayer = false;
         return;
     } 
+
+    while (!_useAudioPlayer)
+    {
+        esp_task_wdt_reset();
+    }
+    
+    _useAudioPlayer = false;
 
     vTaskDelete(audioPlayerLoopTask);
 
     audioPlayerLoopTask = NULL;
-    _useAudioPlayer = false;
+    
 }
 
 void AudioManager::CreateStreamCopierTask()
 {
     if(streamCopierLoopTask != NULL) DeleteStreamCopierTask();
 
+    _useStreamCopier = true;
+
     xTaskCreatePinnedToCore(
         StreamCopierLoopTask,     /* Function to implement the task */
         "StreamCopierLoopTask",    /* Name of the task */
         10000,                    /* Stack size in words */
-        NULL,                     /* Task input parameter */
+        (void*)&_useStreamCopier,                     /* Task input parameter */
         255,                        /* Priority of the task */
         &streamCopierLoopTask,     /* Task handle. */
         0                         // Core ID
     );
 
-    _useStreamCopier = true;
 }
 
 void AudioManager::DeleteStreamCopierTask()
 {
+    _useStreamCopier = false;
     if(streamCopierLoopTask == NULL) {
-        _useStreamCopier = false;
+        debug.printlnWarn("DeleteStreamCopierTask streamCopierLoopTask was null");
         return;
-    } 
+    }
+
+    while (!_useStreamCopier)
+    {
+        esp_task_wdt_reset();
+    }
+
+    _useStreamCopier = false;
 
     vTaskDelete(streamCopierLoopTask);
 
     streamCopierLoopTask = NULL;
-    
 }
 
 void AudioPlayerLoopTask(void *parameter)
 {
-    while (true)
+
+    bool *value = ((bool*)parameter);
+
+    while (*value)
     {
         audioManager.audioPlayer.copy();
-        // delay(1);
         esp_task_wdt_reset();
     }
+
+    (*value) = true;
+
+    while (true)
+    {
+        // Wait until this task get deleted by the main thread.
+        esp_task_wdt_reset();
+    }
+
 }
 
 void StreamCopierLoopTask(void *parameter)
 {
-    while (true)
+    bool *value = ((bool*)parameter);
+
+    while (*value)
     {
         audioManager.streamCopie.copy();
-        // delay(1);
+        esp_task_wdt_reset();
+    }
+
+    (*value) = true;
+
+    while (true)
+    {
+        // Wait until this task get deleted by the main thread.
         esp_task_wdt_reset();
     }
 }
