@@ -30,6 +30,9 @@ private:
     uint32_t _DabTotalprogram;
     StreamMode _CurrentStreamMode;
     uint32_t _CurrentPlayIndex = -1;
+    
+    //                          1,  2,  3,  4,  5,  6,  7,  8,  9,  10
+    uint32_t _FmPresets[10] = {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0};
 
 public:
     ExtendedT4B(HardwareSerial *serial, uint8_t resetPin);
@@ -58,6 +61,9 @@ public:
 
     bool getEnsembleName(char* const ensembleName, uint16_t const size, uint32_t const programIndex, bool const forceUpdate = false);
     bool getServiceName(char* const serviceName, uint16_t const size, uint32_t const programIndex, bool const forceUpdate = false);
+
+    bool getPresetFM(uint8_t const presetIndex, uint32_t* const frequency, bool const forceUpdate = false);
+    bool setPresetFM(uint8_t const presetIndex, uint32_t const frequency);
 
 };
 

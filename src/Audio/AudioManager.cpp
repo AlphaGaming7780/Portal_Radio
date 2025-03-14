@@ -256,11 +256,13 @@ void AudioManager::DeleteAudioPlayerTask()
     _useAudioPlayer = false;
 
     if(audioPlayerLoopTask == NULL) {
+        debug.printlnWarn("DeleteAudioPlayerTask audioPlayerLoopTask is null");
         return;
     } 
 
     while (!_useAudioPlayer)
     {
+        // Wait for the task to end.
         esp_task_wdt_reset();
     }
     
@@ -294,12 +296,13 @@ void AudioManager::DeleteStreamCopierTask()
 {
     _useStreamCopier = false;
     if(streamCopierLoopTask == NULL) {
-        debug.printlnWarn("DeleteStreamCopierTask streamCopierLoopTask was null");
+        debug.printlnWarn("DeleteStreamCopierTask streamCopierLoopTask is null");
         return;
     }
 
     while (!_useStreamCopier)
     {
+        // Wait for the task to end.
         esp_task_wdt_reset();
     }
 

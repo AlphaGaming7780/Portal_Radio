@@ -293,3 +293,27 @@ bool ExtendedT4B::getServiceName(char *const serviceName, uint16_t const size, u
     prog.ServiceName.toCharArray(serviceName, size);
     return true;
 }
+
+bool ExtendedT4B::getPresetFM(uint8_t const presetIndex, uint32_t *const frequency, bool const forceUpdate)
+{
+    //                  Not a good idea but should be a bit better, have to change to full cache this.
+    if(forceUpdate || _FmPresets[presetIndex] == 0) 
+    {
+        if(!T4B::getPresetFM(presetIndex, frequency)) return false;
+
+        _FmPresets[presetIndex] = *frequency;
+
+        return true;
+    }
+
+    *frequency = _FmPresets[presetIndex];
+
+    return *frequency != 0;
+}
+
+bool ExtendedT4B::setPresetFM(uint8_t const presetIndex, uint32_t const frequency)
+{
+    if(T4B::setPresetFM(presetIndex, frequency)) return false;
+    _FmPresets[presetIndex] = frequency;
+    return true;
+}
